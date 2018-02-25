@@ -47,6 +47,58 @@ PtpMessagePDelayReq* MDPdelayReq::SetPdelayReq()
 void MDPdelayReq::TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr)
 {
     /* transmits a Pdelay_Req message from the MD entity, containing the parameters in the structure pointed to by txPdelayReqPtr. */
+    uint8_t sendbuf[1024];
+    int sockfd;
+    struct ether_header *ethheader = (struct ether_header *) sendbuf;
+
+    sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
+
+    struct ifreq if_mac;
+    memset(&if_mac, 0, sizeof(struct ifreq));
+    strncpy(if_mac.ifr_name, "wlo1", IFNAMSIZ-1);
+    if (ioctl(sockfd, SIOCGIFHWADDR, &if_mac) < 0)
+        perror("SIOCGIFHWADDR");
+
+    ethheader->ether_shost[0] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[0];
+    ethheader->ether_shost[1] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[1];
+    ethheader->ether_shost[2] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2];
+    ethheader->ether_shost[3] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[3];
+    ethheader->ether_shost[4] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[4];
+    ethheader->ether_shost[5] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5];
+
+    ethheader->ether_dhost[0] = 0x01;
+    ethheader->ether_dhost[1] = 0x80;
+    ethheader->ether_dhost[2] = 0xC2;
+    ethheader->ether_dhost[3] = 0x00;
+    ethheader->ether_dhost[4] = 0x00;
+    ethheader->ether_dhost[5] = 0x0E;
+
+    ethheader->ether_type = htons(0x88F7);
+
+    txPdelayReqPtr->GetMessage(sendbuf + sizeof(struct ether_header));
+
+    struct ifreq if_idx;
+    memset(&if_idx, 0, sizeof(struct ifreq));
+    strncpy(if_idx.ifr_name, "wlo1", IFNAMSIZ-1);
+    if (ioctl(sockfd, SIOCGIFINDEX, &if_idx) < 0)
+        perror("SIOCGIFINDEX");
+
+    /* Destination address */
+    struct sockaddr_ll socket_address;
+    /* Index of the network device */
+    socket_address.sll_ifindex = if_idx.ifr_ifindex;
+    /* Address length*/
+    socket_address.sll_halen = ETH_ALEN;
+    /* Destination MAC */
+    socket_address.sll_addr[0] = 0x01;
+    socket_address.sll_addr[1] = 0x80;
+    socket_address.sll_addr[2] = 0xC2;
+    socket_address.sll_addr[3] = 0x00;
+    socket_address.sll_addr[4] = 0x00;
+    socket_address.sll_addr[5] = 0x0E;
+
+    if (sendto(sockfd, sendbuf, 54 + 14, 0, (struct sockaddr*)&socket_address, sizeof(struct sockaddr_ll)) < 0)
+        printf("Send failed\n");
 }
 
 double MDPdelayReq::ComputePdelayRateRatio()
