@@ -23,7 +23,7 @@ void ClockSlaveSync::InvokeApplicationInterfaceFunction (void* functionName)
 
 }
 
-void ClockSlaveSync::ProcessStruct(PortSyncSync* rcvd)
+void ClockSlaveSync::SetPortSyncSync(PortSyncSync* rcvd)
 {
     m_rcvdPSSyncPtr = rcvd;
     m_rcvdPSSync = true;

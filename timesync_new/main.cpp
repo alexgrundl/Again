@@ -15,6 +15,7 @@
 #include "ptpmessage/ptpmessagefollowup.h"
 #include "c-extensions/ThreadWrapper.h"
 #include "statemachinemanager.h"
+#include "mdpdelayreq.h"
 
 using namespace std;
 
@@ -56,6 +57,7 @@ int main()
     tas.localClockTickInterval.ns_frac = 0;
     tas.gmRateRatio = 1.0;
     tas.localTime.ns = 0;
+    tas.gmPresent = true;
 //    tas.localTime.ns_frac = 0;
 //    cmSyncRecv.SetTimeAwareSystem(&tas);
 //    cmSyncRecv.ProcessState();
@@ -78,13 +80,22 @@ int main()
 //        }
 //    }
 
-    PortGlobal port;
+    PortGlobal port, port2;
     port.asCapable = true;
     port.portEnabled = true;
     port.pttPortEnabled = true;
-    port.thisPort = 0;
+    port.thisPort = 1;
+
+    port2.asCapable = true;
+    port2.portEnabled = true;
+    port2.pttPortEnabled = true;
+    port2.thisPort = 1;
+
+
     std::vector<PortGlobal> ports;
     ports.push_back(port);
+    ports.push_back(port2);
+    tas.selectedRole.push_back(PORT_ROLE_SLAVE);
     tas.selectedRole.push_back(PORT_ROLE_MASTER);
 
     MDGlobal mdGlobal;
@@ -100,6 +111,8 @@ int main()
 
     ClockMasterSyncSend clockMasterSyncSend(&tas, &siteSyncSync);
 
+
+    MDPdelayReq mdPdelayReq(&tas, &port, &mdGlobal);
 
     PtpMessageSync messageSync;
     messageSync.SetDomainNumber(0);
@@ -121,6 +134,7 @@ int main()
     stateMachines.push_back(&clockMasterSyncSend);
     stateMachines.push_back(&portSyncSyncSend);
     stateMachines.push_back(&mdSyncSendSM);
+    stateMachines.push_back(&mdPdelayReq);
 
     StateMachineManager smManager;
     smManager.SetStateMachines(stateMachines);

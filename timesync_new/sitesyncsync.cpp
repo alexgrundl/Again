@@ -29,7 +29,7 @@ PortSyncSync* SiteSyncSync::SetPSSyncSend (PortSyncSync* rcvdPSSyncIndPtr)
 
 void SiteSyncSync::TxPSSync (PortSyncSync* txPSSyncPtr)
 {
-    m_clockSlaveSync->ProcessStruct(txPSSyncPtr);
+    m_clockSlaveSync->SetPortSyncSync(txPSSyncPtr);
     for (std::vector<PortSyncSyncSend*>::size_type i = 0; i < m_portSyncSyncSends.size(); ++i)
     {
         m_portSyncSyncSends[i]->ProcessStruct(txPSSyncPtr);

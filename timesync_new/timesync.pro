@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     c-extensions/ThreadWrapper.cpp \
     statemachinemanager.cpp \
     mdpdelayreq.cpp \
-    mdpdelayresp.cpp
+    mdpdelayresp.cpp \
+    timeawaresystem.cpp
 
 HEADERS += \
     types.h \
@@ -58,5 +59,6 @@ HEADERS += \
     c-extensions/ThreadWrapper.h \
     statemachinemanager.h \
     mdpdelayreq.h \
-    mdpdelayresp.h
+    mdpdelayresp.h \
+    timeawaresystem.h
 

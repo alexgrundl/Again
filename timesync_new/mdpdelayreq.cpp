@@ -1,5 +1,13 @@
 #include "mdpdelayreq.h"
 
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <netinet/ether.h>
+#include <linux/if_packet.h>
+
 MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal) :
     StateMachineBaseMD(timeAwareSystem, port, mdGlobal)
 {
@@ -57,7 +65,7 @@ UScaledNs MDPdelayReq::ComputePropTime()
 
 void MDPdelayReq::ProcessState()
 {
-    if(m_timeAwareSystem->BEGIN || m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled)
+    if(m_timeAwareSystem->BEGIN || !m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled)
         m_state = STATE_NOT_ENABLED;
     else
     {
@@ -71,8 +79,8 @@ void MDPdelayReq::ProcessState()
                 /* m_pdelayRateRatio = 1.0; */
                 m_rcvdMDTimestampReceive = false;
                 m_pdelayReqSequenceId = rand() % 65536;
-                m_txPdelayReqPtr = SetPdelayReq();
                 delete m_txPdelayReqPtr;
+                m_txPdelayReqPtr = SetPdelayReq();
                 TxPdelayReq(m_txPdelayReqPtr);
                 m_pdelayIntervalTimer = m_timeAwareSystem->GetCurrentTime();
                 m_lostResponses = 0;

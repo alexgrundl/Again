@@ -16,7 +16,7 @@ public:
     void ProcessState();
 
 
-    void ProcessStruct(PortSyncSync* rcvd);
+    void SetPortSyncSync(PortSyncSync* rcvd);
 
     /**
      * @brief updates the global variable clockSlaveTime , based on information received from the SiteSync and LocalClock entities.

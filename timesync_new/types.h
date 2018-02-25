@@ -184,7 +184,7 @@ struct ExtendedTimestamp
         ExtendedTimestamp ts_new = *this;
         ts_new.sec -= ts.sec;
 
-        uint16_t ns_new = ns - ts.ns;
+        uint32_t ns_new = ns - ts.ns;
         if(ns < ns_new)
             ts_new.sec--;
         ts_new.ns = ns_new;

@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "commstructs.h"
+#include "timeawaresystem.h"
 
 class StateMachineBase
 {
