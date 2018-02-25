@@ -7,6 +7,8 @@
 #include <net/if.h>
 #include <netinet/ether.h>
 #include <linux/if_packet.h>
+#include "ptpmessage/ptpmessagesync.h"
+#include "ptpmessage/ptpmessagefollowup.h"
 
 MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal) :
     StateMachineBaseMD(timeAwareSystem, port, mdGlobal)
@@ -49,6 +51,7 @@ void MDPdelayReq::TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr)
     /* transmits a Pdelay_Req message from the MD entity, containing the parameters in the structure pointed to by txPdelayReqPtr. */
     uint8_t sendbuf[1024];
     int sockfd;
+    int messageLength;
     struct ether_header *ethheader = (struct ether_header *) sendbuf;
 
     sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
@@ -76,6 +79,7 @@ void MDPdelayReq::TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr)
     ethheader->ether_type = htons(0x88F7);
 
     txPdelayReqPtr->GetMessage(sendbuf + sizeof(struct ether_header));
+    messageLength = txPdelayReqPtr->GetMessageLength();
 
     struct ifreq if_idx;
     memset(&if_idx, 0, sizeof(struct ifreq));
@@ -97,7 +101,14 @@ void MDPdelayReq::TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr)
     socket_address.sll_addr[4] = 0x00;
     socket_address.sll_addr[5] = 0x0E;
 
-    if (sendto(sockfd, sendbuf, 54 + 14, 0, (struct sockaddr*)&socket_address, sizeof(struct sockaddr_ll)) < 0)
+    UScaledNs now = m_timeAwareSystem->GetCurrentTime();
+    PtpMessageFollowUp resp;
+//    resp.SetRequestReceiptTimestamp(now);
+    resp.GetMessage(sendbuf + sizeof(struct ether_header));
+    messageLength = resp.GetMessageLength();
+
+    if (sendto(sockfd, sendbuf, messageLength + sizeof(struct ether_header), 0,
+               (struct sockaddr*)&socket_address, sizeof(struct sockaddr_ll)) < 0)
         printf("Send failed\n");
 }
 
@@ -130,6 +141,7 @@ void MDPdelayReq::ProcessState()
                 //Hmmmmmmmmmmmmmmmmmmmmm.....
                 /* m_pdelayRateRatio = 1.0; */
                 m_rcvdMDTimestampReceive = false;
+                srand(time(NULL));
                 m_pdelayReqSequenceId = rand() % 65536;
                 delete m_txPdelayReqPtr;
                 m_txPdelayReqPtr = SetPdelayReq();
@@ -152,16 +164,16 @@ void MDPdelayReq::ProcessState()
 
         case STATE_WAITING_FOR_PDELAY_RESP:
             if(m_rcvdPdelayResp && (m_rcvdPdelayRespPtr->GetSequenceID() == m_txPdelayReqPtr->GetSequenceID())
-                    && memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity()->clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock)) == 0 &&
-                    (m_rcvdPdelayRespPtr->GetRequestingPortIdentity()->portNumber == m_portGlobal->thisPort))
+                    && memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock)) == 0 &&
+                    (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber == m_portGlobal->thisPort))
             {
                 m_rcvdPdelayResp = false;
                 m_state = STATE_WAITING_FOR_PDELAY_RESP_FOLLOW_UP;
             }
             else if((m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_mdGlobal->pdelayReqInterval) ||
                     (m_rcvdPdelayResp &&
-                    (memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity()->clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock)) != 0 ||
-                    (m_rcvdPdelayRespPtr->GetRequestingPortIdentity()->portNumber != m_portGlobal->thisPort) ||
+                    (memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock)) != 0 ||
+                    (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber != m_portGlobal->thisPort) ||
                     (m_rcvdPdelayRespPtr->GetSequenceID() != m_txPdelayReqPtr->GetSequenceID()))))
             {
                 ExecuteResetState();

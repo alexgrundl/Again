@@ -15,10 +15,16 @@ public:
     void GetMessage(uint8_t* bytes);
 
 
-    PortIdentity* GetRequestingPortIdentity();
+    PortIdentity GetRequestingPortIdentity();
+
+
+    void SetRequestingPortIdentity(PortIdentity port);
 
 
     Timestamp GetRequestReceiptTimestamp();
+
+
+    void SetRequestReceiptTimestamp(Timestamp timestamp);
 
 
 protected:

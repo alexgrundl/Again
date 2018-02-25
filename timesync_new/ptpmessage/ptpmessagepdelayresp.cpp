@@ -29,12 +29,22 @@ void PtpMessagePDelayResp::GetMessage(uint8_t* bytes)
     bytes[kMessageHeaderLength + 19] = (uint8_t)(m_requestingPortIdentity.portNumber);
 }
 
-PortIdentity* PtpMessagePDelayResp::GetRequestingPortIdentity()
+PortIdentity PtpMessagePDelayResp::GetRequestingPortIdentity()
 {
-    return &m_requestingPortIdentity;
+    return m_requestingPortIdentity;
+}
+
+void PtpMessagePDelayResp::SetRequestingPortIdentity(PortIdentity port)
+{
+    m_requestingPortIdentity = port;
 }
 
 Timestamp PtpMessagePDelayResp::GetRequestReceiptTimestamp()
 {
     return m_requestReceiptTimestamp;
+}
+
+void PtpMessagePDelayResp::SetRequestReceiptTimestamp(Timestamp timestamp)
+{
+    m_requestReceiptTimestamp = timestamp;
 }

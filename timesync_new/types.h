@@ -60,6 +60,25 @@ struct ScaledNs
     }
 };
 
+struct Timestamp
+{
+    uint64_t sec;
+    /** The nanoseconds member is always less than 10^9 */
+    uint32_t ns;
+
+    Timestamp operator+(const ScaledNs& scaled) const
+    {
+        Timestamp ts_new = *this;
+
+        ts_new.sec += scaled.ns / NS_PER_SEC;
+        uint32_t ns_new = ns + (scaled.ns % NS_PER_SEC);
+        if(ns > ns_new)
+            ts_new.sec++;
+        ts_new.ns = ns_new;
+        return ts_new;
+    }
+};
+
 struct UScaledNs
 {
     uint64_t ns;
@@ -121,6 +140,15 @@ struct UScaledNs
         return scaled;
     }
 
+    operator Timestamp() const
+    {
+        Timestamp timestamp;
+        timestamp.sec = ns / NS_PER_SEC;
+        timestamp.ns = ns % NS_PER_SEC;
+
+        return timestamp;
+    }
+
     bool operator>(const UScaledNs& uscaled) const
     {
         return ns > uscaled.ns || (ns == uscaled.ns && ns_frac > uscaled.ns_frac);
@@ -143,25 +171,6 @@ struct UScaledNs
 };
 
 typedef ScaledNs TimeInterval;
-
-struct Timestamp
-{
-    uint64_t sec;
-    /** The nanoseconds member is always less than 10^9 */
-    uint32_t ns;
-
-    Timestamp operator+(const ScaledNs& scaled) const
-    {
-        Timestamp ts_new = *this;
-
-        ts_new.sec += scaled.ns / NS_PER_SEC;
-        uint32_t ns_new = ns + (scaled.ns % NS_PER_SEC);
-        if(ns > ns_new)
-            ts_new.sec++;
-        ts_new.ns = ns_new;
-        return ts_new;
-    }
-};
 
 struct ExtendedTimestamp
 {
