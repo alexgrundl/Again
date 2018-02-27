@@ -13,3 +13,8 @@ void PtpMessagePDelayReq::GetMessage(uint8_t* bytes)
     for(int i = 0; i < 20; i++)
         bytes[kMessageHeaderLength + i] = 0;
 }
+
+void PtpMessagePDelayReq::ParsePackage(const uint8_t* bytes)
+{
+    ParseHeader(bytes);
+}

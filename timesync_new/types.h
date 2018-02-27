@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <cstddef>
 #include <math.h>
+#include <stdio.h>
 
 #define NS_PER_SEC 1000000000
 
@@ -103,6 +104,18 @@ struct Timestamp
 
         return ts_new;
     }
+
+    Timestamp operator*=(double d)
+    {
+        sec *= d;
+        ns *= d;
+
+        uint64_t secs_to_add = ns / NS_PER_SEC;
+        ns -= secs_to_add * NS_PER_SEC;
+        sec += secs_to_add;
+
+        return *this;
+    }
 };
 
 struct UScaledNs
@@ -141,7 +154,7 @@ struct UScaledNs
 
         dScaled *= d;
         uscaled_new.ns = dScaled;
-        uscaled_new.ns_frac = (uint16_t)((dScaled - (double)ns) * 65536.0);
+        uscaled_new.ns_frac = (uint16_t)((dScaled - (double)uscaled_new.ns) * 65536.0);
 
         return uscaled_new;
     }
@@ -156,6 +169,14 @@ struct UScaledNs
         uscaled_new.ns_frac = (uint16_t)((dScaled - (double)ns) * 65536.0);
 
         return uscaled_new;
+    }
+
+    double operator/(const UScaledNs uscaled) const
+    {
+        double dTs = (double)ns + (double)ns_frac * pow(2, -16);
+        double dScaled = (double)uscaled.ns + (double)uscaled.ns_frac * pow(2, -16);
+
+        return dTs / dScaled;
     }
 
     operator ScaledNs() const

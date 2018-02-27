@@ -120,7 +120,10 @@ private:
     bool m_neighborRateRatioValid;
 
 
-    UScaledNs m_txTimestamp;
+    UScaledNs m_pdelayRespTime;
+
+
+    UScaledNs m_pdelayRespFollowUpCorrTime;
 
     void ExecuteResetState();
 

@@ -26,13 +26,17 @@ MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDG
     m_lostResponses = 0;
     m_neighborRateRatioValid = false;
 
-    m_txTimestamp.ns = 0;
-    m_txTimestamp.ns_frac = 0;
+    m_pdelayRespTime.ns = 0;
+    m_pdelayRespTime.ns_frac = 0;
+    m_pdelayRespFollowUpCorrTime.ns = 0;
+    m_pdelayRespFollowUpCorrTime.ns_frac = 0;
 }
 
 MDPdelayReq::~MDPdelayReq()
 {
     delete m_txPdelayReqPtr;
+    delete m_rcvdPdelayRespPtr;
+    delete m_rcvdPdelayRespFollowUpPtr;
 }
 
 PtpMessagePDelayReq* MDPdelayReq::SetPdelayReq()
@@ -119,22 +123,40 @@ void MDPdelayReq::TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr)
 //        printf("Send failed\n");
 
     /* Remove in good code... */
-    txPdelayReqPtr->SetSendTime(m_timeAwareSystem->GetCurrentTime());
+    //txPdelayReqPtr->SetSendTime(m_timeAwareSystem->GetCurrentTime());
     /* End remove */
 
-    m_txTimestamp = m_networkPort->SendEventMessage(txPdelayReqPtr);
+    txPdelayReqPtr->SetSendTime(m_networkPort->SendEventMessage(txPdelayReqPtr));
 
     /* Remove in good code... */
-    m_txTimestamp = txPdelayReqPtr->GetSendTime();
+    //m_txTimestamp = txPdelayReqPtr->GetSendTime();
     /* End remove */
 
-    if(m_txTimestamp.ns > 0)
+    if(txPdelayReqPtr->GetSendTime().ns > 0)
         m_rcvdMDTimestampReceive = true;
 }
 
 double MDPdelayReq::ComputePdelayRateRatio()
 {
     double pdelayRateRatio = 1.0;
+    UScaledNs currentResponderEventTimeCorrected;
+
+    currentResponderEventTimeCorrected.ns = m_rcvdPdelayRespFollowUpPtr->GetRequestReceiptTimestamp().sec * NS_PER_SEC +
+            m_rcvdPdelayRespFollowUpPtr->GetRequestReceiptTimestamp().ns;
+    currentResponderEventTimeCorrected.ns_frac = m_rcvdPdelayRespFollowUpPtr->GetCorrectionField();
+    if(m_pdelayRespTime.ns > 0 && m_pdelayRespFollowUpCorrTime.ns > 0)
+    {
+        m_portGlobal->neighborRateRatio = (currentResponderEventTimeCorrected - m_pdelayRespFollowUpCorrTime) /
+                (m_rcvdPdelayRespPtr->GetReceiveTime() - m_pdelayRespTime);
+        m_neighborRateRatioValid = true;
+
+        printf("m_portGlobal->neighborRateRatio: %0.7f\n", m_portGlobal->neighborRateRatio);
+    }
+    else
+        m_neighborRateRatioValid = false;
+
+    m_pdelayRespTime = m_rcvdPdelayRespPtr->GetReceiveTime();
+    m_pdelayRespFollowUpCorrTime = currentResponderEventTimeCorrected;
 
     return pdelayRateRatio;
 }
@@ -145,17 +167,19 @@ UScaledNs MDPdelayReq::ComputePropTime()
      Timestamp tsPropTime;
      Timestamp t1, t2, t3, t4;
 
-     t1 = m_txTimestamp;
+     t1 = m_txPdelayReqPtr->GetSendTime();
      t2 = m_rcvdPdelayRespPtr->GetRequestReceiptTimestamp();
      t3 = m_rcvdPdelayRespFollowUpPtr->GetRequestReceiptTimestamp();
      t4 = m_rcvdPdelayRespPtr->GetReceiveTime();
 
-
      tsPropTime = ((t4 - t1) - (t3 - t2)) / 2;
+     if(m_neighborRateRatioValid)
+         tsPropTime *= m_portGlobal->neighborRateRatio;
+
      propTime.ns = tsPropTime.sec * NS_PER_SEC + tsPropTime.ns;
      propTime.ns_frac = 0;
 
-     printf("PropTime: %lu\n", propTime.ns);
+     printf("PropTime: %llu\n", propTime.ns);
 
      return propTime;
 }

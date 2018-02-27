@@ -6,6 +6,7 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, PortG
     m_timeAwareSystem = timeAwareSystem;
 
     m_mdPdelayReq = new MDPdelayReq(timeAwareSystem, port, mdGlobal, networkPort);
+    m_mdPdelayResp = new MDPdelayResp(timeAwareSystem, port, mdGlobal, networkPort);
     m_mdSyncSendSM = new MDSyncSendSM(timeAwareSystem, port, mdGlobal, networkPort);
     m_portSyncSyncSend = new PortSyncSyncSend(timeAwareSystem, port, m_mdSyncSendSM);
     m_portSyncSyncSends.push_back(m_portSyncSyncSend);
@@ -26,6 +27,7 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, PortG
     m_stateMachines.push_back(m_portSyncSyncSend);
     m_stateMachines.push_back(m_mdSyncSendSM);
     m_stateMachines.push_back(m_mdPdelayReq);
+    m_stateMachines.push_back(m_mdPdelayResp);
 
     m_stateThread = new CThreadWrapper<StateMachineManager>(this, &StateMachineManager::Process, std::string("State machine thread"));
 }
@@ -79,10 +81,13 @@ void StateMachineManager::ProcessPackage(IReceivePackage* package)
     PtpMessageType messageType = PtpMessageBase::ParseMessageType(package->GetBuffer());
 
     /* Remove in good code. */
-    ((CLinuxReceivePackage*)package)->SetTimestamp(m_timeAwareSystem->GetCurrentTime());
+//    ((CLinuxReceivePackage*)package)->SetTimestamp(m_timeAwareSystem->GetCurrentTime());
 
     switch(messageType)
     {
+    case PTP_MESSSAGE_TYPE_PDELAY_REQ:
+        m_mdPdelayResp->SetPDelayRequest(package);
+        break;
     case PTP_MESSSAGE_TYPE_PDELAY_RESP:
         m_mdPdelayReq->SetPDelayResponse(package);
         break;

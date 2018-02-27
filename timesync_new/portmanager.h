@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "c-extensions/ThreadWrapper.h"
+#include "ThreadWrapper.h"
 #include "comm/linux_netport.h"
 #include "statemachinemanager.h"
 

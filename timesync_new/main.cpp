@@ -13,7 +13,7 @@
 #include "mdsyncreceivesm.h"
 #include "ptpmessage/ptpmessagesync.h"
 #include "ptpmessage/ptpmessagefollowup.h"
-#include "c-extensions/ThreadWrapper.h"
+#include "ThreadWrapper.h"
 #include "statemachinemanager.h"
 #include "mdpdelayreq.h"
 #include "comm/linux_netport.h"
@@ -49,7 +49,7 @@ int main()
 
 
     TimeAwareSystem tas;
-    NetworkPort networkPort("enx74da384a1b56");
+    NetworkPort networkPort("eth0");
     std::vector<NetworkPort*> networtPorts;
 
     networkPort.Initialize();

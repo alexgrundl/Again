@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "c-extensions/ThreadWrapper.h"
+#include "ThreadWrapper.h"
 #include "statemachinebase.h"
 #include "ptpmessage/ptpmessagepdelayreq.h"
 #include "ptpmessage/ptpmessagepdelayresp.h"
@@ -68,6 +68,9 @@ private:
 
 
     MDPdelayReq* m_mdPdelayReq;
+
+
+    MDPdelayResp* m_mdPdelayResp;
 
 
     CThreadWrapper<StateMachineManager>* m_stateThread;

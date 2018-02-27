@@ -4,6 +4,7 @@
 #include "statemachinebase.h"
 #include "ptpmessage/ptpmessagepdelayresp.h"
 #include "ptpmessage/ptpmessagepdelayrespfollowup.h"
+#include "ptpmessage/ptpmessagepdelayreq.h"
 
 class MDPdelayResp : public StateMachineBaseMD
 {
@@ -45,6 +46,10 @@ public:
      */
     void TxPdelayRespFollowUp(PtpMessagePDelayRespFollowUp* txFollowUpPtr);
 
+
+
+    void SetPDelayRequest(IReceivePackage* package);
+
 private:
 
     /**
@@ -70,6 +75,9 @@ private:
      * to be transmitted.
      */
     PtpMessagePDelayRespFollowUp* m_txPdelayRespFollowUpPtr;
+
+
+    PtpMessagePDelayReq* m_rcvdPdelayReqPtr;
 };
 
 #endif // MDPDELAYRESP_H

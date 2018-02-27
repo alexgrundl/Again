@@ -7,17 +7,32 @@ MDPdelayResp::MDPdelayResp(TimeAwareSystem *timeAwareSystem, PortGlobal *port, M
     m_rcvdMDTimestampReceive = false;
     m_txPdelayRespPtr = NULL;
     m_txPdelayRespFollowUpPtr = NULL;
+    m_rcvdPdelayReqPtr = NULL;
 }
 
 MDPdelayResp::~MDPdelayResp()
 {
     delete m_txPdelayRespPtr;
     delete m_txPdelayRespFollowUpPtr;
+    delete m_rcvdPdelayReqPtr;
 }
 
 PtpMessagePDelayResp* MDPdelayResp::SetPdelayResp()
 {
     PtpMessagePDelayResp* pdelayRespPtr = new PtpMessagePDelayResp();
+    PortIdentity identity;
+    Timestamp receiveTime;
+
+    identity.portNumber = m_portGlobal->thisPort;
+    memset(identity.clockIdentity, 0, sizeof(identity.clockIdentity));
+
+    pdelayRespPtr->SetSourcePortIdentity(&identity);
+    pdelayRespPtr->SetSequenceID(m_rcvdPdelayReqPtr->GetSequenceID());
+    receiveTime.sec = m_rcvdPdelayReqPtr->GetReceiveTime().ns / NS_PER_SEC;
+    receiveTime.ns = m_rcvdPdelayReqPtr->GetReceiveTime().ns % NS_PER_SEC;
+    pdelayRespPtr->SetRequestReceiptTimestamp(receiveTime);
+    pdelayRespPtr->SetCorrectionField(m_rcvdPdelayReqPtr->GetReceiveTime().ns_frac);
+    pdelayRespPtr->SetRequestingPortIdentity(m_rcvdPdelayReqPtr->GetSourcePortIdentity());
 
     /* sourcePortIdentity is set equal to the port identity of the port corresponding to this MD entity (see 8.5.2) */
     /* sequenceId is set equal to the sequenceId field of the corresponding Pdelay_Req message */
@@ -33,12 +48,29 @@ PtpMessagePDelayResp* MDPdelayResp::SetPdelayResp()
 
 void MDPdelayResp::TxPdelayResp(PtpMessagePDelayResp* txPdelayRespPtr)
 {
+    txPdelayRespPtr->SetSendTime(m_networkPort->SendEventMessage(txPdelayRespPtr));
+    printf("TxPdelayResp: %llu\n", txPdelayRespPtr->GetSendTime().ns);
 
+    if(txPdelayRespPtr->GetSendTime().ns > 0)
+        m_rcvdMDTimestampReceive = true;
 }
 
 PtpMessagePDelayRespFollowUp* MDPdelayResp::SetPdelayRespFollowUp()
 {
     PtpMessagePDelayRespFollowUp* pdelayRespFollowUpPtr = new PtpMessagePDelayRespFollowUp();
+    PortIdentity identity;
+    Timestamp sendTime;
+
+    identity.portNumber = m_portGlobal->thisPort;
+    memset(identity.clockIdentity, 0, sizeof(identity.clockIdentity));
+
+    pdelayRespFollowUpPtr->SetSourcePortIdentity(&identity);
+    pdelayRespFollowUpPtr->SetSequenceID(m_rcvdPdelayReqPtr->GetSequenceID());
+    sendTime.sec = m_txPdelayRespPtr->GetSendTime().ns / NS_PER_SEC;
+    sendTime.ns = m_txPdelayRespPtr->GetSendTime().ns % NS_PER_SEC;
+    pdelayRespFollowUpPtr->SetRequestReceiptTimestamp(sendTime);
+    pdelayRespFollowUpPtr->SetCorrectionField(m_txPdelayRespPtr->GetSendTime().ns_frac);
+    pdelayRespFollowUpPtr->SetRequestingPortIdentity(m_rcvdPdelayReqPtr->GetSourcePortIdentity());
 
     /* a) sourcePortIdentity is set equal to the port identity of the port corresponding to this MD entity (see 8.5.2),
      * b) sequenceId is set equal to the sequenceId field of the corresponding Pdelay_Req message,
@@ -55,7 +87,7 @@ PtpMessagePDelayRespFollowUp* MDPdelayResp::SetPdelayRespFollowUp()
 
 void MDPdelayResp::TxPdelayRespFollowUp(PtpMessagePDelayRespFollowUp* txFollowUpPtr)
 {
-
+    m_networkPort->SendGenericMessage(txFollowUpPtr);
 }
 
 void MDPdelayResp::ProcessState()
@@ -103,4 +135,13 @@ void MDPdelayResp::ProcessState()
             break;
         }
     }
+}
+
+void MDPdelayResp::SetPDelayRequest(IReceivePackage* package)
+{
+    delete m_rcvdPdelayReqPtr;
+    m_rcvdPdelayReqPtr = new PtpMessagePDelayReq();
+    m_rcvdPdelayReqPtr->ParsePackage(package->GetBuffer());
+    m_rcvdPdelayReqPtr->SetReceiveTime(package->GetTimestamp());
+    m_rcvdPdelayReq = true;
 }
