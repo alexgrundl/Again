@@ -36,10 +36,12 @@ StateMachineBasePort::~StateMachineBasePort()
 
 
 
-StateMachineBaseMD::StateMachineBaseMD(TimeAwareSystem* timeAwareSystem, PortGlobal* portGlobal, MDGlobal* mdGlobal) :
+StateMachineBaseMD::StateMachineBaseMD(TimeAwareSystem* timeAwareSystem, PortGlobal* portGlobal, MDGlobal* mdGlobal,
+                                       INetworkInterfacePort *networkPort) :
     StateMachineBasePort(timeAwareSystem, portGlobal)
 {
     m_mdGlobal = mdGlobal;
+    m_networkPort = networkPort;
 }
 
 StateMachineBaseMD::~StateMachineBaseMD()

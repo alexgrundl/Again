@@ -1,5 +1,7 @@
 #include "ptpmessagebase.h"
 
+const uint8_t PtpMessageBase::DstMac[6] = {0x01, 0x80, 0xC2, 0x00, 0x00, 0x0E};
+
 PtpMessageBase::PtpMessageBase()
 {
     m_versionPTP = 2;
@@ -43,6 +45,30 @@ void PtpMessageBase::GetHeader(uint8_t* bytes)
     bytes[31] = (uint8_t)m_sequenceId;
     bytes[32] = m_control;
     bytes[33] = m_logMessageInterval;
+}
+
+void PtpMessageBase::ParseHeader(const uint8_t* bytes)
+{
+    m_messageType = (PtpMessageType)(bytes[0] & 0x0F);
+    m_transportSpecific = (bytes[0] & 0xF0);
+    m_versionPTP = (bytes[1] & 0x0F);
+    m_messageLength = (bytes[2] << 8) + bytes[3];
+    m_domainNumber = bytes[4];
+    m_flags = (bytes[6] << 8) + bytes[7];
+    m_correctionField = 0;
+    for(int i = 0; i < 8; i++)
+        m_correctionField += ((uint64_t)bytes[8 + i] << (56 - i * 8));
+    for(int i = 0; i < 8; i++)
+        m_sourcePortIdentity.clockIdentity[i] = bytes[20 + i];
+    m_sourcePortIdentity.portNumber = (bytes[28] << 8) + bytes[29];
+    m_sequenceId = (bytes[30] << 8) + bytes[31];
+    m_control = bytes[32];
+    m_logMessageInterval = bytes[33];
+}
+
+PtpMessageType PtpMessageBase::ParseMessageType(const uint8_t* bytes)
+{
+    return (PtpMessageType)(bytes[0] & 0x0F);
 }
 
 uint8_t PtpMessageBase::GetVersionPTP()

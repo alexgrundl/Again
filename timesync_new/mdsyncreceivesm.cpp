@@ -1,8 +1,8 @@
 #include "mdsyncreceivesm.h"
 
 MDSyncReceiveSM::MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal,
-                                 PortSyncSyncReceive* portSyncSyncReceive) :
-    StateMachineBaseMD(timeAwareSystem, port, mdGlobal)
+                                 PortSyncSyncReceive* portSyncSyncReceive, INetworkInterfacePort* networkPort) :
+    StateMachineBaseMD(timeAwareSystem, port, mdGlobal, networkPort)
 {
     m_followUpReceiptTimeoutTime.ns = 0;
     m_followUpReceiptTimeoutTime.ns_frac = 0;

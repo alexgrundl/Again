@@ -32,27 +32,6 @@ public:
         TLV_TYPE_PATH_TRACE = 8
     };
 
-//    union
-//    {
-//        struct Bits
-//        {
-//             unsigned int security           : 1;
-//             unsigned int profileSpecific    : 2;
-//             unsigned int                    : 2;
-//             unsigned int unicast            : 1;
-//             unsigned int twoStep            : 1;
-//             unsigned int alternateMaster    : 1;
-//             unsigned int                    : 2;
-//             unsigned int frequencyTracable  : 1;
-//             unsigned int timeTracable       : 1;
-//             unsigned int timescale          : 1;
-//             unsigned int utcReasonable      : 1;
-//             unsigned int li59               : 1;
-//             unsigned int li61               : 1;
-//        };
-//        unsigned short flagsAll;
-//    } Flags;
-
     PtpMessageBase();
 
 
@@ -60,6 +39,12 @@ public:
 
 
     static const uint8_t kMessageHeaderLength = 34;
+
+
+    static const uint16_t kEtherType = 0x88F7;
+
+
+    static const uint8_t DstMac[6];
 
 
     uint8_t GetVersionPTP();
@@ -123,6 +108,12 @@ public:
 
 
     virtual void GetMessage(uint8_t* bytes) = 0;
+
+
+    void ParseHeader(const uint8_t* bytes);
+
+
+    static PtpMessageType ParseMessageType(const uint8_t* bytes);
 
 
 protected:

@@ -10,8 +10,8 @@
 #include "ptpmessage/ptpmessagesync.h"
 #include "ptpmessage/ptpmessagefollowup.h"
 
-MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal) :
-    StateMachineBaseMD(timeAwareSystem, port, mdGlobal)
+MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal, INetworkInterfacePort* networkPort) :
+    StateMachineBaseMD(timeAwareSystem, port, mdGlobal, networkPort)
 {
     m_pdelayIntervalTimer.ns = 0;
     m_pdelayIntervalTimer.ns_frac = 0;
@@ -25,6 +25,9 @@ MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDG
     m_initPdelayRespReceived = false;
     m_lostResponses = 0;
     m_neighborRateRatioValid = false;
+
+    m_txTimestamp.ns = 0;
+    m_txTimestamp.ns_frac = 0;
 }
 
 MDPdelayReq::~MDPdelayReq()
@@ -36,6 +39,10 @@ PtpMessagePDelayReq* MDPdelayReq::SetPdelayReq()
 {
     PtpMessagePDelayReq* pdelayReqPtr = new PtpMessagePDelayReq();
 
+    PortIdentity identity;
+    identity.portNumber = m_portGlobal->thisPort;
+    memset(identity.clockIdentity, 0, sizeof(identity.clockIdentity));
+    pdelayReqPtr->SetSourcePortIdentity(&identity);
     /* 1) sourcePortIdentity is set equal to the port identity of the port corresponding to this MD entity
         (see 8.5.2),
 
@@ -49,67 +56,80 @@ PtpMessagePDelayReq* MDPdelayReq::SetPdelayReq()
 void MDPdelayReq::TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr)
 {
     /* transmits a Pdelay_Req message from the MD entity, containing the parameters in the structure pointed to by txPdelayReqPtr. */
-    uint8_t sendbuf[1024];
-    int sockfd;
-    int messageLength;
-    struct ether_header *ethheader = (struct ether_header *) sendbuf;
+//    uint8_t sendbuf[1024];
+//    int sockfd;
+//    int messageLength;
+//    struct ether_header *ethheader = (struct ether_header *) sendbuf;
 
-    sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
+//    sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
 
-    struct ifreq if_mac;
-    memset(&if_mac, 0, sizeof(struct ifreq));
-    strncpy(if_mac.ifr_name, "wlo1", IFNAMSIZ-1);
-    if (ioctl(sockfd, SIOCGIFHWADDR, &if_mac) < 0)
-        perror("SIOCGIFHWADDR");
+//    struct ifreq if_mac;
+//    memset(&if_mac, 0, sizeof(struct ifreq));
+//    strncpy(if_mac.ifr_name, "enx74da384a1b56", IFNAMSIZ-1);
+//    if (ioctl(sockfd, SIOCGIFHWADDR, &if_mac) < 0)
+//        perror("SIOCGIFHWADDR");
 
-    ethheader->ether_shost[0] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[0];
-    ethheader->ether_shost[1] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[1];
-    ethheader->ether_shost[2] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2];
-    ethheader->ether_shost[3] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[3];
-    ethheader->ether_shost[4] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[4];
-    ethheader->ether_shost[5] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5];
+//    ethheader->ether_shost[0] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[0];
+//    ethheader->ether_shost[1] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[1];
+//    ethheader->ether_shost[2] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2];
+//    ethheader->ether_shost[3] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[3];
+//    ethheader->ether_shost[4] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[4];
+//    ethheader->ether_shost[5] = ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5];
 
-    ethheader->ether_dhost[0] = 0x01;
-    ethheader->ether_dhost[1] = 0x80;
-    ethheader->ether_dhost[2] = 0xC2;
-    ethheader->ether_dhost[3] = 0x00;
-    ethheader->ether_dhost[4] = 0x00;
-    ethheader->ether_dhost[5] = 0x0E;
+//    ethheader->ether_dhost[0] = 0x01;
+//    ethheader->ether_dhost[1] = 0x80;
+//    ethheader->ether_dhost[2] = 0xC2;
+//    ethheader->ether_dhost[3] = 0x00;
+//    ethheader->ether_dhost[4] = 0x00;
+//    ethheader->ether_dhost[5] = 0x0E;
 
-    ethheader->ether_type = htons(0x88F7);
+//    ethheader->ether_type = htons(0x88F7);
 
-    txPdelayReqPtr->GetMessage(sendbuf + sizeof(struct ether_header));
-    messageLength = txPdelayReqPtr->GetMessageLength();
+//    txPdelayReqPtr->GetMessage(sendbuf + sizeof(struct ether_header));
+//    messageLength = txPdelayReqPtr->GetMessageLength();
 
-    struct ifreq if_idx;
-    memset(&if_idx, 0, sizeof(struct ifreq));
-    strncpy(if_idx.ifr_name, "wlo1", IFNAMSIZ-1);
-    if (ioctl(sockfd, SIOCGIFINDEX, &if_idx) < 0)
-        perror("SIOCGIFINDEX");
+//    struct ifreq if_idx;
+//    memset(&if_idx, 0, sizeof(struct ifreq));
+//    strncpy(if_idx.ifr_name, "enx74da384a1b56", IFNAMSIZ-1);
+//    if (ioctl(sockfd, SIOCGIFINDEX, &if_idx) < 0)
+//        perror("SIOCGIFINDEX");
 
-    /* Destination address */
-    struct sockaddr_ll socket_address;
-    /* Index of the network device */
-    socket_address.sll_ifindex = if_idx.ifr_ifindex;
-    /* Address length*/
-    socket_address.sll_halen = ETH_ALEN;
-    /* Destination MAC */
-    socket_address.sll_addr[0] = 0x01;
-    socket_address.sll_addr[1] = 0x80;
-    socket_address.sll_addr[2] = 0xC2;
-    socket_address.sll_addr[3] = 0x00;
-    socket_address.sll_addr[4] = 0x00;
-    socket_address.sll_addr[5] = 0x0E;
+//    /* Destination address */
+//    struct sockaddr_ll socket_address;
+//    /* Index of the network device */
+//    socket_address.sll_ifindex = if_idx.ifr_ifindex;
+//    /* Address length*/
+//    socket_address.sll_halen = ETH_ALEN;
+//    /* Destination MAC */
+//    socket_address.sll_addr[0] = 0x01;
+//    socket_address.sll_addr[1] = 0x80;
+//    socket_address.sll_addr[2] = 0xC2;
+//    socket_address.sll_addr[3] = 0x00;
+//    socket_address.sll_addr[4] = 0x00;
+//    socket_address.sll_addr[5] = 0x0E;
 
-    UScaledNs now = m_timeAwareSystem->GetCurrentTime();
-    PtpMessageFollowUp resp;
-//    resp.SetRequestReceiptTimestamp(now);
-    resp.GetMessage(sendbuf + sizeof(struct ether_header));
-    messageLength = resp.GetMessageLength();
+//    UScaledNs now = m_timeAwareSystem->GetCurrentTime();
+////    PtpMessageFollowUp resp;
+////    resp.SetRequestReceiptTimestamp(now);
+////    resp.GetMessage(sendbuf + sizeof(struct ether_header));
+////    messageLength = resp.GetMessageLength();
 
-    if (sendto(sockfd, sendbuf, messageLength + sizeof(struct ether_header), 0,
-               (struct sockaddr*)&socket_address, sizeof(struct sockaddr_ll)) < 0)
-        printf("Send failed\n");
+//    if (sendto(sockfd, sendbuf, messageLength + sizeof(struct ether_header), 0,
+//               (struct sockaddr*)&socket_address, sizeof(struct sockaddr_ll)) < 0)
+//        printf("Send failed\n");
+
+    /* Remove in good code... */
+    txPdelayReqPtr->SetSendTime(m_timeAwareSystem->GetCurrentTime());
+    /* End remove */
+
+    m_txTimestamp = m_networkPort->SendEventMessage(txPdelayReqPtr);
+
+    /* Remove in good code... */
+    m_txTimestamp = txPdelayReqPtr->GetSendTime();
+    /* End remove */
+
+    if(m_txTimestamp.ns > 0)
+        m_rcvdMDTimestampReceive = true;
 }
 
 double MDPdelayReq::ComputePdelayRateRatio()
@@ -121,7 +141,21 @@ double MDPdelayReq::ComputePdelayRateRatio()
 
 UScaledNs MDPdelayReq::ComputePropTime()
 {
-     UScaledNs propTime = {0, 0};
+     UScaledNs propTime;
+     Timestamp tsPropTime;
+     Timestamp t1, t2, t3, t4;
+
+     t1 = m_txTimestamp;
+     t2 = m_rcvdPdelayRespPtr->GetRequestReceiptTimestamp();
+     t3 = m_rcvdPdelayRespFollowUpPtr->GetRequestReceiptTimestamp();
+     t4 = m_rcvdPdelayRespPtr->GetReceiveTime();
+
+
+     tsPropTime = ((t4 - t1) - (t3 - t2)) / 2;
+     propTime.ns = tsPropTime.sec * NS_PER_SEC + tsPropTime.ns;
+     propTime.ns_frac = 0;
+
+     printf("PropTime: %lu\n", propTime.ns);
 
      return propTime;
 }
@@ -155,9 +189,11 @@ void MDPdelayReq::ProcessState()
             break;
 
         case STATE_INITIAL_SEND_PDELAY_REQ:
+        case STATE_SEND_PDELAY_REQ:
             if(m_rcvdMDTimestampReceive)
             {
                 m_rcvdMDTimestampReceive = false;
+//                NS_ReceiveMessage(false);
                 m_state = STATE_WAITING_FOR_PDELAY_RESP;
             }
             break;
@@ -189,9 +225,9 @@ void MDPdelayReq::ProcessState()
             {
                 m_rcvdPdelayRespFollowUp = false;
                 if (m_portGlobal->computeNeighborRateRatio)
-                m_portGlobal->neighborRateRatio = ComputePdelayRateRatio();
+                    m_portGlobal->neighborRateRatio = ComputePdelayRateRatio();
                 if (m_portGlobal->computeNeighborPropDelay)
-                m_portGlobal->neighborPropDelay = ComputePropTime();
+                    m_portGlobal->neighborPropDelay = ComputePropTime();
                 m_lostResponses = 0;
                 m_mdGlobal->isMeasuringDelay = true;
                 if ((m_portGlobal->neighborPropDelay <= m_mdGlobal->neighborPropDelayThresh) &&
@@ -250,3 +286,43 @@ void MDPdelayReq::ExecuteSendPDelayReqState()
     m_pdelayIntervalTimer = m_timeAwareSystem->GetCurrentTime();
 }
 
+
+void MDPdelayReq::SetPDelayResponse(IReceivePackage* package)
+{
+    delete m_rcvdPdelayRespPtr;
+    m_rcvdPdelayRespPtr = new PtpMessagePDelayResp();
+    m_rcvdPdelayRespPtr->ParsePackage(package->GetBuffer());
+    m_rcvdPdelayRespPtr->SetReceiveTime(package->GetTimestamp());
+    m_rcvdPdelayResp = true;
+}
+
+void MDPdelayReq::SetPDelayResponseFollowUp(IReceivePackage* package)
+{
+    delete m_rcvdPdelayRespFollowUpPtr;
+    m_rcvdPdelayRespFollowUpPtr = new PtpMessagePDelayRespFollowUp();
+    m_rcvdPdelayRespFollowUpPtr->ParsePackage(package->GetBuffer());
+    m_rcvdPdelayRespFollowUpPtr->SetReceiveTime(package->GetTimestamp());
+    m_rcvdPdelayRespFollowUp = true;
+}
+
+//void MDPdelayReq::NS_ReceiveMessage(bool followUp)
+//{
+//    CLinuxReceivePackage package(128);
+//    m_networkPort->ReceiveMessage(&package);
+//    package.SetValid();
+//    if(package.IsValid() > 0)
+//    {
+//        if(!followUp)
+//        {
+//            m_rcvdPdelayResp = true;
+//            delete m_rcvdPdelayRespPtr;
+//            m_rcvdPdelayRespPtr = new PtpMessagePDelayResp();
+//            m_rcvdPdelayRespPtr->ParseHeader(package.GetBuffer());
+//        }
+//        else
+//        {
+//            m_rcvdPdelayRespFollowUp = true;
+//            m_rcvdPdelayRespFollowUpPtr = NULL;
+//        }
+//    }
+//}

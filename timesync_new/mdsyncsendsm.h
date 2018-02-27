@@ -11,7 +11,8 @@ class MDSyncSendSM : public StateMachineBaseMD
 {
 public:
 
-    MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGloball);
+    MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal,
+                 INetworkInterfacePort* networkPort);
 
     virtual ~MDSyncSendSM();
 

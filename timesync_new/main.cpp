@@ -16,6 +16,8 @@
 #include "c-extensions/ThreadWrapper.h"
 #include "statemachinemanager.h"
 #include "mdpdelayreq.h"
+#include "comm/linux_netport.h"
+#include "portmanager.h"
 
 using namespace std;
 
@@ -47,6 +49,11 @@ int main()
 
 
     TimeAwareSystem tas;
+    NetworkPort networkPort("enx74da384a1b56");
+    std::vector<NetworkPort*> networtPorts;
+
+    networkPort.Initialize();
+    networtPorts.push_back(&networkPort);
 //    PtpClock clock;
 //    ClockSourceTimeParams params;
 
@@ -99,20 +106,8 @@ int main()
     tas.selectedRole.push_back(PORT_ROLE_MASTER);
 
     MDGlobal mdGlobal;
-
-    MDSyncSendSM mdSyncSendSM(&tas, &port, &mdGlobal);
-    PortSyncSyncSend portSyncSyncSend(&tas, &port, &mdSyncSendSM);
-    ClockSlaveSync clockSlaveSync(&tas);
-    std::vector<PortSyncSyncSend*> portSyncSyncSends;
-    portSyncSyncSends.push_back(&portSyncSyncSend);
-    SiteSyncSync siteSyncSync(&tas, &clockSlaveSync, portSyncSyncSends);
-    PortSyncSyncReceive portSyncSyncReceive(&tas, &port, &siteSyncSync);
-    MDSyncReceiveSM mdSyncReceiveSM(&tas, &port, &mdGlobal, &portSyncSyncReceive);
-
-    ClockMasterSyncSend clockMasterSyncSend(&tas, &siteSyncSync);
-
-
-    MDPdelayReq mdPdelayReq(&tas, &port, &mdGlobal);
+    mdGlobal.pdelayReqInterval.ns = NS_PER_SEC;
+    mdGlobal.pdelayReqInterval.ns_frac = 0;
 
     PtpMessageSync messageSync;
     messageSync.SetDomainNumber(0);
@@ -125,28 +120,16 @@ int main()
     messageFollowUp.SetLogMessageInterval(-3);
     messageFollowUp.SetSequenceID(30000);
 
-
-    std::vector<StateMachineBase*> stateMachines;
-    stateMachines.push_back(&mdSyncReceiveSM);
-    stateMachines.push_back(&portSyncSyncReceive);
-    stateMachines.push_back(&siteSyncSync);
-    stateMachines.push_back(&clockSlaveSync);
-    stateMachines.push_back(&clockMasterSyncSend);
-    stateMachines.push_back(&portSyncSyncSend);
-    stateMachines.push_back(&mdSyncSendSM);
-    stateMachines.push_back(&mdPdelayReq);
-
-    StateMachineManager smManager;
-    smManager.SetStateMachines(stateMachines);
+    StateMachineManager smManager(&tas, &port, &mdGlobal, &networkPort);
+    PortManager portManager(networtPorts, &smManager);
     smManager.StartProcessing();
+    portManager.StartReceiving();
 
     while(true)
     {
 //        mdSyncReceiveSM.SetSyncMessage(&messageSync);
-//        mdSyncReceiveSM.ProcessState();
-        mdSyncReceiveSM.SetSyncMessage(&messageSync);
         usleep(1000 * 10);
-        mdSyncReceiveSM.SetFollowUpMessage(&messageFollowUp);
+//        mdSyncReceiveSM.SetFollowUpMessage(&messageFollowUp);
     }
 
     return 0;

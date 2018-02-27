@@ -27,6 +27,9 @@ public:
     void SetRequestReceiptTimestamp(Timestamp timestamp);
 
 
+    void ParsePackage(const uint8_t* bytes);
+
+
 protected:
 
     Timestamp m_requestReceiptTimestamp;

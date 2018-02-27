@@ -12,7 +12,8 @@ class MDPdelayReq : public StateMachineBaseMD
 {
 public:
 
-    MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal);
+    MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal,
+                INetworkInterfacePort* networkPort);
 
     ~MDPdelayReq();
 
@@ -42,6 +43,12 @@ public:
 
 
     void ProcessState();
+
+
+    void SetPDelayResponse(IReceivePackage *package);
+
+
+    void SetPDelayResponseFollowUp(IReceivePackage *package);
 
 private:
 
@@ -113,10 +120,15 @@ private:
     bool m_neighborRateRatioValid;
 
 
+    UScaledNs m_txTimestamp;
+
     void ExecuteResetState();
 
 
     void ExecuteSendPDelayReqState();
+
+
+//    void NS_ReceiveMessage(bool followUp);
 };
 
 #endif // MDPDELAYREQ_H

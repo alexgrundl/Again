@@ -72,9 +72,35 @@ struct Timestamp
 
         ts_new.sec += scaled.ns / NS_PER_SEC;
         uint32_t ns_new = ns + (scaled.ns % NS_PER_SEC);
-        if(ns > ns_new)
+        if(ns_new >= NS_PER_SEC)
+        {
             ts_new.sec++;
+            ns_new -= NS_PER_SEC;
+        }
         ts_new.ns = ns_new;
+        return ts_new;
+    }
+
+    Timestamp operator-(const Timestamp& ts) const
+    {
+        Timestamp ts_new = *this;
+
+        ts_new.sec -= ts.sec;
+        uint32_t ns_new = ns >= ts.ns ? ns - ts.ns : NS_PER_SEC * ns - ts.ns;
+        if(ns < ts.ns)
+        {
+            ts_new.sec--;
+        }
+        ts_new.ns = ns_new;
+        return ts_new;
+    }
+
+    Timestamp operator/(int value) const
+    {
+        Timestamp ts_new = *this;
+        ts_new.sec /= value;
+        ts_new.ns /= value;
+
         return ts_new;
     }
 };

@@ -28,7 +28,10 @@ SOURCES += main.cpp \
     statemachinemanager.cpp \
     mdpdelayreq.cpp \
     mdpdelayresp.cpp \
-    timeawaresystem.cpp
+    timeawaresystem.cpp \
+    c-extensions/TimeMeas.cpp \
+    comm/linux_netport.cpp \
+    portmanager.cpp
 
 HEADERS += \
     types.h \
@@ -60,5 +63,9 @@ HEADERS += \
     statemachinemanager.h \
     mdpdelayreq.h \
     mdpdelayresp.h \
-    timeawaresystem.h
+    timeawaresystem.h \
+    c-extensions/TimeMeas.h \
+    comm/netport.h \
+    comm/linux_netport.h \
+    portmanager.h
 
