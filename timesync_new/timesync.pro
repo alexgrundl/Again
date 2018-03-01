@@ -31,7 +31,11 @@ SOURCES += main.cpp \
     timeawaresystem.cpp \
     c-extensions/TimeMeas.cpp \
     comm/linux_netport.cpp \
-    portmanager.cpp
+    portmanager.cpp \
+    portannounceinformation.cpp \
+    portannouncereceive.cpp \
+    portroleselection.cpp \
+    ptpmessage/ptpmessageannounce.cpp
 
 HEADERS += \
     types.h \
@@ -67,5 +71,9 @@ HEADERS += \
     c-extensions/TimeMeas.h \
     comm/netport.h \
     comm/linux_netport.h \
-    portmanager.h
+    portmanager.h \
+    portannounceinformation.h \
+    portannouncereceive.h \
+    portroleselection.h \
+    ptpmessage/ptpmessageannounce.h
 

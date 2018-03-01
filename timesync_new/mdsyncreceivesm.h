@@ -11,7 +11,7 @@ class MDSyncReceiveSM : public StateMachineBaseMD
 public:
 
 
-    MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal, PortSyncSyncReceive* portSyncSyncReceive,
+    MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, std::shared_ptr<PortSyncSyncReceive> portSyncSyncReceive,
                     INetworkInterfacePort *network);
 
 
@@ -21,10 +21,10 @@ public:
     void ProcessState();
 
 
-    void SetSyncMessage(PtpMessageSync* rcvdSyncPtr);
+    void SetSyncMessage(IReceivePackage* package);
 
 
-    void SetFollowUpMessage(PtpMessageFollowUp* rcvdFollowUpPtr);
+    void SetFollowUpMessage(IReceivePackage *package);
 
 private:
 
@@ -68,7 +68,7 @@ private:
 
 
 
-    PortSyncSyncReceive* m_portSyncSyncReceive;
+    std::shared_ptr<PortSyncSyncReceive> m_portSyncSyncReceive;
 
     /**
      * @brief Creates an MDSyncReceive structure, and returns a pointer to this structure. The members of this structure are set as follows

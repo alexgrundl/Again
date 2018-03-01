@@ -10,8 +10,8 @@
 #include "ptpmessage/ptpmessagesync.h"
 #include "ptpmessage/ptpmessagefollowup.h"
 
-MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal, INetworkInterfacePort* networkPort) :
-    StateMachineBaseMD(timeAwareSystem, port, mdGlobal, networkPort)
+MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort* networkPort) :
+    StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_pdelayIntervalTimer.ns = 0;
     m_pdelayIntervalTimer.ns_frac = 0;
@@ -45,7 +45,8 @@ PtpMessagePDelayReq* MDPdelayReq::SetPdelayReq()
 
     PortIdentity identity;
     identity.portNumber = m_portGlobal->thisPort;
-    memset(identity.clockIdentity, 0, sizeof(identity.clockIdentity));
+
+    PtpMessageBase::GetClockIdentity(m_networkPort->GetMAC(), identity.clockIdentity);
     pdelayReqPtr->SetSourcePortIdentity(&identity);
     /* 1) sourcePortIdentity is set equal to the port identity of the port corresponding to this MD entity
         (see 8.5.2),
@@ -206,7 +207,7 @@ void MDPdelayReq::ProcessState()
                 TxPdelayReq(m_txPdelayReqPtr);
                 m_pdelayIntervalTimer = m_timeAwareSystem->GetCurrentTime();
                 m_lostResponses = 0;
-                m_mdGlobal->isMeasuringDelay = false;
+                m_portGlobal->isMeasuringDelay = false;
                 m_portGlobal->asCapable = false;
                 m_state = STATE_INITIAL_SEND_PDELAY_REQ;
             }
@@ -223,16 +224,18 @@ void MDPdelayReq::ProcessState()
             break;
 
         case STATE_WAITING_FOR_PDELAY_RESP:
+            uint8_t portClockIdentity[8];
+            PtpMessageBase::GetClockIdentity(m_networkPort->GetMAC(), portClockIdentity);
             if(m_rcvdPdelayResp && (m_rcvdPdelayRespPtr->GetSequenceID() == m_txPdelayReqPtr->GetSequenceID())
-                    && memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock)) == 0 &&
+                    && memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, sizeof(portClockIdentity)) == 0 &&
                     (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber == m_portGlobal->thisPort))
             {
                 m_rcvdPdelayResp = false;
                 m_state = STATE_WAITING_FOR_PDELAY_RESP_FOLLOW_UP;
             }
-            else if((m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_mdGlobal->pdelayReqInterval) ||
+            else if((m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval) ||
                     (m_rcvdPdelayResp &&
-                    (memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock)) != 0 ||
+                    (memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, sizeof(portClockIdentity)) != 0 ||
                     (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber != m_portGlobal->thisPort) ||
                     (m_rcvdPdelayRespPtr->GetSequenceID() != m_txPdelayReqPtr->GetSequenceID()))))
             {
@@ -253,15 +256,15 @@ void MDPdelayReq::ProcessState()
                 if (m_portGlobal->computeNeighborPropDelay)
                     m_portGlobal->neighborPropDelay = ComputePropTime();
                 m_lostResponses = 0;
-                m_mdGlobal->isMeasuringDelay = true;
-                if ((m_portGlobal->neighborPropDelay <= m_mdGlobal->neighborPropDelayThresh) &&
+                m_portGlobal->isMeasuringDelay = true;
+                if ((m_portGlobal->neighborPropDelay <= m_portGlobal->neighborPropDelayThresh) &&
                 (m_rcvdPdelayRespPtr->GetSourcePortIdentity().clockIdentity != m_timeAwareSystem->thisClock) && m_neighborRateRatioValid)
                     m_portGlobal->asCapable = true;
                 else
                     m_portGlobal->asCapable = false;
                 m_state = STATE_WAITING_FOR_PDELAY_INTERVAL_TIMER;
             }
-            else if((m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_mdGlobal->pdelayReqInterval) ||
+            else if((m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval) ||
                     (m_rcvdPdelayResp && (m_rcvdPdelayRespPtr->GetSequenceID() == m_txPdelayReqPtr->GetSequenceID())))
             {
                 ExecuteResetState();
@@ -270,7 +273,7 @@ void MDPdelayReq::ProcessState()
             break;
 
         case STATE_WAITING_FOR_PDELAY_INTERVAL_TIMER:
-            if(m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_mdGlobal->pdelayReqInterval)
+            if(m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval)
             {
                 ExecuteSendPDelayReqState();
                 m_state = STATE_SEND_PDELAY_REQ;
@@ -292,11 +295,11 @@ void MDPdelayReq::ProcessState()
 void MDPdelayReq::ExecuteResetState()
 {
     m_initPdelayRespReceived = false;
-    if (m_lostResponses <= m_mdGlobal->allowedLostResponses)
+    if (m_lostResponses <= m_portGlobal->allowedLostResponses)
     m_lostResponses += 1;
     else
     {
-        m_mdGlobal->isMeasuringDelay = false;
+        m_portGlobal->isMeasuringDelay = false;
         m_portGlobal->asCapable = false;
     }
 }

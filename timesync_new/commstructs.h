@@ -5,6 +5,7 @@
 #include <time.h>
 
 #include "types.h"
+#include "ptpmessage/ptpmessageannounce.h"
 
 struct MDSyncSend
 {
@@ -115,8 +116,6 @@ struct PortGlobal
     uint16_t thisPort;
 
 
-
-
     /**
      * @brief The value of this attribute tells a slave port the number of sync intervals to wait without receiving synchronization
      * information, before assuming that the master is no longer transmitting synchronization information, and that the BMC algorithm
@@ -126,11 +125,10 @@ struct PortGlobal
      * The default value shall be 3
      */
     uint8_t syncReceiptTimeout;
-};
 
 
-struct MDGlobal
-{
+    /** Media dependent... */
+
     /**
      * @brief The current value of the logarithm to base 2 of the mean time interval, in seconds, between the sending of successive Pdelay_Req messages.
      * This value is set in the LinkDelaySyncIntervalSetting state machine.
@@ -171,6 +169,130 @@ struct MDGlobal
      * @brief The sequenceId for the next Sync message to be sent by this MD entity.
      */
     uint16_t syncSequenceId;
+
+    /** End media dependent... */
+
+
+
+    /** Announce */
+
+    /**
+     * @brief The time interval after which announce receipt timeout occurs if an Announce message has not been received during the interval.
+     * The value of announceReceiptTimeoutTimeInterval is equal to announceReceiptTimeout (see 10.6.3.2) multiplied by the announceInterval (see 10.3.9.6)
+     * for the port at the other end of the link to which this port is attached. The value of announceInterval for the port at the other end of the link is
+     * computed from logMessageInterval of the received Announce message (see 10.5.2.2.11).
+     */
+    UScaledNs announceReceiptTimeoutTimeInterval;
+
+    /**
+     * @brief Indicates the origin and state of the port’s time-synchronization spanning tree information.
+     */
+    SpanningTreePortState infoIs;
+
+    /**
+     * @brief The masterPriorityVector for the port.
+     */
+    PriorityVector masterPriority;
+    /**
+     * @brief The current value of the logarithm to base 2 of the mean time interval, in seconds, between the sending of successive Announce messages (see 10.6.2.2).
+     * This value is set in the AnnounceIntervalSetting state machine (see 10.3.14).
+     */
+    int8_t currentLogAnnounceInterval;
+
+    /**
+     * @brief The initial value of the logarithm to base 2 of the mean time interval, in seconds, between the sending of successive Announce messages (see 10.6.2.2).
+     */
+    int8_t initialLogAnnounceInterval;
+
+    /**
+     * @brief A variable containing the mean Announce message transmission interval for the port. This value is set in the AnnounceIntervalSetting
+     * state machine (see 10.3.14).
+     */
+    UScaledNs announceInterval;
+
+    /**
+     * @brief The value of stepsRemoved contained in the received Announce information.
+     */
+    uint16_t messageStepsRemoved;
+
+    /**
+     * @brief A Boolean variable that is set to cause a port to transmit Announce information; specifically, it is set when an announce interval has elapsed
+     * (see Figure 10-15), port roles have been updated, and portPriority and portStepsRemoved information has been updated with newly determined masterPriority
+     * and masterStepsRemoved information.
+     */
+    bool newInfo;
+
+    /**
+     * @brief The portPriorityVector for the port.
+     */
+    PriorityVector portPriority;
+
+    /**
+     * @brief The value of stepsRemoved for the port. portStepsRemoved is set equal to masterStepsRemoved (see 10.3.8.3) after masterStepsRemoved is updated.
+     */
+    uint16_t portStepsRemoved;
+
+    /**
+     * @brief A pointer to a structure that contains the fields of a received Announce message.
+     */
+    PtpMessageAnnounce* rcvdAnnouncePtr;
+
+    /**
+     * @brief A Boolean variable that is TRUE if a received Announce message is qualified, and FALSE if it is not qualified.
+     */
+    bool rcvdMsg;
+
+    /**
+     * @brief A Boolean variable that is set to TRUE to indicate that the PortAnnounceInformation state machine (see 10.3.11) should copy the newly determined
+     * masterPriority and masterStepsRemoved to portPriority and portStepsRemoved, respectively.
+     */
+    bool updtInfo;
+
+    /**
+     * @brief A global variable in which the leap61 flag (see 10.5.2.2.6) of a received Announce message is saved.
+     */
+    bool annLeap61;
+
+    /**
+     * @brief A global variable in which the leap59 flag (see 10.5.2.2.6) of a received Announce message is saved.
+     */
+    bool annLeap59;
+
+    /**
+     * @brief A global variable in which the currentUtcOffsetValid flag (see 10.5.2.2.6) of a received Announce message is saved.
+     */
+    bool annCurrentUtcOffsetValid;
+
+    /**
+     * @brief A global variable in which the timeTraceable flag (see 10.5.2.2.6) of a received Announce message is saved.
+     */
+    bool annTimeTraceable;
+
+    /**
+     * @brief A global variable in which the frequencyTraceable flag (see 10.5.2.2.6) of a received Announce message is saved.
+     */
+    bool annFrequencyTraceable;
+
+    /**
+     * @brief A global variable in which the currentUtcOffset field (see 10.5.3.2.1) of a received Announce message is saved.
+     */
+    int16_t annCurrentUtcOffset;
+
+    /**
+     * @brief a global variable in which the timeSource field (see 10.5.3.2.1) of a received Announce message is saved.
+     */
+    ClockTimeSource annTimeSource;
+
+    /**
+     * @brief The value of this attribute tells a slave port the number of announce intervals to wait without receiving an Announce message,
+     * before assuming that the master is no longer transmitting Announce messages, and that the BMC algorithm needs to be run, if appropriate.
+     * The condition of the slave port not receiving an Announce message for announceReceiptTimeout announce intervals is referred to as announce
+     * receipt timeout.
+     * The default value shall be 3. The announceReceiptTimeout is a per-port attribute.
+     */
+    uint8_t announceReceiptTimeout;
+
+    /** End announce */
 };
 
 #endif // COMM_STRUCTS

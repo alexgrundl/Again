@@ -39,6 +39,9 @@ public:
     void GetMessage(uint8_t* bytes);
 
 
+    void ParsePackage(const uint8_t* bytes);
+
+
     Timestamp GetPreciseOriginTimestamp();
 
 

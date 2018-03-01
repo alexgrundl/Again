@@ -9,26 +9,13 @@ class ClockMasterSyncSend : public StateMachineBase
 public:
 
 
-    ClockMasterSyncSend(TimeAwareSystem* timeAwareSystem, SiteSyncSync* siteSyncSync);
+    ClockMasterSyncSend(TimeAwareSystem* timeAwareSystem, std::shared_ptr<SiteSyncSync> siteSyncSync);
 
 
     ~ClockMasterSyncSend();
 
 
     void ProcessState();
-
-    /**
-     * @brief Creates a PortSyncSync structure to be transmitted, and returns a pointer to this structure.
-     * @param gmRateRatio
-     * @return A pointer to the structure to be transmitted.
-     */
-    PortSyncSync* SetPSSyncCMSS (double gmRateRatio);
-
-    /**
-     * @brief Transmits a copy of the PortSyncSync structure pointed to by txPSSyncPtr to the SiteSync state machine.
-     * @param txPSSyncPtr The structure to transmit.
-     */
-    void TxPSSyncCMSS (PortSyncSync* txPSSyncPtr);
 
 private:
 
@@ -43,7 +30,21 @@ private:
     PortSyncSync* m_txPSSyncPtr;
 
 
-    SiteSyncSync* m_siteSyncSync;
+    std::shared_ptr<SiteSyncSync> m_siteSyncSync;
+
+
+    /**
+     * @brief Creates a PortSyncSync structure to be transmitted, and returns a pointer to this structure.
+     * @param gmRateRatio
+     * @return A pointer to the structure to be transmitted.
+     */
+    PortSyncSync* SetPSSyncCMSS (double gmRateRatio);
+
+    /**
+     * @brief Transmits a copy of the PortSyncSync structure pointed to by txPSSyncPtr to the SiteSync state machine.
+     * @param txPSSyncPtr The structure to transmit.
+     */
+    void TxPSSyncCMSS (PortSyncSync* txPSSyncPtr);
 };
 
 #endif // CLOCKMASTERSYNCSEND_H

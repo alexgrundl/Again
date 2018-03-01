@@ -87,7 +87,7 @@ struct Timestamp
         Timestamp ts_new = *this;
 
         ts_new.sec -= ts.sec;
-        uint32_t ns_new = ns >= ts.ns ? ns - ts.ns : NS_PER_SEC * ns - ts.ns;
+        uint32_t ns_new = ns >= ts.ns ? ns - ts.ns : NS_PER_SEC + ns - ts.ns;
         if(ns < ts.ns)
         {
             ts_new.sec--;
@@ -240,9 +240,11 @@ struct ExtendedTimestamp
         ExtendedTimestamp ts_new = *this;
         ts_new.sec -= ts.sec;
 
-        uint32_t ns_new = ns - ts.ns;
-        if(ns < ns_new)
+        uint32_t ns_new = ns >= ts.ns ? ns - ts.ns : NS_PER_SEC + ns - ts.ns;
+        if(ns < ts.ns)
+        {
             ts_new.sec--;
+        }
         ts_new.ns = ns_new;
 
         uint16_t ns_frac_new = ns_frac - ts.ns_frac;
@@ -280,8 +282,8 @@ struct ExtendedTimestamp
 //        ns = (uint32_t)remainder;
 //        ns_frac = (uint16_t)((remainder - (double)ns) * 65536.0);
 
-        double dTs = (double)sec + ((double)ns + (double)ns_frac * pow(2, -16)) / (double)NS_PER_SEC;
-        double dScaled = ((double)uscaled.ns + (double)uscaled.ns_frac * pow(2, -16)) / (double)NS_PER_SEC;
+        double dTs = (double)sec * NS_PER_SEC + (double)ns + (double)ns_frac * pow(2, -16);
+        double dScaled = (double)uscaled.ns + (double)uscaled.ns_frac * pow(2, -16);
 
         return dTs / dScaled;
     }
@@ -325,7 +327,11 @@ enum ClockClass
 //    is not within holdover specification,
 //    216..232: For use by alternate PTP profiles,
 //    248: Default none of the other clockClass definitions apply,
-//    255: A slave-only clock(255)."
+
+    /**
+     * A slave-only clock.
+     */
+    CLOCK_CLASS_SLAVE_ONLY = 255
 };
 
 enum ClockAccuracy
@@ -366,49 +372,179 @@ struct ClockQuality
 
 enum ClockTimeSource
 {
-    CLOCK_TIME_SOURCE_ATOMIC = 0x10, // ATOMIC_CLOCK Any device, or device directly connected to such a device, that is based on atomic resonance for frequency and
-                                     // that has been calibrated against international standards for frequency and time.
+    /**
+     * Any device, or device directly connected to such a device, that is based on atomic resonance for frequency and that has been calibrated
+     * against international standards for frequency and time.
+     */
+    CLOCK_TIME_SOURCE_ATOMIC = 0x10,
 
-    /** To be defined... */
-
-//    0x20 GPS Any device synchronized to any of the satellite systems
-//    that distribute time and frequency tied to international
-//    standards
-//    0x30 TERRESTRIAL_RADIO Any device synchronized via any of the radio distribution
-//    systems that distribute time and frequency tied to
-//    international standards
-//    0x40 PTP Any device synchronized to an IEEE 1588 PTP-based
-//    source of time external to the gPTP domain. See NOTE.
-//    0x50 NTP Any device synchronized via NTP to servers that distribute
-//    time and frequency tied to international standards
-//    0x60 HAND_SET Used in all cases for any device whose time has been set by
-//    means of a human interface based on observation of an
-//    international standards source of time to within the claimed
-//    clock accuracy
-//    0x90 OTHER Any source of time and/or frequency not covered by other
-//    values, or for which the source is not known
-//    0xA0 INTERNAL_OSCILLATOR Any device whose frequency is not based on atomic
-//    resonance nor calibrated against international standards for
-//    frequency, and whose time is based on a free-running
-//    oscillator with epoch determined in an arbitrary or
-//    unknown manner
+    /**
+     * Any device synchronized to any of the satellite systems that distribute time and frequency tied to international standards.
+     */
+    CLOCK_TIME_SOURCE_GPS = 0x20,
+    /**
+     * Any device synchronized via any of the radio distribution systems that distribute time and frequency tied to international standards.
+     */
+    CLOCK_TIME_SOURCE_TERRESTRIAL_RADIO = 0x30,
+    /**
+     * Any device synchronized to an IEEE 1588 PTP-based source of time external to the gPTP domain.
+     */
+    CLOCK_TIME_SOURCE_PTP = 0x40,
+    /**
+     * Any device synchronized via NTP to servers that distribute time and frequency tied to international standards.
+     */
+    CLOCK_TIME_SOURCE_NTP = 0x50,
+    /**
+     * Used in all cases for any device whose time has been set by means of a human interface based on observation of an international standards
+     * source of time to within the claimed clock accuracy.
+     */
+    CLOCK_TIME_SOURCE_HAND_SET = 0x60,
+    /**
+     * Any source of time and/or frequency not covered by other values, or for which the source is not known.
+     */
+    CLOCK_TIME_SOURCE_OTHER = 0x90,
+    /**
+     * Any device whose frequency is not based on atomic resonance nor calibrated against international standards for frequency, and whose time
+     * is based on a free-running oscillator with epoch determined in an arbitrary or unknown manner.
+     */
+    CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR = 0xA0,
 
 };
 
 enum PortRole
 {
-    /** Any port of the time-aware system for which portEnabled, pttPortEnabled, and asCapable are not all TRUE.*/
+    /**
+     * Any port of the time-aware system for which portEnabled, pttPortEnabled, and asCapable are not all TRUE.
+     */
     PORT_ROLE_DISABLED = 3,
-    /** Any port, P, of the time-aware system that is closer to the root than any other port of the gPTP communication path connected to P */
+    /**
+     * Any port, P, of the time-aware system that is closer to the root than any other port of the gPTP communication path connected to P
+     */
     PORT_ROLE_MASTER = 6,
-    /** Any port of the time-aware system whose port role is not MasterPort, SlavePort, or DisabledPort. */
+    /**
+     * Any port of the time-aware system whose port role is not MasterPort, SlavePort, or DisabledPort.
+     */
     PORT_ROLE_PASSIVE = 7,
-    /** The one port of the time-aware system that is closest to the root time-aware system. If the root is grandmaster-capable, the SlavePort is
-     * also closest to the grandmaster. The time- aware system does not transmit Sync or Announce messages on the SlavePort. */
+    /**
+     * The one port of the time-aware system that is closest to the root time-aware system. If the root is grandmaster-capable,
+     * the SlavePort is also closest to the grandmaster. The time- aware system does not transmit Sync or Announce messages on the SlavePort.
+     */
     PORT_ROLE_SLAVE = 9
 };
 
 typedef UScaledNs MDTimestampReceive;
+
+
+struct SystemIdentity
+{
+    uint8_t priority1;
+    ClockQuality clockQuality;
+    uint8_t priority2;
+    uint8_t clockIdentity[8];
+
+    enum Info
+    {
+        INFO_SUPERIOR,
+        INFO_EQUAL,
+        INFO_INFERIOR
+    };
+
+
+    Info Compare(SystemIdentity identity)
+    {
+        if(priority1 == identity.priority1)
+        {
+            if(clockQuality.clockClass == identity.clockQuality.clockClass)
+            {
+                if(clockQuality.clockAccuracy == identity.clockQuality.clockAccuracy)
+                {
+                    if(clockQuality.offsetScaledLogVariance == identity.clockQuality.offsetScaledLogVariance)
+                    {
+                        if(priority2 == identity.priority2)
+                        {
+                            for (uint8_t i = 0; i < sizeof(clockIdentity); ++i)
+                            {
+                                if(clockIdentity[i] != identity.clockIdentity[i])
+                                    return clockIdentity[i] < identity.clockIdentity[i] ? INFO_SUPERIOR : INFO_INFERIOR;
+                            }
+                            return INFO_EQUAL;
+                        }
+                        return priority2 < identity.priority2 ? INFO_SUPERIOR : INFO_INFERIOR;
+                    }
+                    return clockQuality.offsetScaledLogVariance < identity.clockQuality.offsetScaledLogVariance ? INFO_SUPERIOR : INFO_INFERIOR;
+                }
+                return clockQuality.clockAccuracy < identity.clockQuality.clockAccuracy ? INFO_SUPERIOR : INFO_INFERIOR;
+            }
+            return clockQuality.clockClass < identity.clockQuality.clockClass ? INFO_SUPERIOR : INFO_INFERIOR;
+        }
+        return priority1 < identity.priority1 ? INFO_SUPERIOR : INFO_INFERIOR;
+    }
+};
+
+struct PriorityVector
+{
+    SystemIdentity identity;
+    uint16_t stepsRemoved;
+
+    /**
+     * @brief The port identity of the transmitting time-aware-system
+     */
+    PortIdentity sourcePortIdentity;
+
+    /**
+     * @brief Port number of the receiving port.
+     */
+    uint16_t portNumber;
+
+
+    SystemIdentity::Info Compare(PriorityVector vector)
+    {
+        SystemIdentity::Info info = identity.Compare(vector.identity);
+        if(info == SystemIdentity::INFO_EQUAL)
+        {
+            if(stepsRemoved == vector.stepsRemoved)
+            {
+                for (uint8_t i = 0; i < sizeof(sourcePortIdentity.clockIdentity); ++i)
+                {
+                    if(sourcePortIdentity.clockIdentity[i] != vector.sourcePortIdentity.clockIdentity[i])
+                        return sourcePortIdentity.clockIdentity[i] < vector.sourcePortIdentity.clockIdentity[i] ? SystemIdentity::INFO_SUPERIOR : SystemIdentity::INFO_INFERIOR;
+                }
+                if(sourcePortIdentity.portNumber == vector.sourcePortIdentity.portNumber)
+                {
+                    if(portNumber != vector.portNumber)
+                        return portNumber < vector.portNumber ? SystemIdentity::INFO_SUPERIOR : SystemIdentity::INFO_INFERIOR;
+                    return SystemIdentity::INFO_EQUAL;
+                }
+                return sourcePortIdentity.portNumber < vector.sourcePortIdentity.portNumber ? SystemIdentity::INFO_SUPERIOR : SystemIdentity::INFO_INFERIOR;
+            }
+            return stepsRemoved < vector.stepsRemoved ? SystemIdentity::INFO_SUPERIOR : SystemIdentity::INFO_INFERIOR;
+        }
+        return info;
+    }
+};
+
+enum SpanningTreePortState
+{
+    /**
+     * The port has received current information (i.e., announce receipt timeout has not occurred and, if gmPresent is TRUE, sync receipt timeout
+     * also has not occurred) from the master time-aware system for the attached communication path.
+     */
+    SPANNING_TREE_PORT_STATE_RECEIVED,
+    /**
+     * Information for the port has been derived from the SlavePort for the time-aware system (with the addition of SlavePort stepsRemoved).
+     * This includes the possibility that the SlavePort is the port whose portNumber is 0, i.e., the time-aware system is the root of the
+     * gPTP domain.
+     */
+    SPANNING_TREE_PORT_STATE_MINE,
+    /**
+     * Announce receipt timeout or, in the case where gmPresent is TRUE, sync receipt timeout have occurred.
+     */
+    SPANNING_TREE_PORT_STATE_AGED,
+    /**
+     * PortEnabled, pttPortEnabled, and asCapable are not all TRUE.
+     */
+    SPANNING_TREE_PORT_STATE_DISABLED
+};
 
 #endif // TYPES_H
 

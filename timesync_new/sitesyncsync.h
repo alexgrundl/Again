@@ -1,6 +1,8 @@
 #ifndef SITESYNCSYNC_H
 #define SITESYNCSYNC_H
 
+#include <memory>
+
 #include "commstructs.h"
 #include "statemachinebase.h"
 #include "portsyncsyncsend.h"
@@ -10,30 +12,16 @@ class SiteSyncSync : public StateMachineBase
 {
 public:
 
-    SiteSyncSync(TimeAwareSystem* timeAwareSystem, ClockSlaveSync* clockSlaveSync, std::vector<PortSyncSyncSend*>& portSyncSyncSends);
+    SiteSyncSync(TimeAwareSystem* timeAwareSystem, std::shared_ptr<ClockSlaveSync> clockSlaveSync, std::vector<std::shared_ptr<PortSyncSyncSend>> portSyncSyncSends);
 
 
     virtual ~SiteSyncSync();
-
-    /**
-     * @brief Creates a PortSyncSync structure to be transmitted, and returns a pointer to this structure. The members are
-     * copied from the received PortSyncSync structure pointed to by rcvdPSSyncPtr.
-     * @param rcvdPSSyncIndPtr The structure to copy its members.
-     * @return A Pointer to thecreated PortSyncSync structure.
-     */
-    PortSyncSync* SetPSSyncSend (PortSyncSync* rcvdPSSyncIndPtr);
-    /**
-     * @brief Transmits a copy of the PortSyncSync structure pointed to by txPSSyncPtr to the PortSyncSyncSend state machine
-     * of each PortSync entity and the ClockSlaveSync state machine of the ClockSlave entity of this time-aware system.
-     * @param txPSSyncPtr The structure to transmit.
-     */
-    void TxPSSync (PortSyncSync* txPSSyncPtr);
 
 
     void ProcessState();
 
 
-    void ProcessStruct(PortSyncSync* rcvd);
+    void SetSync(PortSyncSync* rcvd);
 
 private:
 
@@ -53,10 +41,25 @@ private:
     PortSyncSync* m_txPSSyncPtr;
 
 
-    ClockSlaveSync* m_clockSlaveSync;
+    std::shared_ptr<ClockSlaveSync> m_clockSlaveSync;
 
 
-    std::vector<PortSyncSyncSend*> m_portSyncSyncSends;
+    std::vector<std::shared_ptr<PortSyncSyncSend>> m_portSyncSyncSends;
+
+
+    /**
+     * @brief Creates a PortSyncSync structure to be transmitted, and returns a pointer to this structure. The members are
+     * copied from the received PortSyncSync structure pointed to by rcvdPSSyncPtr.
+     * @param rcvdPSSyncIndPtr The structure to copy its members.
+     * @return A Pointer to thecreated PortSyncSync structure.
+     */
+    PortSyncSync* SetPSSyncSend (PortSyncSync* rcvdPSSyncIndPtr);
+    /**
+     * @brief Transmits a copy of the PortSyncSync structure pointed to by txPSSyncPtr to the PortSyncSyncSend state machine
+     * of each PortSync entity and the ClockSlaveSync state machine of the ClockSlave entity of this time-aware system.
+     * @param txPSSyncPtr The structure to transmit.
+     */
+    void TxPSSync (PortSyncSync* txPSSyncPtr);
 };
 
 #endif // SITESYNCSYNC_H

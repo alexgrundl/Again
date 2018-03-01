@@ -1,8 +1,8 @@
 #include "mdsyncreceivesm.h"
 
-MDSyncReceiveSM::MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal,
-                                 PortSyncSyncReceive* portSyncSyncReceive, INetworkInterfacePort* networkPort) :
-    StateMachineBaseMD(timeAwareSystem, port, mdGlobal, networkPort)
+MDSyncReceiveSM::MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, std::shared_ptr<PortSyncSyncReceive> portSyncSyncReceive,
+                                 INetworkInterfacePort* networkPort) :
+    StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_followUpReceiptTimeoutTime.ns = 0;
     m_followUpReceiptTimeoutTime.ns_frac = 0;
@@ -20,6 +20,8 @@ MDSyncReceiveSM::MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, PortGlobal* p
 MDSyncReceiveSM::~MDSyncReceiveSM()
 {
     delete m_txMDSyncReceivePtr;
+    delete m_rcvdSyncPtr;
+    delete m_rcvdFollowUpPtr;
 }
 
 MDSyncReceive* MDSyncReceiveSM::SetMDSyncReceive()
@@ -35,6 +37,7 @@ MDSyncReceive* MDSyncReceiveSM::SetMDSyncReceive()
     m_rcvdFollowUpPtr->GetFollowUpTLV(&tlv);
     mdSyncReceivePtr->rateRatio = tlv.cumulativeScaledRateOffset * pow(2, -41) + 1.0;
 
+    mdSyncReceivePtr->upstreamTxTime = (m_rcvdSyncPtr->GetReceiveTime() - m_portGlobal->neighborPropDelay) / m_portGlobal->neighborRateRatio;
     /** upstreamTxTime is set equal to the <syncEventIngressTimestamp> for the most recently received
     Sync message, minus the mean propagation time on the link attached to this port
     (neighborPropDelay, see 10.2.4.7) divided by neighborRateRatio (see 10.2.4.6), minus
@@ -45,14 +48,14 @@ MDSyncReceive* MDSyncReceiveSM::SetMDSyncReceive()
     mdSyncReceivePtr->gmTimeBaseIndicator = tlv.gmTimeBaseIndicator;
     mdSyncReceivePtr->lastGmPhaseChange = tlv.lastGmPhaseChange;
     /* scaledLastGmFreqChange has to be converted to the correct value, probably... */
-    //mdSyncReceivePtr->lastGmFreqChange = tlv.scaledLastGmFreqChange;
+    mdSyncReceivePtr->lastGmFreqChange = tlv.scaledLastGmFreqChange / pow(2, 41);
 
     return mdSyncReceivePtr;
 }
 
 void MDSyncReceiveSM::TxMDSyncReceive(MDSyncReceive* txMDSyncReceivePtr)
 {
-    m_portSyncSyncReceive->ProcessStruct(txMDSyncReceivePtr);
+    m_portSyncSyncReceive->ProcessSync(txMDSyncReceivePtr);
 }
 
 void MDSyncReceiveSM::ProcessState()
@@ -83,6 +86,7 @@ void MDSyncReceiveSM::ProcessState()
         case STATE_WAITING_FOR_FOLLOW_UP:
             if(m_rcvdFollowUp && (m_rcvdFollowUpPtr->GetSequenceID() == m_rcvdSyncPtr->GetSequenceID()))
             {
+                printf("Giving to port sync sync..\n");
                 m_rcvdFollowUp = false;
                 delete m_txMDSyncReceivePtr;
                 m_txMDSyncReceivePtr = SetMDSyncReceive();
@@ -92,7 +96,6 @@ void MDSyncReceiveSM::ProcessState()
             else if(m_timeAwareSystem->GetCurrentTime() >= m_followUpReceiptTimeoutTime)
             {
                 UScaledNs time = m_timeAwareSystem->GetCurrentTime();
-                printf("Time   : %lu\n", time.ns);
                 m_rcvdSync = false;
                 m_rcvdFollowUp = false;
                 m_state = STATE_DISCARD;
@@ -106,14 +109,20 @@ void MDSyncReceiveSM::ProcessState()
     }
 }
 
-void MDSyncReceiveSM::SetSyncMessage(PtpMessageSync* rcvdSyncPtr)
+void MDSyncReceiveSM::SetSyncMessage(IReceivePackage *package)
 {
-    m_rcvdSyncPtr = rcvdSyncPtr;
+    delete m_rcvdSyncPtr;
+    m_rcvdSyncPtr = new PtpMessageSync();
+    m_rcvdSyncPtr->ParsePackage(package->GetBuffer());
+    m_rcvdSyncPtr->SetReceiveTime(package->GetTimestamp());
     m_rcvdSync = true;
 }
 
-void MDSyncReceiveSM::SetFollowUpMessage(PtpMessageFollowUp* rcvdFollowUpPtr)
+void MDSyncReceiveSM::SetFollowUpMessage(IReceivePackage *package)
 {
-    m_rcvdFollowUpPtr = rcvdFollowUpPtr;
+    delete m_rcvdFollowUpPtr;
+    m_rcvdFollowUpPtr = new PtpMessageFollowUp();
+    m_rcvdFollowUpPtr->ParsePackage(package->GetBuffer());
+    m_rcvdFollowUpPtr->SetReceiveTime(package->GetTimestamp());
     m_rcvdFollowUp = true;
 }

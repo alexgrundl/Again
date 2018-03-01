@@ -19,3 +19,8 @@ void PtpMessageSync::GetMessage(uint8_t *bytes)
 //    for(int i = 0; i < 20; i++)
 //        bytes[kMessageHeaderLength + i] = 0;
 }
+
+void PtpMessageSync::ParsePackage(const uint8_t* bytes)
+{
+    ParseHeader(bytes);
+}

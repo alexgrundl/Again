@@ -12,34 +12,9 @@ class MDPdelayReq : public StateMachineBaseMD
 {
 public:
 
-    MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal,
-                INetworkInterfacePort* networkPort);
+    MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort* networkPort);
 
     ~MDPdelayReq();
-
-    /**
-     * @brief Creates a structure containing the parameters of a Pdelay_Req message to be
-     * transmitted, and returns a pointer, txPdelayReqPtr, to this structure.
-     * @return A pointer to the created structure.
-     */
-    PtpMessagePDelayReq* SetPdelayReq();
-
-    /**
-     * @brief Transmits a Pdelay_Req message from the MD entity, containing the parameters in the structure pointed to by
-     * txPdelayReqPtr.
-     * @param txPdelayReqPtr The message to transmit.
-     */
-    void TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr);
-
-    /**
-     * @brief Computes neighborRateRatio.
-     */
-    double ComputePdelayRateRatio();
-
-    /**
-     * @brief Computes the mean propagation delay on the link attached to this MD entity.
-     */
-    UScaledNs ComputePropTime();
 
 
     void ProcessState();
@@ -124,6 +99,31 @@ private:
 
 
     UScaledNs m_pdelayRespFollowUpCorrTime;
+
+    /**
+     * @brief Creates a structure containing the parameters of a Pdelay_Req message to be
+     * transmitted, and returns a pointer, txPdelayReqPtr, to this structure.
+     * @return A pointer to the created structure.
+     */
+    PtpMessagePDelayReq* SetPdelayReq();
+
+    /**
+     * @brief Transmits a Pdelay_Req message from the MD entity, containing the parameters in the structure pointed to by
+     * txPdelayReqPtr.
+     * @param txPdelayReqPtr The message to transmit.
+     */
+    void TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr);
+
+    /**
+     * @brief Computes neighborRateRatio.
+     */
+    double ComputePdelayRateRatio();
+
+    /**
+     * @brief Computes the mean propagation delay on the link attached to this MD entity.
+     */
+    UScaledNs ComputePropTime();
+
 
     void ExecuteResetState();
 

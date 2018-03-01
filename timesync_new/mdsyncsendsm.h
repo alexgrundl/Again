@@ -11,35 +11,9 @@ class MDSyncSendSM : public StateMachineBaseMD
 {
 public:
 
-    MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal,
-                 INetworkInterfacePort* networkPort);
+    MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort* networkPort);
 
     virtual ~MDSyncSendSM();
-
-    /**
-     * @brief Creates a structure whose parameters contain the fields (see 11.4 and its subclauses) of a Sync message to be transmitted,
-     * and returns a pointer to this structure. The parameters are set as follows.
-     * @return A pointer to the created sync message.
-     */
-    PtpMessageSync* SetSync();
-
-    /**
-     * @brief Transmits a Sync message from this MD entity, whose fields contain the parameters in the structure pointed to by txSyncPtr.
-     * @param txSyncPtr Pointer to the message to transmit.
-     */
-    void TxSync(PtpMessageSync* txSyncPtr);
-
-    /**
-     * @brief Creates a structure whose parameters contain the fields of a Follow_Up message to be transmitted, and returns a pointer to this structure.
-     * @return A pointer to the created follow up message.
-     */
-    PtpMessageFollowUp* SetFollowUp();
-
-    /**
-     * @brief Transmits a Follow_Up message from this MD entity, whose fields contain the parameters in the structure pointed to by txFollowUpPtr.
-     * @param txFollowUpPtr Pointer to the message to transmit.
-     */
-    void TxFollowUp(PtpMessageFollowUp* txFollowUpPtr);
 
 
     void ProcessState();
@@ -82,6 +56,32 @@ private:
      * @brief The MDSyncSend structure received from the PortSyncSyncSend state machine.
      */
     MDSyncSend* m_rcvdMDSyncPtr;
+
+
+    /**
+     * @brief Creates a structure whose parameters contain the fields (see 11.4 and its subclauses) of a Sync message to be transmitted,
+     * and returns a pointer to this structure. The parameters are set as follows.
+     * @return A pointer to the created sync message.
+     */
+    PtpMessageSync* SetSync();
+
+    /**
+     * @brief Transmits a Sync message from this MD entity, whose fields contain the parameters in the structure pointed to by txSyncPtr.
+     * @param txSyncPtr Pointer to the message to transmit.
+     */
+    void TxSync(PtpMessageSync* txSyncPtr);
+
+    /**
+     * @brief Creates a structure whose parameters contain the fields of a Follow_Up message to be transmitted, and returns a pointer to this structure.
+     * @return A pointer to the created follow up message.
+     */
+    PtpMessageFollowUp* SetFollowUp();
+
+    /**
+     * @brief Transmits a Follow_Up message from this MD entity, whose fields contain the parameters in the structure pointed to by txFollowUpPtr.
+     * @param txFollowUpPtr Pointer to the message to transmit.
+     */
+    void TxFollowUp(PtpMessageFollowUp* txFollowUpPtr);
 };
 
 #endif // MDSYNCSENDSM_H

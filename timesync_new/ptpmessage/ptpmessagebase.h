@@ -44,7 +44,7 @@ public:
     static const uint16_t kEtherType = 0x88F7;
 
 
-    static const uint8_t DstMac[6];
+    static const uint8_t kMacMulticast[6];
 
 
     uint8_t GetVersionPTP();
@@ -115,6 +115,11 @@ public:
 
     static PtpMessageType ParseMessageType(const uint8_t* bytes);
 
+
+    static void GetClockIdentity(const uint8_t* portMac, uint8_t* clockIdentity);
+
+
+    static bool IsPortIdentityEqual(PortIdentity* identity1, PortIdentity* identity2);
 
 protected:
 

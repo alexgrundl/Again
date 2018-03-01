@@ -1,6 +1,6 @@
 #include "portsyncsyncsend.h"
 
-PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDSyncSendSM* mdSyncSendSM) :
+PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal* port, std::shared_ptr<MDSyncSendSM> mdSyncSendSM) :
     StateMachineBasePort(timeAwareSystem, port)
 {
     m_rcvdPSSync = false;
@@ -64,7 +64,7 @@ void PortSyncSyncSend::TxMDSync(MDSyncSend* txMDSyncPtr)
     m_mdSyncSendSM->SetMDSyncSend(txMDSyncPtr);
 }
 
-void PortSyncSyncSend::ProcessStruct(PortSyncSync* rcvd)
+void PortSyncSyncSend::ProcessSync(PortSyncSync* rcvd)
 {
     m_rcvdPSSyncPtr = rcvd;
     m_rcvdPSSync = true;

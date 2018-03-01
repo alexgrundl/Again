@@ -1,7 +1,7 @@
 #include "mdpdelayresp.h"
 
-MDPdelayResp::MDPdelayResp(TimeAwareSystem *timeAwareSystem, PortGlobal *port, MDGlobal *mdGlobal, INetworkInterfacePort* networkPort) :
-    StateMachineBaseMD(timeAwareSystem, port, mdGlobal, networkPort)
+MDPdelayResp::MDPdelayResp(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetworkInterfacePort* networkPort) :
+    StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_rcvdPdelayReq = false;
     m_rcvdMDTimestampReceive = false;

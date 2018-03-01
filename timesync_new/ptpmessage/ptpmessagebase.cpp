@@ -1,6 +1,6 @@
 #include "ptpmessagebase.h"
 
-const uint8_t PtpMessageBase::DstMac[6] = {0x01, 0x80, 0xC2, 0x00, 0x00, 0x0E};
+const uint8_t PtpMessageBase::kMacMulticast[6] = {0x01, 0x80, 0xC2, 0x00, 0x00, 0x0E};
 
 PtpMessageBase::PtpMessageBase()
 {
@@ -174,4 +174,24 @@ void PtpMessageBase::SetReceiveTime(UScaledNs value)
 void PtpMessageBase::SetSendTime(UScaledNs value)
 {
     m_sendTime = value;
+}
+
+void PtpMessageBase::GetClockIdentity(const uint8_t* portMac, uint8_t* clockIdentity)
+{
+    clockIdentity[0] = portMac[0];
+    clockIdentity[1] = portMac[1];
+    clockIdentity[2] = portMac[2];
+
+    clockIdentity[3] = 0xFF;
+    clockIdentity[4] = 0xFE;
+
+    clockIdentity[5] = portMac[3];
+    clockIdentity[6] = portMac[4];
+    clockIdentity[7] = portMac[5];
+}
+
+bool PtpMessageBase::IsPortIdentityEqual(PortIdentity* identity1, PortIdentity* identity2)
+{
+    return memcmp(identity1->clockIdentity, identity2->clockIdentity, sizeof(identity2->clockIdentity)) == 0 &&
+            identity1->portNumber == identity2->portNumber;
 }

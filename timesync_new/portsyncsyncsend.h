@@ -1,6 +1,8 @@
 #ifndef PORTSYNCSYNCSEND_H
 #define PORTSYNCSYNCSEND_H
 
+#include <memory>
+
 #include "statemachinebase.h"
 #include "mdsyncsendsm.h"
 
@@ -8,24 +10,13 @@ class PortSyncSyncSend : public StateMachineBasePort
 {
 public:
 
-    PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDSyncSendSM* mdSyncSendSM);
+    PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal* port, std::shared_ptr<MDSyncSendSM> mdSyncSendSM);
+
 
     virtual ~PortSyncSyncSend();
 
-    /**
-     * @brief Creates an MDSyncSend structure, and returns a pointer to this structure.
-     * @return A pointer to the created structure.
-     */
-    MDSyncSend* SetMDSync();
 
-    /**
-     * @brief Transmits the MDSyncSend structure pointed to by txMDSyncSendPtr, to the MDSyncSendSM state machine of the MD entity of this port.
-     * @param txMDSyncPtr The structure to transmit.
-     */
-    void TxMDSync(MDSyncSend* txMDSyncPtr);
-
-
-    void ProcessStruct(PortSyncSync* rcvd);
+    void ProcessSync(PortSyncSync* rcvd);
 
 
     void ProcessState();
@@ -106,10 +97,24 @@ private:
 
 
 
-    MDSyncSendSM* m_mdSyncSendSM;
+    std::shared_ptr<MDSyncSendSM> m_mdSyncSendSM;
+
+
+    /**
+     * @brief Creates an MDSyncSend structure, and returns a pointer to this structure.
+     * @return A pointer to the created structure.
+     */
+    MDSyncSend* SetMDSync();
+
+    /**
+     * @brief Transmits the MDSyncSend structure pointed to by txMDSyncSendPtr, to the MDSyncSendSM state machine of the MD entity of this port.
+     * @param txMDSyncPtr The structure to transmit.
+     */
+    void TxMDSync(MDSyncSend* txMDSyncPtr);
 
 
     void ExecuteSendMDSyncState();
+
 };
 
 #endif // PORTSYNCSYNCSEND_H

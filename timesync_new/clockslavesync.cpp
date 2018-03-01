@@ -15,7 +15,8 @@ ClockSlaveSync::~ClockSlaveSync()
 
 void ClockSlaveSync::UpdateSlaveTime()
 {
-
+    if(!m_timeAwareSystem->gmPresent)
+        m_timeAwareSystem->clockSlaveTime = m_timeAwareSystem->localTime;
 }
 
 void ClockSlaveSync::InvokeApplicationInterfaceFunction (void* functionName)

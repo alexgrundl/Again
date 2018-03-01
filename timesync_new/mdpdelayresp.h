@@ -10,42 +10,13 @@ class MDPdelayResp : public StateMachineBaseMD
 {
 public:
 
-    MDPdelayResp(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal, INetworkInterfacePort *networkPort);
+    MDPdelayResp(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort *networkPort);
 
 
     ~MDPdelayResp();
 
 
     void ProcessState();
-
-    /**
-     * @brief Creates a structure containing the parameters (see 11.4 and its subclauses) of a Pdelay_Resp message
-     * to be transmitted, and returns a pointer, txPdelayRespPtr, to this structure.
-     * @return The created structure.
-     */
-    PtpMessagePDelayResp* SetPdelayResp();
-
-    /**
-     * @brief Transmits a Pdelay_Resp message from the MD entity, containing the parameters in the structure pointed
-     * to by txPdelayRespPtr.
-     * @param txPdelayRespPtr The structure to transmit.
-     */
-    void TxPdelayResp(PtpMessagePDelayResp* txPdelayRespPtr);
-
-    /**
-     * @brief Creates a structure containing the parameters of a Pdelay_Resp_Follow_Up message  to be transmitted,
-     * and returns a pointer, txPdelayRespFollowUpPtr, to this structure.
-     * @return The created structure.
-     */
-    PtpMessagePDelayRespFollowUp* SetPdelayRespFollowUp();
-
-    /**
-     * @brief Transmits a Pdelay_Resp_Follow_Up message from the P2PPort entity containing the parameters in the structure
-     * pointed to by txPdelayRespFollowUpPtr.
-     * @param txFollowUpPtr The structure to transmit.
-     */
-    void TxPdelayRespFollowUp(PtpMessagePDelayRespFollowUp* txFollowUpPtr);
-
 
 
     void SetPDelayRequest(IReceivePackage* package);
@@ -78,6 +49,35 @@ private:
 
 
     PtpMessagePDelayReq* m_rcvdPdelayReqPtr;
+
+
+    /**
+     * @brief Creates a structure containing the parameters (see 11.4 and its subclauses) of a Pdelay_Resp message
+     * to be transmitted, and returns a pointer, txPdelayRespPtr, to this structure.
+     * @return The created structure.
+     */
+    PtpMessagePDelayResp* SetPdelayResp();
+
+    /**
+     * @brief Transmits a Pdelay_Resp message from the MD entity, containing the parameters in the structure pointed
+     * to by txPdelayRespPtr.
+     * @param txPdelayRespPtr The structure to transmit.
+     */
+    void TxPdelayResp(PtpMessagePDelayResp* txPdelayRespPtr);
+
+    /**
+     * @brief Creates a structure containing the parameters of a Pdelay_Resp_Follow_Up message  to be transmitted,
+     * and returns a pointer, txPdelayRespFollowUpPtr, to this structure.
+     * @return The created structure.
+     */
+    PtpMessagePDelayRespFollowUp* SetPdelayRespFollowUp();
+
+    /**
+     * @brief Transmits a Pdelay_Resp_Follow_Up message from the P2PPort entity containing the parameters in the structure
+     * pointed to by txPdelayRespFollowUpPtr.
+     * @param txFollowUpPtr The structure to transmit.
+     */
+    void TxPdelayRespFollowUp(PtpMessagePDelayRespFollowUp* txFollowUpPtr);
 };
 
 #endif // MDPDELAYRESP_H

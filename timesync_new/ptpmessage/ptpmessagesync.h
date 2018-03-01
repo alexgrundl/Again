@@ -9,10 +9,14 @@ public:
 
     PtpMessageSync();
 
+
     virtual ~PtpMessageSync();
 
 
     void GetMessage(uint8_t* bytes);
+
+
+    void ParsePackage(const uint8_t* bytes);
 
 private:
 

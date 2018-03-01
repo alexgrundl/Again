@@ -1,6 +1,6 @@
 #include "portsyncsyncreceive.h"
 
-PortSyncSyncReceive::PortSyncSyncReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port, SiteSyncSync* siteSyncSync) :
+PortSyncSyncReceive::PortSyncSyncReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port, std::shared_ptr<SiteSyncSync> siteSyncSync) :
     StateMachineBasePort(timeAwareSystem, port)
 {
     m_rcvdMDSync = false;
@@ -34,10 +34,10 @@ PortSyncSync* PortSyncSyncReceive::SetPSSyncPSSR (MDSyncReceive* rcvdMDSyncPtr, 
 
 void PortSyncSyncReceive::TxPSSyncPSSR (PortSyncSync* txPSSyncPtr)
 {
-    m_siteSyncSync->ProcessStruct(txPSSyncPtr);
+    m_siteSyncSync->SetSync(txPSSyncPtr);
 }
 
-void PortSyncSyncReceive::ProcessStruct(MDSyncReceive* rcvd)
+void PortSyncSyncReceive::ProcessSync(MDSyncReceive* rcvd)
 {
     m_rcvdMDSyncPtr = rcvd;
     m_rcvdMDSync = true;
@@ -64,9 +64,9 @@ void PortSyncSyncReceive::ProcessState()
                 m_rateRatio = m_rcvdMDSyncPtr->rateRatio;
                 m_rateRatio += m_portGlobal->neighborRateRatio - 1.0;
                 /* Irgendwas ist da faul......... Beim Standard sollte hier doch 3 * 125 ms rauskommen und nicht
-                   3 * 2^13 Sekunden... */
-                m_portGlobal->syncReceiptTimeoutTimeInterval.ns = m_portGlobal->syncReceiptTimeout * NS_PER_SEC
-                        * pow(2, 16 + m_rcvdMDSyncPtr->logMessageInterval);
+                   3 * 2^13 Sekunden... "16 +" wird jetzt mal auskommentiert... */
+                m_portGlobal->syncReceiptTimeoutTimeInterval.ns = (uint64_t)m_portGlobal->syncReceiptTimeout * NS_PER_SEC
+                        * pow(2, /*16 +*/ m_rcvdMDSyncPtr->logMessageInterval);
                 m_portGlobal->syncReceiptTimeoutTimeInterval.ns_frac = 0;
 
                 delete m_txPSSyncPtr;

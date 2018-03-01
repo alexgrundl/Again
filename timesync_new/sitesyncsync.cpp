@@ -1,6 +1,6 @@
 #include "sitesyncsync.h"
 
-SiteSyncSync::SiteSyncSync(TimeAwareSystem* timeAwareSystem, ClockSlaveSync* clockSlaveSync, std::vector<PortSyncSyncSend*>& portSyncSyncSends) :
+SiteSyncSync::SiteSyncSync(TimeAwareSystem* timeAwareSystem, std::shared_ptr<ClockSlaveSync> clockSlaveSync, std::vector<std::shared_ptr<PortSyncSyncSend>> portSyncSyncSends) :
     StateMachineBase(timeAwareSystem)
 {
     m_rcvdPSSync = false;
@@ -8,7 +8,7 @@ SiteSyncSync::SiteSyncSync(TimeAwareSystem* timeAwareSystem, ClockSlaveSync* clo
     m_txPSSyncPtr = NULL;
 
     m_clockSlaveSync = clockSlaveSync;
-    for (std::vector<PortSyncSyncSend*>::size_type i = 0; i < portSyncSyncSends.size(); ++i)
+    for (std::vector<std::shared_ptr<PortSyncSyncSend>>::size_type i = 0; i < portSyncSyncSends.size(); ++i)
     {
         m_portSyncSyncSends.push_back(portSyncSyncSends[i]);
     }
@@ -32,12 +32,12 @@ void SiteSyncSync::TxPSSync (PortSyncSync* txPSSyncPtr)
     m_clockSlaveSync->SetPortSyncSync(txPSSyncPtr);
     for (std::vector<PortSyncSyncSend*>::size_type i = 0; i < m_portSyncSyncSends.size(); ++i)
     {
-        m_portSyncSyncSends[i]->ProcessStruct(txPSSyncPtr);
+        m_portSyncSyncSends[i]->ProcessSync(txPSSyncPtr);
     }
 
 }
 
-void SiteSyncSync::ProcessStruct(PortSyncSync* rcvd)
+void SiteSyncSync::SetSync(PortSyncSync* rcvd)
 {
     m_rcvdPSSyncPtr = rcvd;
     m_rcvdPSSync = true;

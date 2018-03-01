@@ -16,6 +16,7 @@ public:
      */
     double ComputeClockSourceFreqOffset();
 
+
     void ProcessState();
 
 private:

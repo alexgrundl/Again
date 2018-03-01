@@ -36,7 +36,7 @@ void PtpMessagePDelayResp::ParsePackage(const uint8_t* bytes)
     for(int i = 0; i < 6; i++)
         m_requestReceiptTimestamp.sec += ((uint64_t)bytes[kMessageHeaderLength + i] << (40 - i * 8));
     m_requestReceiptTimestamp.ns = 0;
-    for(int i = 0; i < 6; i++)
+    for(int i = 0; i < 4; i++)
         m_requestReceiptTimestamp.ns += ((uint64_t)bytes[kMessageHeaderLength + 6 + i] << (24 - i * 8));
 
     for(int i = 0; i < 8; i++)

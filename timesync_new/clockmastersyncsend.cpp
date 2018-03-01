@@ -1,6 +1,6 @@
 #include "clockmastersyncsend.h"
 
-ClockMasterSyncSend::ClockMasterSyncSend(TimeAwareSystem* timeAwareSystem, SiteSyncSync* siteSyncSync) :
+ClockMasterSyncSend::ClockMasterSyncSend(TimeAwareSystem* timeAwareSystem, std::shared_ptr<SiteSyncSync> siteSyncSync) :
     StateMachineBase(timeAwareSystem)
 {
     m_syncSendTime.ns = 0;
@@ -40,14 +40,15 @@ PortSyncSync* ClockMasterSyncSend::SetPSSyncCMSS(double gmRateRatio)
 
 void ClockMasterSyncSend::TxPSSyncCMSS(PortSyncSync* txPSSyncPtr)
 {
-    m_siteSyncSync->ProcessStruct(txPSSyncPtr);
+    m_siteSyncSync->SetSync(txPSSyncPtr);
 }
 
 void ClockMasterSyncSend::ProcessState()
 {
     if(m_timeAwareSystem->BEGIN)
     {
-        m_syncSendTime = m_timeAwareSystem->GetCurrentTime() + m_timeAwareSystem->clockMasterSyncInterval;
+        m_syncSendTime = m_timeAwareSystem->GetCurrentTime();
+        m_syncSendTime.ns += 1000000000 * pow(2, m_timeAwareSystem->clockMasterLogSyncInterval);
         m_state = STATE_INITIALIZING;
     }
     else
@@ -58,7 +59,8 @@ void ClockMasterSyncSend::ProcessState()
 
             m_txPSSyncPtr = SetPSSyncCMSS (m_timeAwareSystem->gmRateRatio);
             TxPSSyncCMSS(m_txPSSyncPtr);
-            m_syncSendTime = m_timeAwareSystem->GetCurrentTime() + m_timeAwareSystem->clockMasterSyncInterval;
+            m_syncSendTime = m_timeAwareSystem->GetCurrentTime();
+            m_syncSendTime.ns += 1000000000 * pow(2, m_timeAwareSystem->clockMasterLogSyncInterval);
         }
     }
 }

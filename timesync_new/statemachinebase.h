@@ -42,7 +42,16 @@ public:
 
         STATE_INITIAL_WAITING_FOR_PDELAY_REQ,
         STATE_WAITING_FOR_PDELAY_REQ,
-        STATE_SENT_PDELAY_RESP_WAITING_FOR_TIMESTAMP
+        STATE_SENT_PDELAY_RESP_WAITING_FOR_TIMESTAMP,
+
+        STATE_RECEIVE,
+        STATE_DISABLED,
+        STATE_AGED,
+        STATE_UPDATE,
+        STATE_CURRENT,
+        STATE_SUPERIOR_MASTER_PORT,
+        STATE_REPEATED_MASTER_PORT,
+        STATE_INFERIOR_MASTER_OR_OTHER_PORT
     };
 
 
@@ -82,9 +91,6 @@ public:
     virtual ~StateMachineBasePort();
 
 
-    void SetMDGlobal(MDGlobal* mdGlobal);
-
-
 protected:
 
     PortGlobal* m_portGlobal;
@@ -97,20 +103,13 @@ class StateMachineBaseMD : public StateMachineBasePort
 
 public:
 
-    StateMachineBaseMD(TimeAwareSystem* timeAwareSystem, PortGlobal* portGlobal, MDGlobal* mdGlobal,
-                       INetworkInterfacePort* network);
+    StateMachineBaseMD(TimeAwareSystem* timeAwareSystem, PortGlobal* portGlobal, INetworkInterfacePort* network);
 
 
     virtual ~StateMachineBaseMD();
 
 
-    void SetMDGlobal(MDGlobal* mdGlobal);
-
-
 protected:
-
-
-    MDGlobal* m_mdGlobal;
 
 
     INetworkInterfacePort* m_networkPort;

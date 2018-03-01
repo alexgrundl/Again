@@ -10,7 +10,7 @@ class PortSyncSyncReceive : public StateMachineBasePort
 {
 public:
 
-    PortSyncSyncReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port, SiteSyncSync* siteSyncSync);
+    PortSyncSyncReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port, std::shared_ptr<SiteSyncSync> siteSyncSync);
 
 
     ~PortSyncSyncReceive();
@@ -18,23 +18,8 @@ public:
 
     void ProcessState();
 
-    /**
-     * @brief Creates a PortSyncSync structure to be transmitted, and returns a pointer to this structure.
-     * @param rcvdMDSyncPtr
-     * @param syncReceiptTimeoutTimeInterval
-     * @param rateRatio
-     */
-    PortSyncSync* SetPSSyncPSSR (MDSyncReceive* rcvdMDSyncPtr, UScaledNs syncReceiptTimeoutTimeInterval, double rateRatio);
 
-    /**
-     * @brief Transmits a copy of the PortSyncSync structure pointed to by txPSSyncPtr to the SiteSyncSync
-     * state machine of this time-aware system.
-     * @param txPSSyncPtr The structure to transmit.
-     */
-    void TxPSSyncPSSR (PortSyncSync* txPSSyncPtr);
-
-
-    void ProcessStruct(MDSyncReceive* rcvd);
+    void ProcessSync(MDSyncReceive* rcvd);
 
 private:
 
@@ -62,7 +47,23 @@ private:
     double m_rateRatio;
 
 
-    SiteSyncSync* m_siteSyncSync;
+    std::shared_ptr<SiteSyncSync> m_siteSyncSync;
+
+
+    /**
+     * @brief Creates a PortSyncSync structure to be transmitted, and returns a pointer to this structure.
+     * @param rcvdMDSyncPtr
+     * @param syncReceiptTimeoutTimeInterval
+     * @param rateRatio
+     */
+    PortSyncSync* SetPSSyncPSSR (MDSyncReceive* rcvdMDSyncPtr, UScaledNs syncReceiptTimeoutTimeInterval, double rateRatio);
+
+    /**
+     * @brief Transmits a copy of the PortSyncSync structure pointed to by txPSSyncPtr to the SiteSyncSync
+     * state machine of this time-aware system.
+     * @param txPSSyncPtr The structure to transmit.
+     */
+    void TxPSSyncPSSR (PortSyncSync* txPSSyncPtr);
 };
 
 #endif // PORTSYNCSYNCRECEIVE_H

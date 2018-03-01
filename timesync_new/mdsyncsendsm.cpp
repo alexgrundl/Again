@@ -1,7 +1,7 @@
 #include "mdsyncsendsm.h"
 
-MDSyncSendSM::MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDGlobal* mdGlobal, INetworkInterfacePort* networkPort) :
-    StateMachineBaseMD(timeAwareSystem, port, mdGlobal, networkPort)
+MDSyncSendSM::MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort* networkPort) :
+    StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_rcvdMDSync = false;
     m_rcvdMDSyncPtr = NULL;
@@ -23,7 +23,7 @@ PtpMessageSync* MDSyncSendSM::SetSync()
 
     syncPtr->SetCorrectionField(0);
     syncPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
-    syncPtr->SetSequenceID(m_mdGlobal->syncSequenceId);
+    syncPtr->SetSequenceID(m_portGlobal->syncSequenceId);
     syncPtr->SetLogMessageInterval((m_rcvdMDSyncPtr->logMessageInterval));
 
     return syncPtr;
@@ -37,7 +37,7 @@ PtpMessageFollowUp* MDSyncSendSM::SetFollowUp()
     correctionScaled = m_rcvdMDSyncPtr->followUpCorrectionField + ((*m_rcvdMDTimestampReceivePtr) - m_rcvdMDSyncPtr->upstreamTxTime) * m_rcvdMDSyncPtr->rateRatio;
     followUpPtr->SetCorrectionField(correctionScaled.ns);
     followUpPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
-    followUpPtr->SetSequenceID(m_mdGlobal->syncSequenceId);
+    followUpPtr->SetSequenceID(m_portGlobal->syncSequenceId);
     followUpPtr->SetLogMessageInterval(m_rcvdMDSyncPtr->logMessageInterval);
     followUpPtr->SetPreciseOriginTimestamp(m_rcvdMDSyncPtr->preciseOriginTimestamp);
 
@@ -78,7 +78,7 @@ void MDSyncSendSM::ProcessState()
     {
         m_rcvdMDSync = false;
         m_rcvdMDTimestampReceive = false;
-        m_mdGlobal->syncSequenceId = rand() % 65536;
+        m_portGlobal->syncSequenceId = rand() % 65536;
         m_state = STATE_INITIALIZING;
     }
     else
@@ -93,7 +93,7 @@ void MDSyncSendSM::ProcessState()
                 delete m_txSyncPtr;
                 m_txSyncPtr = SetSync();
                 TxSync(m_txSyncPtr);
-                m_mdGlobal->syncSequenceId += 1;
+                m_portGlobal->syncSequenceId += 1;
                 m_state = STATE_SEND_SYNC;
             }
             break;
