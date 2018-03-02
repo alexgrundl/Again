@@ -75,5 +75,6 @@ HEADERS += \
     portannounceinformation.h \
     portannouncereceive.h \
     portroleselection.h \
-    ptpmessage/ptpmessageannounce.h
+    ptpmessage/ptpmessageannounce.h \
+    comm/netport.h
 
