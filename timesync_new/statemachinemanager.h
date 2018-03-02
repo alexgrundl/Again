@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 
-#include "c-extensions/ThreadWrapper.h"
+#include "ThreadWrapper.h"
 #include "statemachinebase.h"
 #include "ptpmessage/ptpmessagepdelayreq.h"
 #include "ptpmessage/ptpmessagepdelayresp.h"

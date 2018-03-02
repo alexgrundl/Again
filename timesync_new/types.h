@@ -116,6 +116,26 @@ struct Timestamp
 
         return *this;
     }
+
+    bool operator>(const Timestamp& ts) const
+    {
+        return sec > ts.sec || (sec == ts.sec && ns > ts.ns);
+    }
+
+    bool operator>=(const Timestamp& ts) const
+    {
+        return sec > ts.sec || (sec == ts.sec && ns >= ts.ns);
+    }
+
+    bool operator<(const Timestamp& ts) const
+    {
+        return sec < ts.sec || (sec == ts.sec && ns < ts.ns);
+    }
+
+    bool operator<=(const Timestamp& ts) const
+    {
+        return sec < ts.sec || (sec == ts.sec && ns <= ts.ns);
+    }
 };
 
 struct UScaledNs

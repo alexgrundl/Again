@@ -60,6 +60,7 @@ void PortAnnounceReceive::ProcessState()
             if(m_rcvdAnnounce && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable)
             {
                 m_rcvdAnnounce = false;
+                printf("Qualifiying announce...\n");
                 m_portGlobal->rcvdMsg = QualifyAnnounce(m_portGlobal->rcvdAnnouncePtr);
                 m_state = STATE_RECEIVE;
             }
@@ -83,8 +84,11 @@ void PortAnnounceReceive::ProcessState()
     }
 }
 
-void PortAnnounceReceive::ProcessAnnounce(PtpMessageAnnounce* message)
+void PortAnnounceReceive::SetAnnounce(IReceivePackage *package)
 {
-    m_portGlobal->rcvdAnnouncePtr = message;
+    delete m_portGlobal->rcvdAnnouncePtr;
+    m_portGlobal->rcvdAnnouncePtr = new PtpMessageAnnounce();
+    m_portGlobal->rcvdAnnouncePtr->ParsePackage(package->GetBuffer());
+    m_portGlobal->rcvdAnnouncePtr->SetReceiveTime(package->GetTimestamp());
     m_rcvdAnnounce = true;
 }

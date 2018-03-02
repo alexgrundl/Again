@@ -164,25 +164,35 @@ double MDPdelayReq::ComputePdelayRateRatio()
 
 UScaledNs MDPdelayReq::ComputePropTime()
 {
-     UScaledNs propTime;
-     Timestamp tsPropTime;
-     Timestamp t1, t2, t3, t4;
+    UScaledNs propTime;
+    Timestamp tsPropTime;
+    Timestamp t1, t2, t3, t4;
+    Timestamp localDelta, remoteDelta;
 
-     t1 = m_txPdelayReqPtr->GetSendTime();
-     t2 = m_rcvdPdelayRespPtr->GetRequestReceiptTimestamp();
-     t3 = m_rcvdPdelayRespFollowUpPtr->GetRequestReceiptTimestamp();
-     t4 = m_rcvdPdelayRespPtr->GetReceiveTime();
+    t1 = m_txPdelayReqPtr->GetSendTime();
+    t2 = m_rcvdPdelayRespPtr->GetRequestReceiptTimestamp();
+    t3 = m_rcvdPdelayRespFollowUpPtr->GetRequestReceiptTimestamp();
+    t4 = m_rcvdPdelayRespPtr->GetReceiveTime();
+    localDelta = t4 - t1;
+    remoteDelta = t3 - t2;
 
-     tsPropTime = ((t4 - t1) - (t3 - t2)) / 2;
-     if(m_neighborRateRatioValid)
-         tsPropTime *= m_portGlobal->neighborRateRatio;
+    if(localDelta >= remoteDelta)
+        tsPropTime = (localDelta - remoteDelta) / 2;
+    else
+    {
+        tsPropTime.sec = 0;
+        tsPropTime.ns = 0;
+    }
 
-     propTime.ns = tsPropTime.sec * NS_PER_SEC + tsPropTime.ns;
-     propTime.ns_frac = 0;
+    if(m_neighborRateRatioValid)
+        tsPropTime *= m_portGlobal->neighborRateRatio;
 
-     printf("PropTime: %llu\n", propTime.ns);
+    propTime.ns = tsPropTime.sec * NS_PER_SEC + tsPropTime.ns;
+    propTime.ns_frac = 0;
 
-     return propTime;
+    printf("PropTime: %llu\n", propTime.ns);
+
+    return propTime;
 }
 
 void MDPdelayReq::ProcessState()

@@ -18,7 +18,7 @@ public:
     void ProcessState();
 
 
-    void ProcessAnnounce(PtpMessageAnnounce* message);
+    void SetAnnounce(IReceivePackage *package);
 
 private:
 

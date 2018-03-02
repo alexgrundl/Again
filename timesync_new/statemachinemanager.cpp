@@ -133,6 +133,8 @@ void StateMachineManager::ProcessPackage(int portIndex, IReceivePackage* package
     case PTP_MESSSAGE_TYPE_FOLLOW_UP:
         m_mdSyncReceiveSM[portIndex]->SetFollowUpMessage(package);
         break;
+    case PTP_MESSSAGE_TYPE_ANNOUNCE:
+        m_portAnnounceReceive[portIndex]->SetAnnounce(package);
     }
 }
 

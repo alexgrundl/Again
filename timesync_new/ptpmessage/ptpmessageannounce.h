@@ -26,7 +26,13 @@ public:
     PtpMessageAnnounce();
 
 
+    ~PtpMessageAnnounce();
+
+
     void ParsePackage(const uint8_t* bytes);
+
+
+    void GetMessage(uint8_t* bytes);
 
 
     int16_t GetCurrentUtcOffset();
@@ -72,9 +78,6 @@ public:
 
 
     AnnounceTLV GetTLV();
-
-
-    void AddPathSequence(uint8_t* sequence);
 
 
     bool GetFlagLeap61();
@@ -146,7 +149,7 @@ private:
     ClockTimeSource m_timeSource;
 
 
-    AnnounceTLV tlv;
+    AnnounceTLV m_tlv;
 };
 
 #endif // PTPMESSAGEANNOUNCE_H
