@@ -14,9 +14,6 @@ public:
     ~PortAnnounceInformation();
 
 
-    void SetAnnounce(PtpMessageAnnounce* message);
-
-
     void ProcessState();
 
 

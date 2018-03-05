@@ -31,7 +31,7 @@ private:
     /**
      * @brief A pointer to the received ClockSourceTime.invoke function parameters.
      */
-    ClockSourceTimeParams* m_rcvdClockSourceReqPtr;
+    std::unique_ptr<ClockSourceTimeParams> m_rcvdClockSourceReqPtr;
     /**
      * @brief A Boolean variable that notifies the current state machine when the LocalClock entity updates its time.
      * This variable is reset by this state machine.

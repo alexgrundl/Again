@@ -5,8 +5,11 @@ PortManager::PortManager(std::vector<std::shared_ptr<INetworkInterfacePort>> net
     m_networkPorts = networkPorts;
     m_stateMachineManager = stateMachineManager;
 
-    m_portThread = new CThreadWrapper<PortManager>(this, &PortManager::Receive,
-                                                   std::string("Port manager thread"));
+    for (std::vector<std::shared_ptr<INetworkInterfacePort>>::size_type i = 0; i < networkPorts.size(); ++i)
+    {
+        m_portThread = new CThreadWrapper<PortManager>(this, &PortManager::Receive,
+                                                       std::string("Port manager thread ") + std::to_string(i + 1));
+    }
 }
 
 void PortManager::StartReceiving()

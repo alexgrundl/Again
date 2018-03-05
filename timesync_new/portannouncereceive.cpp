@@ -60,8 +60,11 @@ void PortAnnounceReceive::ProcessState()
             if(m_rcvdAnnounce && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable)
             {
                 m_rcvdAnnounce = false;
-                printf("Qualifiying announce...\n");
-                m_portGlobal->rcvdMsg = QualifyAnnounce(m_portGlobal->rcvdAnnouncePtr);
+                if(QualifyAnnounce(m_portGlobal->rcvdAnnouncePtr))
+                {
+                    printf("Qualifiying announce...\n");
+                    m_portGlobal->rcvdMsg = true;
+                }
                 m_state = STATE_RECEIVE;
             }
             break;
@@ -71,7 +74,7 @@ void PortAnnounceReceive::ProcessState()
                 m_rcvdAnnounce = false;
                 if(QualifyAnnounce(m_portGlobal->rcvdAnnouncePtr))
                 {
-                    m_portAnnounceInformation->SetAnnounce(m_portGlobal->rcvdAnnouncePtr);
+                    printf("Qualifiying announce...\n");
                     m_portGlobal->rcvdMsg = true;
                 }
             }

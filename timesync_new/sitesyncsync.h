@@ -38,7 +38,7 @@ private:
     /**
      * @brief A pointer to the PortSyncSync structure transmitted by the state machine.
      */
-    PortSyncSync* m_txPSSyncPtr;
+    std::unique_ptr<PortSyncSync> m_txPSSyncPtr;
 
 
     std::shared_ptr<ClockSlaveSync> m_clockSlaveSync;
@@ -53,13 +53,13 @@ private:
      * @param rcvdPSSyncIndPtr The structure to copy its members.
      * @return A Pointer to thecreated PortSyncSync structure.
      */
-    PortSyncSync* SetPSSyncSend (PortSyncSync* rcvdPSSyncIndPtr);
+    void SetPSSyncSend (PortSyncSync* rcvdPSSyncIndPtr);
     /**
      * @brief Transmits a copy of the PortSyncSync structure pointed to by txPSSyncPtr to the PortSyncSyncSend state machine
      * of each PortSync entity and the ClockSlaveSync state machine of the ClockSlave entity of this time-aware system.
      * @param txPSSyncPtr The structure to transmit.
      */
-    void TxPSSync (PortSyncSync* txPSSyncPtr);
+    void TxPSSync();
 };
 
 #endif // SITESYNCSYNC_H

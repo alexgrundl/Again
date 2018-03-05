@@ -112,29 +112,33 @@ void StateMachineManager::InitialProcess()
 void StateMachineManager::ProcessPackage(int portIndex, IReceivePackage* package)
 {
     PtpMessageType messageType = PtpMessageBase::ParseMessageType(package->GetBuffer());
+    int domain = PtpMessageBase::ParseDomain(package->GetBuffer());
 
     /* Remove in good code. */
 //    ((CLinuxReceivePackage*)package)->SetTimestamp(m_timeAwareSystem->GetCurrentTime());
 
+    if(domain == 0)
+    {
     switch(messageType)
     {
-    case PTP_MESSSAGE_TYPE_PDELAY_REQ:
-        m_mdPdelayResp[portIndex]->SetPDelayRequest(package);
-        break;
-    case PTP_MESSSAGE_TYPE_PDELAY_RESP:
-        m_mdPdelayReq[portIndex]->SetPDelayResponse(package);
-        break;
-    case PTP_MESSSAGE_TYPE_PDELAY_RESP_FOLLOW_UP:
-        m_mdPdelayReq[portIndex]->SetPDelayResponseFollowUp(package);
-        break;
-    case PTP_MESSSAGE_TYPE_SYNC:
-        m_mdSyncReceiveSM[portIndex]->SetSyncMessage(package);
-        break;
-    case PTP_MESSSAGE_TYPE_FOLLOW_UP:
-        m_mdSyncReceiveSM[portIndex]->SetFollowUpMessage(package);
-        break;
-    case PTP_MESSSAGE_TYPE_ANNOUNCE:
-        m_portAnnounceReceive[portIndex]->SetAnnounce(package);
+        case PTP_MESSSAGE_TYPE_PDELAY_REQ:
+            m_mdPdelayResp[portIndex]->SetPDelayRequest(package);
+            break;
+        case PTP_MESSSAGE_TYPE_PDELAY_RESP:
+            m_mdPdelayReq[portIndex]->SetPDelayResponse(package);
+            break;
+        case PTP_MESSSAGE_TYPE_PDELAY_RESP_FOLLOW_UP:
+            m_mdPdelayReq[portIndex]->SetPDelayResponseFollowUp(package);
+            break;
+        case PTP_MESSSAGE_TYPE_SYNC:
+            m_mdSyncReceiveSM[portIndex]->SetSyncMessage(package);
+            break;
+        case PTP_MESSSAGE_TYPE_FOLLOW_UP:
+            m_mdSyncReceiveSM[portIndex]->SetFollowUpMessage(package);
+            break;
+        case PTP_MESSSAGE_TYPE_ANNOUNCE:
+            m_portAnnounceReceive[portIndex]->SetAnnounce(package);
+        }
     }
 }
 

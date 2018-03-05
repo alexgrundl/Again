@@ -58,11 +58,6 @@ void PortAnnounceInformation::RecordOtherAnnounceInfo(PtpMessageAnnounce* rcvdAn
     m_portGlobal->annTimeSource = rcvdAnnouncePtr->GetTimeSource();
 }
 
-void PortAnnounceInformation::SetAnnounce(PtpMessageAnnounce* message)
-{
-    m_portGlobal->rcvdAnnouncePtr = message;
-}
-
 void PortAnnounceInformation::ProcessState()
 {
     if(((!m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled || !m_portGlobal->asCapable) &&
@@ -126,8 +121,8 @@ void PortAnnounceInformation::ProcessState()
                 m_portGlobal->portPriority = m_messagePriority;
                 m_portGlobal->portStepsRemoved = m_portGlobal->rcvdAnnouncePtr->GetStepsRemoved();
                 RecordOtherAnnounceInfo(m_portGlobal->rcvdAnnouncePtr);
-                m_portGlobal->announceReceiptTimeoutTimeInterval.ns = m_portGlobal->announceReceiptTimeout * NS_PER_SEC *
-                        pow(2, 16 + m_portGlobal->rcvdAnnouncePtr->GetLogMessageInterval());
+                m_portGlobal->announceReceiptTimeoutTimeInterval.ns = (uint64_t)m_portGlobal->announceReceiptTimeout * NS_PER_SEC *
+                        pow(2, /*16 +*/ m_portGlobal->rcvdAnnouncePtr->GetLogMessageInterval());
                 m_portGlobal->announceReceiptTimeoutTimeInterval.ns_frac = 0;
                 m_announceReceiptTimeoutTime = m_timeAwareSystem->GetCurrentTime() + m_portGlobal->announceReceiptTimeoutTimeInterval;
                 m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_RECEIVED;
@@ -178,6 +173,7 @@ void PortAnnounceInformation::ExecuteAgedState()
 void PortAnnounceInformation::ExecuteUpdateState()
 {
     m_portGlobal->portPriority = m_portGlobal->masterPriority;
+    printf("ggg: %u\n", m_portGlobal->portPriority.stepsRemoved);
     m_portGlobal->portStepsRemoved = m_timeAwareSystem->masterStepsRemoved;
     m_portGlobal->updtInfo = false;
     m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_MINE;

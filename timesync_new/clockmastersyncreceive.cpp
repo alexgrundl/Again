@@ -4,7 +4,7 @@ ClockMasterSyncReceive::ClockMasterSyncReceive(TimeAwareSystem* timeAwareSystem)
     StateMachineBase(timeAwareSystem)
 {
     m_rcvdClockSourceReq = false;
-    m_rcvdClockSourceReqPtr = NULL;
+    m_rcvdClockSourceReqPtr = std::unique_ptr<ClockSourceTimeParams>(new ClockSourceTimeParams());
     m_rcvdLocalClockTick = false;
 
     m_sourceTimeOld.sec = 0;
@@ -80,7 +80,10 @@ void ClockMasterSyncReceive::ProcessState()
 
 void ClockMasterSyncReceive::SetClockSourceRequest(ClockSourceTimeParams* clockSourceReqPtr)
 {
-    m_rcvdClockSourceReqPtr = clockSourceReqPtr;
+    m_rcvdClockSourceReqPtr->sourceTime = clockSourceReqPtr->sourceTime;
+    m_rcvdClockSourceReqPtr->timeBaseIndicator = clockSourceReqPtr->timeBaseIndicator;
+    m_rcvdClockSourceReqPtr->lastGmPhaseChange = clockSourceReqPtr->lastGmPhaseChange;
+    m_rcvdClockSourceReqPtr->lastGmFreqChange = clockSourceReqPtr->lastGmFreqChange;
     m_rcvdClockSourceReq = true;
 }
 

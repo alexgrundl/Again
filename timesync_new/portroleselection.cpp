@@ -99,6 +99,7 @@ void PortRoleSelection::UpdtRolesTree()
         std::shared_ptr<PortGlobal> port = m_ports[i];
         port->masterPriority.identity = m_timeAwareSystem->gmPriority.identity;
         port->masterPriority.stepsRemoved = m_timeAwareSystem->gmPriority.stepsRemoved;
+        printf("hhh: %u\n", port->masterPriority.stepsRemoved);
         memcpy(port->masterPriority.sourcePortIdentity.clockIdentity, m_timeAwareSystem->systemPriority.sourcePortIdentity.clockIdentity,
                sizeof(m_timeAwareSystem->systemPriority.sourcePortIdentity.clockIdentity));
         port->masterPriority.sourcePortIdentity.portNumber = port->thisPort;

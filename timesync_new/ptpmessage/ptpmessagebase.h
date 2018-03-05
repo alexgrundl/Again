@@ -116,6 +116,9 @@ public:
     static PtpMessageType ParseMessageType(const uint8_t* bytes);
 
 
+    static uint8_t ParseDomain(const uint8_t* bytes);
+
+
     static void GetClockIdentity(const uint8_t* portMac, uint8_t* clockIdentity);
 
 

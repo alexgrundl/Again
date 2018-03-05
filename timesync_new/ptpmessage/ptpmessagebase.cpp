@@ -71,6 +71,11 @@ PtpMessageType PtpMessageBase::ParseMessageType(const uint8_t* bytes)
     return (PtpMessageType)(bytes[0] & 0x0F);
 }
 
+uint8_t PtpMessageBase::ParseDomain(const uint8_t* bytes)
+{
+    return bytes[4];
+}
+
 uint8_t PtpMessageBase::GetVersionPTP()
 {
     return m_versionPTP;
