@@ -133,7 +133,7 @@ void MDPdelayReq::TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr)
     //m_txTimestamp = txPdelayReqPtr->GetSendTime();
     /* End remove */
 
-    if(txPdelayReqPtr->GetSendTime().ns > 0)
+//    if(txPdelayReqPtr->GetSendTime().ns > 0)
         m_rcvdMDTimestampReceive = true;
 }
 
@@ -190,7 +190,7 @@ UScaledNs MDPdelayReq::ComputePropTime()
     propTime.ns = tsPropTime.sec * NS_PER_SEC + tsPropTime.ns;
     propTime.ns_frac = 0;
 
-    printf("PropTime: %llu\n", propTime.ns);
+    printf("PropTime: %lu\n", propTime.ns);
 
     return propTime;
 }

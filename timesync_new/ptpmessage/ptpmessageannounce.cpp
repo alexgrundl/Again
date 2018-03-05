@@ -158,17 +158,17 @@ void PtpMessageAnnounce::ParsePackage(const uint8_t* bytes)
 {
     ParseHeader(bytes);
 
-    m_currentUtcOffset = (bytes[kMessageHeaderLength + 12] << 8) + bytes[kMessageHeaderLength + 13];
-    m_grandmasterPriority1 = bytes[kMessageHeaderLength + 14];
-    m_grandmasterClockQuality.clockClass = (ClockClass)bytes[kMessageHeaderLength + 15];
-    m_grandmasterClockQuality.clockAccuracy = (ClockAccuracy)bytes[kMessageHeaderLength + 16];
-    m_grandmasterClockQuality.offsetScaledLogVariance = (bytes[kMessageHeaderLength + 17] << 8) + bytes[kMessageHeaderLength + 18];
-    m_grandmasterPriority2 = bytes[kMessageHeaderLength + 19];
-    memcpy(m_grandmasterIdentity, bytes + 20, sizeof(m_grandmasterIdentity));
-    m_stepsRemoved = (bytes[kMessageHeaderLength + 28] << 8) + bytes[kMessageHeaderLength + 29];
-    m_timeSource = (ClockTimeSource)bytes[kMessageHeaderLength + 30];
-    m_tlv.tlvType = (TlvType)((bytes[kMessageHeaderLength + 31] << 8) + bytes[kMessageHeaderLength + 32]);
-    m_tlv.lengthField = (bytes[kMessageHeaderLength + 33] << 8) + bytes[kMessageHeaderLength + 34];
+    m_currentUtcOffset = (bytes[kMessageHeaderLength + 10] << 8) + bytes[kMessageHeaderLength + 11];
+    m_grandmasterPriority1 = bytes[kMessageHeaderLength + 13];
+    m_grandmasterClockQuality.clockClass = (ClockClass)bytes[kMessageHeaderLength + 14];
+    m_grandmasterClockQuality.clockAccuracy = (ClockAccuracy)bytes[kMessageHeaderLength + 15];
+    m_grandmasterClockQuality.offsetScaledLogVariance = (bytes[kMessageHeaderLength + 16] << 8) + bytes[kMessageHeaderLength + 17];
+    m_grandmasterPriority2 = bytes[kMessageHeaderLength + 18];
+    memcpy(m_grandmasterIdentity, bytes + kMessageHeaderLength + 19, sizeof(m_grandmasterIdentity));
+    m_stepsRemoved = (bytes[kMessageHeaderLength + 27] << 8) + bytes[kMessageHeaderLength + 28];
+    m_timeSource = (ClockTimeSource)bytes[kMessageHeaderLength + 29];
+    m_tlv.tlvType = (TlvType)((bytes[kMessageHeaderLength + 30] << 8) + bytes[kMessageHeaderLength + 31]);
+    m_tlv.lengthField = (bytes[kMessageHeaderLength + 32] << 8) + bytes[kMessageHeaderLength + 33];
 
     for (std::vector<uint8_t*>::size_type i = 0; i < m_tlv.pathSequence.size(); ++i)
     {
@@ -177,7 +177,7 @@ void PtpMessageAnnounce::ParsePackage(const uint8_t* bytes)
     for (int i = 0; i < m_tlv.lengthField; i+=8)
     {
         uint8_t* clockIdentity = new uint8_t[8];
-        memcpy(clockIdentity, bytes + 35 + 8 * i, 8);
+        memcpy(clockIdentity, bytes + kMessageHeaderLength + 34 + 8 * i, 8);
         m_tlv.pathSequence.push_back(clockIdentity);
     }
 }

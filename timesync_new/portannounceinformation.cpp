@@ -33,8 +33,8 @@ PortAnnounceInformation::MasterInfo PortAnnounceInformation::RcvInfo(PtpMessageA
     m_messagePriority.sourcePortIdentity = rcvdAnnouncePtr->GetSourcePortIdentity();
 
     /* if the received message conveys the port role MasterPort.....?????????????????????? */
-    if(m_timeAwareSystem->selectedRole[m_portGlobal->thisPort] == PORT_ROLE_MASTER)
-    {
+//    if(m_timeAwareSystem->selectedRole[m_portGlobal->thisPort] == PORT_ROLE_MASTER)
+//    {
         SystemIdentity::Info info = m_messagePriority.Compare(m_portGlobal->portPriority);
         if(info == SystemIdentity::INFO_SUPERIOR)
             return MASTER_INFO_SUPERIOR;
@@ -43,7 +43,7 @@ PortAnnounceInformation::MasterInfo PortAnnounceInformation::RcvInfo(PtpMessageA
         else
             return MASTER_INFO_INFERIOR;
 
-    }
+//    }
     return MASTER_INFO_OTHER;
 }
 

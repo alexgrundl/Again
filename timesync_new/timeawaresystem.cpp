@@ -34,7 +34,7 @@ TimeAwareSystem::TimeAwareSystem()
     masterTime.sec = 0;
     masterTime.ns = 0;
     masterTime.ns_frac = 0;
-    memset(thisClock, 0, sizeof(thisClock));
+    memset(thisClock, 255, sizeof(thisClock));
     clockMasterLogSyncInterval = 0;
 
 
@@ -54,7 +54,7 @@ TimeAwareSystem::TimeAwareSystem()
     sysCurrentUtcOffset = 0;
     sysTimeSource = CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR;
 
-    systemPriority.identity.priority1 = 255;
+    systemPriority.identity.priority1 = 254;
     systemPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
     systemPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
     systemPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;

@@ -66,7 +66,6 @@ void PortAnnounceReceive::ProcessState()
             }
             break;
         case STATE_RECEIVE:
-            break;
             if(m_rcvdAnnounce && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable && !m_portGlobal->rcvdMsg)
             {
                 m_rcvdAnnounce = false;
@@ -76,6 +75,7 @@ void PortAnnounceReceive::ProcessState()
                     m_portGlobal->rcvdMsg = true;
                 }
             }
+            break;
         default:
             fprintf(stderr, "State not allowed: %i, File: %s\n", m_state, __FILE__);
             break;

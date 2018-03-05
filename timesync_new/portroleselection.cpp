@@ -13,9 +13,9 @@ PortRoleSelection::~PortRoleSelection()
 
 void PortRoleSelection::UpdtRoleDisabledTree()
 {
-    for (std::vector<PortRole>::size_type i = 0; i < m_timeAwareSystem->selectedRole.size(); ++i)
+    for (std::vector<PortRole>::size_type i = 0; i < m_ports.size(); ++i)
     {
-        m_timeAwareSystem->selectedRole[i] = PORT_ROLE_DISABLED;
+        m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_DISABLED;
 
         m_timeAwareSystem->lastGmPriority.identity.priority1 = 255;
         m_timeAwareSystem->lastGmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
@@ -59,7 +59,7 @@ void PortRoleSelection::UpdtRolesTree()
     std::shared_ptr<PortGlobal> bestPort = NULL;
     PriorityVector bestGmPriority = m_timeAwareSystem->systemPriority;
 
-    for (std::vector<std::shared_ptr<PortGlobal>>::size_type i = 1; i < m_ports.size(); ++i)
+    for (std::vector<std::shared_ptr<PortGlobal>>::size_type i = 0; i < m_ports.size(); ++i)
     {
         std::shared_ptr<PortGlobal> port = m_ports[i];
         PriorityVector gmPathPriortiy = port->portPriority;
@@ -84,20 +84,17 @@ void PortRoleSelection::UpdtRolesTree()
      * currentUtcOffset, and timeSource are set to sysLeap61, sysLeap59, sysCurrentUtcOffsetValid, sysTimeTraceable, sysFrequencyTraceable,
      * sysCurrentUtcOffset, and sysTimeSource, respectively.
      */
-    if(bestPort != NULL)
-    {
-        m_timeAwareSystem->leap61 = bestPort != NULL ? bestPort->annLeap61 : m_timeAwareSystem->sysLeap61;
-        m_timeAwareSystem->leap59 = bestPort != NULL ? bestPort->annLeap59 : m_timeAwareSystem->sysLeap59;
-        m_timeAwareSystem->currentUtcOffsetValid = bestPort != NULL ? bestPort->annCurrentUtcOffsetValid : m_timeAwareSystem->currentUtcOffsetValid;
-        m_timeAwareSystem->timeTraceable = bestPort != NULL ? bestPort->annTimeTraceable : m_timeAwareSystem->sysTimeTraceable;
-        m_timeAwareSystem->frequencyTraceable = bestPort != NULL ? bestPort->annFrequencyTraceable : m_timeAwareSystem->sysFrequencyTraceable;
-        m_timeAwareSystem->currentUtcOffset = bestPort != NULL ? bestPort->annCurrentUtcOffset : m_timeAwareSystem->sysCurrentUtcOffset;
-        m_timeAwareSystem->timeSource = bestPort != NULL ? bestPort->annTimeSource : m_timeAwareSystem->sysTimeSource;
-    }
+    m_timeAwareSystem->leap61 = bestPort != NULL ? bestPort->annLeap61 : m_timeAwareSystem->sysLeap61;
+    m_timeAwareSystem->leap59 = bestPort != NULL ? bestPort->annLeap59 : m_timeAwareSystem->sysLeap59;
+    m_timeAwareSystem->currentUtcOffsetValid = bestPort != NULL ? bestPort->annCurrentUtcOffsetValid : m_timeAwareSystem->currentUtcOffsetValid;
+    m_timeAwareSystem->timeTraceable = bestPort != NULL ? bestPort->annTimeTraceable : m_timeAwareSystem->sysTimeTraceable;
+    m_timeAwareSystem->frequencyTraceable = bestPort != NULL ? bestPort->annFrequencyTraceable : m_timeAwareSystem->sysFrequencyTraceable;
+    m_timeAwareSystem->currentUtcOffset = bestPort != NULL ? bestPort->annCurrentUtcOffset : m_timeAwareSystem->sysCurrentUtcOffset;
+    m_timeAwareSystem->timeSource = bestPort != NULL ? bestPort->annTimeSource : m_timeAwareSystem->sysTimeSource;
 
     /** Computes the first three components and the clockIdentity of the fourth component of the
      * masterPriorityVector for each port (i.e., everything except the portNumber of the fourth component) */
-    for (std::vector<std::shared_ptr<PortGlobal>>::size_type i = 1; i < m_ports.size(); ++i)
+    for (std::vector<std::shared_ptr<PortGlobal>>::size_type i = 0; i < m_ports.size(); ++i)
     {
         std::shared_ptr<PortGlobal> port = m_ports[i];
         port->masterPriority.identity = m_timeAwareSystem->gmPriority.identity;
@@ -134,11 +131,11 @@ void PortRoleSelection::UpdtRolesTree()
       * 9) If the portPriorityVector was received in an Announce message and announce receipt timeout, or sync receipt timeout with gmPresent TRUE, have not
       * occurred (infoIs == Received), the gmPriorityVector is not now derived from the portPriorityVector, and the masterPriorityVector is better than the
       * portPriorityVector, selectedRole[j] set to MasterPort and updtInfo is set to TRUE. */
-     for (std::vector<std::shared_ptr<PortGlobal>>::size_type i = 1; i < m_ports.size(); ++i)
+     for (std::vector<std::shared_ptr<PortGlobal>>::size_type i = 0; i < m_ports.size(); ++i)
      {
          std::shared_ptr<PortGlobal> port = m_ports[i];
          if(port->infoIs == SPANNING_TREE_PORT_STATE_DISABLED)
-             m_timeAwareSystem->selectedRole[i] = PORT_ROLE_DISABLED;
+             m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_DISABLED;
          else if(/*m_timeAwareSystem->gmPresent &&*/ port->infoIs == SPANNING_TREE_PORT_STATE_AGED)
          {
              m_timeAwareSystem->selected[i] = PORT_ROLE_MASTER;
@@ -155,19 +152,19 @@ void PortRoleSelection::UpdtRolesTree()
          {
              if(port == bestPort)
              {
-                 m_timeAwareSystem->selectedRole[i] = PORT_ROLE_SLAVE;
+                 m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_SLAVE;
                  port->updtInfo = false;
 
                  portIsSlave = true;
              }
              else if(port->masterPriority.Compare(port->portPriority) != SystemIdentity::INFO_SUPERIOR)
              {
-                 m_timeAwareSystem->selectedRole[i] = PORT_ROLE_PASSIVE;
+                 m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_PASSIVE;
                  port->updtInfo = false;
              }
              else
              {
-                 m_timeAwareSystem->selectedRole[i] = PORT_ROLE_MASTER;
+                 m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_MASTER;
                  port->updtInfo = true;
              }
          }

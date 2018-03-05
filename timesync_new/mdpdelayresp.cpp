@@ -49,7 +49,7 @@ PtpMessagePDelayResp* MDPdelayResp::SetPdelayResp()
 void MDPdelayResp::TxPdelayResp(PtpMessagePDelayResp* txPdelayRespPtr)
 {
     txPdelayRespPtr->SetSendTime(m_networkPort->SendEventMessage(txPdelayRespPtr));
-    printf("TxPdelayResp: %llu\n", txPdelayRespPtr->GetSendTime().ns);
+    printf("TxPdelayResp: %lu\n", txPdelayRespPtr->GetSendTime().ns);
 
     if(txPdelayRespPtr->GetSendTime().ns > 0)
         m_rcvdMDTimestampReceive = true;
