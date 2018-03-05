@@ -99,6 +99,22 @@ PtpMessageAnnounce::AnnounceTLV PtpMessageAnnounce::GetTLV()
     return m_tlv;
 }
 
+void PtpMessageAnnounce::SetPathSequence(std::vector<uint8_t*> pathSequence)
+{
+    for (std::vector<uint8_t*>::size_type i = 0; i < m_tlv.pathSequence.size(); ++i)
+    {
+        delete m_tlv.pathSequence[i];
+    }
+
+    m_tlv.lengthField = pathSequence.size() * 8;
+    for (std::vector<uint8_t*>::size_type i = 0; i < pathSequence.size(); ++i)
+    {
+        uint8_t* clockIdentity = new uint8_t[8];
+        memcpy(clockIdentity, pathSequence[i], 8);
+        m_tlv.pathSequence.push_back(clockIdentity);
+    }
+}
+
 bool PtpMessageAnnounce::GetFlagLeap61()
 {
     return (m_flags & (1 << FLAG_LI61)) == FLAG_LI61;

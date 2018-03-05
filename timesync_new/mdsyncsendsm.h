@@ -2,6 +2,7 @@
 #define MDSYNCSENDSM_H
 
 #include <cstdlib>
+#include <memory>
 
 #include "statemachinebase.h"
 #include "ptpmessage/ptpmessagesync.h"
@@ -34,7 +35,7 @@ private:
     /**
      * @brief A pointer to a structure whose members contain the values of the fields of a Sync message to be transmitted.
      */
-    PtpMessageSync* m_txSyncPtr;
+    std::unique_ptr<PtpMessageSync> m_txSyncPtr;
     /**
      * @brief A Boolean variable that notifies the current state machine when the <syncEventEgressTimestamp> for a transmitted
      * Sync message is received. This variable is reset by the current state machine.
@@ -44,18 +45,18 @@ private:
     /**
      * @brief A pointer to the received MDTimestampReceive structure.
      */
-    MDTimestampReceive* m_rcvdMDTimestampReceivePtr;
+    std::unique_ptr<MDTimestampReceive> m_rcvdMDTimestampReceivePtr;
     /**
      * @brief A pointer to a structure whose members contain the values of the fields of a Follow_Up message to be transmitted.
      */
-    PtpMessageFollowUp* m_txFollowUpPtr;
+    std::unique_ptr<PtpMessageFollowUp> m_txFollowUpPtr;
 
 
 
     /**
      * @brief The MDSyncSend structure received from the PortSyncSyncSend state machine.
      */
-    MDSyncSend* m_rcvdMDSyncPtr;
+    std::unique_ptr<MDSyncSend> m_rcvdMDSyncPtr;
 
 
     /**
@@ -63,25 +64,25 @@ private:
      * and returns a pointer to this structure. The parameters are set as follows.
      * @return A pointer to the created sync message.
      */
-    PtpMessageSync* SetSync();
+    void SetSync();
 
     /**
      * @brief Transmits a Sync message from this MD entity, whose fields contain the parameters in the structure pointed to by txSyncPtr.
      * @param txSyncPtr Pointer to the message to transmit.
      */
-    void TxSync(PtpMessageSync* txSyncPtr);
+    void TxSync();
 
     /**
      * @brief Creates a structure whose parameters contain the fields of a Follow_Up message to be transmitted, and returns a pointer to this structure.
      * @return A pointer to the created follow up message.
      */
-    PtpMessageFollowUp* SetFollowUp();
+    void SetFollowUp();
 
     /**
      * @brief Transmits a Follow_Up message from this MD entity, whose fields contain the parameters in the structure pointed to by txFollowUpPtr.
      * @param txFollowUpPtr Pointer to the message to transmit.
      */
-    void TxFollowUp(PtpMessageFollowUp* txFollowUpPtr);
+    void TxFollowUp();
 };
 
 #endif // MDSYNCSENDSM_H

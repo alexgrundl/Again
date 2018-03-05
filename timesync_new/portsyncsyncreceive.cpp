@@ -4,8 +4,8 @@ PortSyncSyncReceive::PortSyncSyncReceive(TimeAwareSystem* timeAwareSystem, PortG
     StateMachineBasePort(timeAwareSystem, port)
 {
     m_rcvdMDSync = false;
-    m_rcvdMDSyncPtr = NULL;
-    m_txPSSyncPtr = NULL;
+    m_rcvdMDSyncPtr = std::unique_ptr<MDSyncReceive>(new MDSyncReceive());
+    m_txPSSyncPtr = std::unique_ptr<PortSyncSync>(new PortSyncSync());
     m_rateRatio = 1.0;
 
     m_siteSyncSync = siteSyncSync;
@@ -13,33 +13,37 @@ PortSyncSyncReceive::PortSyncSyncReceive(TimeAwareSystem* timeAwareSystem, PortG
 
 PortSyncSyncReceive::~PortSyncSyncReceive()
 {
-    delete m_txPSSyncPtr;
 }
 
-PortSyncSync* PortSyncSyncReceive::SetPSSyncPSSR (MDSyncReceive* rcvdMDSyncPtr, UScaledNs syncReceiptTimeoutTimeInterval, double rateRatio)
+void PortSyncSyncReceive::SetPSSyncPSSR (MDSyncReceive* rcvdMDSyncPtr, UScaledNs syncReceiptTimeoutTimeInterval, double rateRatio)
 {
-    PortSyncSync* txPSSyncPtr = new PortSyncSync();
-    txPSSyncPtr->localPortNumber = m_portGlobal->thisPort;
-    txPSSyncPtr->followUpCorrectionField = rcvdMDSyncPtr->followUpCorrectionField;
-    txPSSyncPtr->sourcePortIdentity = rcvdMDSyncPtr->sourcePortIdentity;
-    txPSSyncPtr->logMessageInterval = rcvdMDSyncPtr->logMessageInterval;
-    txPSSyncPtr->preciseOriginTimestamp = rcvdMDSyncPtr->preciseOriginTimestamp;
-    txPSSyncPtr->upstreamTxTime = rcvdMDSyncPtr->upstreamTxTime;
-    txPSSyncPtr->syncReceiptTimeoutTime = m_timeAwareSystem->GetCurrentTime() + syncReceiptTimeoutTimeInterval;
-    txPSSyncPtr->rateRatio = rateRatio;
-
-    return txPSSyncPtr;
+    m_txPSSyncPtr->localPortNumber = m_portGlobal->thisPort;
+    m_txPSSyncPtr->followUpCorrectionField = rcvdMDSyncPtr->followUpCorrectionField;
+    m_txPSSyncPtr->sourcePortIdentity = rcvdMDSyncPtr->sourcePortIdentity;
+    m_txPSSyncPtr->logMessageInterval = rcvdMDSyncPtr->logMessageInterval;
+    m_txPSSyncPtr->preciseOriginTimestamp = rcvdMDSyncPtr->preciseOriginTimestamp;
+    m_txPSSyncPtr->upstreamTxTime = rcvdMDSyncPtr->upstreamTxTime;
+    m_txPSSyncPtr->syncReceiptTimeoutTime = m_timeAwareSystem->GetCurrentTime() + syncReceiptTimeoutTimeInterval;
+    m_txPSSyncPtr->rateRatio = rateRatio;
 }
 
 
-void PortSyncSyncReceive::TxPSSyncPSSR (PortSyncSync* txPSSyncPtr)
+void PortSyncSyncReceive::TxPSSyncPSSR()
 {
-    m_siteSyncSync->SetSync(txPSSyncPtr);
+    m_siteSyncSync->SetSync(m_txPSSyncPtr.get());
 }
 
 void PortSyncSyncReceive::ProcessSync(MDSyncReceive* rcvd)
 {
-    m_rcvdMDSyncPtr = rcvd;
+    m_rcvdMDSyncPtr->followUpCorrectionField = rcvd->followUpCorrectionField;
+    m_rcvdMDSyncPtr->gmTimeBaseIndicator = rcvd->gmTimeBaseIndicator;
+    m_rcvdMDSyncPtr->lastGmFreqChange = rcvd->lastGmFreqChange;
+    m_rcvdMDSyncPtr->lastGmPhaseChange = rcvd->lastGmPhaseChange;
+    m_rcvdMDSyncPtr->logMessageInterval = rcvd->logMessageInterval;
+    m_rcvdMDSyncPtr->preciseOriginTimestamp = rcvd->preciseOriginTimestamp;
+    m_rcvdMDSyncPtr->rateRatio = rcvd->rateRatio;
+    m_rcvdMDSyncPtr->sourcePortIdentity = rcvd->sourcePortIdentity;
+    m_rcvdMDSyncPtr->upstreamTxTime = rcvd->upstreamTxTime;
     m_rcvdMDSync = true;
 }
 
@@ -69,9 +73,8 @@ void PortSyncSyncReceive::ProcessState()
                         * pow(2, /*16 +*/ m_rcvdMDSyncPtr->logMessageInterval);
                 m_portGlobal->syncReceiptTimeoutTimeInterval.ns_frac = 0;
 
-                delete m_txPSSyncPtr;
-                m_txPSSyncPtr = SetPSSyncPSSR(m_rcvdMDSyncPtr, m_portGlobal->syncReceiptTimeoutTimeInterval, m_rateRatio);
-                TxPSSyncPSSR(m_txPSSyncPtr);
+                SetPSSyncPSSR(m_rcvdMDSyncPtr.get(), m_portGlobal->syncReceiptTimeoutTimeInterval, m_rateRatio);
+                TxPSSyncPSSR();
 
                 m_state = STATE_RECEIVED_SYNC;
             }

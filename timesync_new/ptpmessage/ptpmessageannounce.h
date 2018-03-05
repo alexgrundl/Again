@@ -80,6 +80,9 @@ public:
     AnnounceTLV GetTLV();
 
 
+    void SetPathSequence(std::vector<uint8_t*> pathSequence);
+
+
     bool GetFlagLeap61();
 
 

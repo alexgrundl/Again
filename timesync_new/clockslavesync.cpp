@@ -5,7 +5,7 @@ ClockSlaveSync::ClockSlaveSync(TimeAwareSystem* timeAwareSystem) :
 {
     m_rcvdPSSync = false;
     m_rcvdLocalClockTick = false;
-    m_rcvdPSSyncPtr = NULL;
+    m_rcvdPSSyncPtr = std::unique_ptr<PortSyncSync>(new PortSyncSync());
 }
 
 ClockSlaveSync::~ClockSlaveSync()
@@ -26,7 +26,17 @@ void ClockSlaveSync::InvokeApplicationInterfaceFunction (void* functionName)
 
 void ClockSlaveSync::SetPortSyncSync(PortSyncSync* rcvd)
 {
-    m_rcvdPSSyncPtr = rcvd;
+    m_rcvdPSSyncPtr->followUpCorrectionField = rcvd->followUpCorrectionField;
+    m_rcvdPSSyncPtr->gmTimeBaseIndicator = rcvd->gmTimeBaseIndicator;
+    m_rcvdPSSyncPtr->lastGmFreqChange = rcvd->lastGmFreqChange;
+    m_rcvdPSSyncPtr->lastGmPhaseChange = rcvd->lastGmPhaseChange;
+    m_rcvdPSSyncPtr->localPortNumber = rcvd->localPortNumber;
+    m_rcvdPSSyncPtr->logMessageInterval = rcvd->logMessageInterval;
+    m_rcvdPSSyncPtr->preciseOriginTimestamp = rcvd->preciseOriginTimestamp;
+    m_rcvdPSSyncPtr->rateRatio = rcvd->rateRatio;
+    m_rcvdPSSyncPtr->sourcePortIdentity = rcvd->sourcePortIdentity;
+    m_rcvdPSSyncPtr->syncReceiptTimeoutTime = rcvd->syncReceiptTimeoutTime;
+    m_rcvdPSSyncPtr->upstreamTxTime = rcvd->upstreamTxTime;
     m_rcvdPSSync = true;
 }
 

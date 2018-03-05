@@ -1,6 +1,8 @@
 #ifndef PORTANNOUNCERECEIVE_H
 #define PORTANNOUNCERECEIVE_H
 
+#include <memory>
+
 #include "statemachinebase.h"
 #include "ptpmessage/ptpmessageannounce.h"
 #include "portannounceinformation.h"
@@ -9,7 +11,7 @@ class PortAnnounceReceive : public StateMachineBasePort
 {
 public:
 
-    PortAnnounceReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port, PortAnnounceInformation* portAnnounceInformation);
+    PortAnnounceReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port, std::shared_ptr<PortAnnounceInformation> portAnnounceInformation);
 
 
     ~PortAnnounceReceive();
@@ -29,7 +31,7 @@ private:
     bool m_rcvdAnnounce;
 
 
-    PortAnnounceInformation* m_portAnnounceInformation;
+    std::shared_ptr<PortAnnounceInformation> m_portAnnounceInformation;
 
     /**
      * @brief Qualifies the received Announce message pointed to by rcvdAnnouncePtr.

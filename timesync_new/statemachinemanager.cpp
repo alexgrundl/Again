@@ -35,7 +35,9 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
     {
         m_portAnnounceInformation.push_back(std::shared_ptr<PortAnnounceInformation>(new PortAnnounceInformation(timeAwareSystem, ports[i].get())));
         m_portAnnounceReceive.push_back(std::shared_ptr<PortAnnounceReceive>(new PortAnnounceReceive(
-                                                                                 timeAwareSystem, ports[i].get(), m_portAnnounceInformation[i].get())));
+                                                                                 timeAwareSystem, ports[i].get(), m_portAnnounceInformation[i])));
+        m_mdPortAnnounceTransmit.push_back(std::shared_ptr<MDPortAnnounceTransmit>(new MDPortAnnounceTransmit(m_timeAwareSystem, ports[i].get(), networkPorts[i].get())));
+        m_portAnnounceTransmit.push_back(std::shared_ptr<PortAnnounceTransmit>(new PortAnnounceTransmit(m_timeAwareSystem, ports[i].get(), m_mdPortAnnounceTransmit[i])));
     }
     m_portRoleSelection = std::shared_ptr<PortRoleSelection>(new PortRoleSelection(m_timeAwareSystem, ports));
 
@@ -57,6 +59,8 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
 
         m_stateMachines.push_back(m_portAnnounceInformation[i]);
         m_stateMachines.push_back(m_portAnnounceReceive[i]);
+        m_stateMachines.push_back(m_mdPortAnnounceTransmit[i]);
+        m_stateMachines.push_back(m_portAnnounceTransmit[i]);
     }
     m_stateMachines.push_back(m_portRoleSelection);
 

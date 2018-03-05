@@ -1,6 +1,8 @@
 #ifndef CLOCKSLAVESYNC_H
 #define CLOCKSLAVESYNC_H
 
+#include <memory>
+
 #include "statemachinebase.h"
 
 class ClockSlaveSync : public StateMachineBase
@@ -48,7 +50,7 @@ private:
     /**
      * @brief A pointer to the received PortSyncSync structure.
      */
-    PortSyncSync* m_rcvdPSSyncPtr;
+    std::unique_ptr<PortSyncSync> m_rcvdPSSyncPtr;
 };
 
 #endif // CLOCKSLAVESYNC_H

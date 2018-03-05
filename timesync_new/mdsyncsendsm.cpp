@@ -4,71 +4,71 @@ MDSyncSendSM::MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, I
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_rcvdMDSync = false;
-    m_rcvdMDSyncPtr = NULL;
-    m_txSyncPtr = NULL;
+    m_rcvdMDSyncPtr = std::unique_ptr<MDSyncSend>(new MDSyncSend());
+    m_txSyncPtr = std::unique_ptr<PtpMessageSync>(new PtpMessageSync());
     m_rcvdMDTimestampReceive = false;
-    m_rcvdMDTimestampReceivePtr = NULL;
-    m_txFollowUpPtr = NULL;
+    m_rcvdMDTimestampReceivePtr = std::unique_ptr<MDTimestampReceive>(new MDTimestampReceive());
+    m_txFollowUpPtr = std::unique_ptr<PtpMessageFollowUp>(new PtpMessageFollowUp());
 }
 
 MDSyncSendSM::~MDSyncSendSM()
 {
-    delete m_txSyncPtr;
-    delete m_txFollowUpPtr;
 }
 
-PtpMessageSync* MDSyncSendSM::SetSync()
+void MDSyncSendSM::SetSync()
 {
-    PtpMessageSync* syncPtr = new PtpMessageSync();
-
-    syncPtr->SetCorrectionField(0);
-    syncPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
-    syncPtr->SetSequenceID(m_portGlobal->syncSequenceId);
-    syncPtr->SetLogMessageInterval((m_rcvdMDSyncPtr->logMessageInterval));
-
-    return syncPtr;
+    m_txSyncPtr->SetCorrectionField(0);
+    m_txSyncPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
+    m_txSyncPtr->SetSequenceID(m_portGlobal->syncSequenceId);
+    m_txSyncPtr->SetLogMessageInterval((m_rcvdMDSyncPtr->logMessageInterval));
 }
 
-PtpMessageFollowUp* MDSyncSendSM::SetFollowUp()
+void MDSyncSendSM::SetFollowUp()
 {
-    PtpMessageFollowUp* followUpPtr = new PtpMessageFollowUp();
     ScaledNs correctionScaled;
 
     correctionScaled = m_rcvdMDSyncPtr->followUpCorrectionField + ((*m_rcvdMDTimestampReceivePtr) - m_rcvdMDSyncPtr->upstreamTxTime) * m_rcvdMDSyncPtr->rateRatio;
-    followUpPtr->SetCorrectionField(correctionScaled.ns);
-    followUpPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
-    followUpPtr->SetSequenceID(m_portGlobal->syncSequenceId);
-    followUpPtr->SetLogMessageInterval(m_rcvdMDSyncPtr->logMessageInterval);
-    followUpPtr->SetPreciseOriginTimestamp(m_rcvdMDSyncPtr->preciseOriginTimestamp);
+    m_txFollowUpPtr->SetCorrectionField(correctionScaled.ns);
+    m_txFollowUpPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
+    m_txFollowUpPtr->SetSequenceID(m_portGlobal->syncSequenceId);
+    m_txFollowUpPtr->SetLogMessageInterval(m_rcvdMDSyncPtr->logMessageInterval);
+    m_txFollowUpPtr->SetPreciseOriginTimestamp(m_rcvdMDSyncPtr->preciseOriginTimestamp);
 
-    followUpPtr->SetCumulativeScaledRateOffset((m_rcvdMDSyncPtr->rateRatio - 1.0) * pow(2, 41));
-    followUpPtr->SetGmTimeBaseIndicator(m_rcvdMDSyncPtr->gmTimeBaseIndicator);
-    followUpPtr->SetLastGmPhaseChange(m_rcvdMDSyncPtr->lastGmPhaseChange);
-    followUpPtr->SetScaledLastGmFreqChange(m_rcvdMDSyncPtr->lastGmFreqChange * pow(2, 41));
-
-    return followUpPtr;
+    m_txFollowUpPtr->SetCumulativeScaledRateOffset((m_rcvdMDSyncPtr->rateRatio - 1.0) * pow(2, 41));
+    m_txFollowUpPtr->SetGmTimeBaseIndicator(m_rcvdMDSyncPtr->gmTimeBaseIndicator);
+    m_txFollowUpPtr->SetLastGmPhaseChange(m_rcvdMDSyncPtr->lastGmPhaseChange);
+    m_txFollowUpPtr->SetScaledLastGmFreqChange(m_rcvdMDSyncPtr->lastGmFreqChange * pow(2, 41));
 }
 
 
-void MDSyncSendSM::TxFollowUp(PtpMessageFollowUp* txFollowUpPtr)
+void MDSyncSendSM::TxFollowUp()
 {
 
 }
 
-void MDSyncSendSM::TxSync(PtpMessageSync *txSyncPtr)
+void MDSyncSendSM::TxSync()
 {
 
 }
 
 void MDSyncSendSM::SetMDSyncSend(MDSyncSend* rcvdMDSyncPtr)
 {
-    m_rcvdMDSyncPtr = rcvdMDSyncPtr;
+    m_rcvdMDSyncPtr->followUpCorrectionField = rcvdMDSyncPtr->followUpCorrectionField;
+    m_rcvdMDSyncPtr->gmTimeBaseIndicator = rcvdMDSyncPtr->gmTimeBaseIndicator;
+    m_rcvdMDSyncPtr->lastGmFreqChange = rcvdMDSyncPtr->lastGmFreqChange;
+    m_rcvdMDSyncPtr->lastGmPhaseChange = rcvdMDSyncPtr->lastGmPhaseChange;
+    m_rcvdMDSyncPtr->logMessageInterval = rcvdMDSyncPtr->logMessageInterval;
+    m_rcvdMDSyncPtr->preciseOriginTimestamp = rcvdMDSyncPtr->preciseOriginTimestamp;
+    m_rcvdMDSyncPtr->rateRatio = rcvdMDSyncPtr->rateRatio;
+    m_rcvdMDSyncPtr->sourcePortIdentity = rcvdMDSyncPtr->sourcePortIdentity;
+    m_rcvdMDSyncPtr->upstreamTxTime = rcvdMDSyncPtr->upstreamTxTime;
     m_rcvdMDSync = true;
 }
 
 void MDSyncSendSM::SetMDTimestampReceive(MDTimestampReceive* rcvdMDTimestampReceivePtr)
 {
-    m_rcvdMDTimestampReceivePtr = rcvdMDTimestampReceivePtr;
+    m_rcvdMDTimestampReceivePtr->ns = rcvdMDTimestampReceivePtr->ns;
+    m_rcvdMDTimestampReceivePtr->ns_frac = rcvdMDTimestampReceivePtr->ns_frac;
     m_rcvdMDTimestampReceive = true;
 }
 
@@ -90,9 +90,8 @@ void MDSyncSendSM::ProcessState()
             if(m_rcvdMDSync && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable)
             {
                 m_rcvdMDSync = false;
-                delete m_txSyncPtr;
-                m_txSyncPtr = SetSync();
-                TxSync(m_txSyncPtr);
+                SetSync();
+                TxSync();
                 m_portGlobal->syncSequenceId += 1;
                 m_state = STATE_SEND_SYNC;
             }
@@ -102,9 +101,8 @@ void MDSyncSendSM::ProcessState()
             if(m_rcvdMDTimestampReceive)
             {
                 m_rcvdMDTimestampReceive = false;
-                delete m_txFollowUpPtr;
-                m_txFollowUpPtr = SetFollowUp();
-                TxFollowUp(m_txFollowUpPtr);
+                SetFollowUp();
+                TxFollowUp();
                 m_state = STATE_SEND_FOLLOW_UP;
             }
             break;

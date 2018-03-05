@@ -5,34 +5,30 @@ MDPdelayResp::MDPdelayResp(TimeAwareSystem *timeAwareSystem, PortGlobal *port, I
 {
     m_rcvdPdelayReq = false;
     m_rcvdMDTimestampReceive = false;
-    m_txPdelayRespPtr = NULL;
-    m_txPdelayRespFollowUpPtr = NULL;
-    m_rcvdPdelayReqPtr = NULL;
+    m_txPdelayRespPtr = std::unique_ptr<PtpMessagePDelayResp>(new PtpMessagePDelayResp());
+    m_txPdelayRespFollowUpPtr = std::unique_ptr<PtpMessagePDelayRespFollowUp>(new PtpMessagePDelayRespFollowUp());
+    m_rcvdPdelayReqPtr = std::unique_ptr<PtpMessagePDelayReq>(new PtpMessagePDelayReq());
 }
 
 MDPdelayResp::~MDPdelayResp()
 {
-    delete m_txPdelayRespPtr;
-    delete m_txPdelayRespFollowUpPtr;
-    delete m_rcvdPdelayReqPtr;
 }
 
-PtpMessagePDelayResp* MDPdelayResp::SetPdelayResp()
+void MDPdelayResp::SetPdelayResp()
 {
-    PtpMessagePDelayResp* pdelayRespPtr = new PtpMessagePDelayResp();
     PortIdentity identity;
     Timestamp receiveTime;
 
     identity.portNumber = m_portGlobal->thisPort;
     memset(identity.clockIdentity, 0, sizeof(identity.clockIdentity));
 
-    pdelayRespPtr->SetSourcePortIdentity(&identity);
-    pdelayRespPtr->SetSequenceID(m_rcvdPdelayReqPtr->GetSequenceID());
+    m_txPdelayRespPtr->SetSourcePortIdentity(&identity);
+    m_txPdelayRespPtr->SetSequenceID(m_rcvdPdelayReqPtr->GetSequenceID());
     receiveTime.sec = m_rcvdPdelayReqPtr->GetReceiveTime().ns / NS_PER_SEC;
     receiveTime.ns = m_rcvdPdelayReqPtr->GetReceiveTime().ns % NS_PER_SEC;
-    pdelayRespPtr->SetRequestReceiptTimestamp(receiveTime);
-    pdelayRespPtr->SetCorrectionField(m_rcvdPdelayReqPtr->GetReceiveTime().ns_frac);
-    pdelayRespPtr->SetRequestingPortIdentity(m_rcvdPdelayReqPtr->GetSourcePortIdentity());
+    m_txPdelayRespPtr->SetRequestReceiptTimestamp(receiveTime);
+    m_txPdelayRespPtr->SetCorrectionField(m_rcvdPdelayReqPtr->GetReceiveTime().ns_frac);
+    m_txPdelayRespPtr->SetRequestingPortIdentity(m_rcvdPdelayReqPtr->GetSourcePortIdentity());
 
     /* sourcePortIdentity is set equal to the port identity of the port corresponding to this MD entity (see 8.5.2) */
     /* sequenceId is set equal to the sequenceId field of the corresponding Pdelay_Req message */
@@ -42,35 +38,32 @@ PtpMessagePDelayResp* MDPdelayResp::SetPdelayResp()
      * corresponding Pdelay_Req message */
     /* requestingPortIdentity is set equal to the sourcePortIdentity field of the corresponding Pdelay_Req message */
     /* remaining parameters are set as specified in 11.4.2 and 11.4.6. */
-
-    return pdelayRespPtr;
 }
 
-void MDPdelayResp::TxPdelayResp(PtpMessagePDelayResp* txPdelayRespPtr)
+void MDPdelayResp::TxPdelayResp()
 {
-    txPdelayRespPtr->SetSendTime(m_networkPort->SendEventMessage(txPdelayRespPtr));
-    printf("TxPdelayResp: %lu\n", txPdelayRespPtr->GetSendTime().ns);
+    m_txPdelayRespPtr->SetSendTime(m_networkPort->SendEventMessage(m_txPdelayRespPtr.get()));
+    printf("TxPdelayResp: %lu\n", m_txPdelayRespPtr->GetSendTime().ns);
 
-    if(txPdelayRespPtr->GetSendTime().ns > 0)
+    if(m_txPdelayRespPtr->GetSendTime().ns > 0)
         m_rcvdMDTimestampReceive = true;
 }
 
-PtpMessagePDelayRespFollowUp* MDPdelayResp::SetPdelayRespFollowUp()
+void MDPdelayResp::SetPdelayRespFollowUp()
 {
-    PtpMessagePDelayRespFollowUp* pdelayRespFollowUpPtr = new PtpMessagePDelayRespFollowUp();
     PortIdentity identity;
     Timestamp sendTime;
 
     identity.portNumber = m_portGlobal->thisPort;
     memset(identity.clockIdentity, 0, sizeof(identity.clockIdentity));
 
-    pdelayRespFollowUpPtr->SetSourcePortIdentity(&identity);
-    pdelayRespFollowUpPtr->SetSequenceID(m_rcvdPdelayReqPtr->GetSequenceID());
+    m_txPdelayRespFollowUpPtr->SetSourcePortIdentity(&identity);
+    m_txPdelayRespFollowUpPtr->SetSequenceID(m_rcvdPdelayReqPtr->GetSequenceID());
     sendTime.sec = m_txPdelayRespPtr->GetSendTime().ns / NS_PER_SEC;
     sendTime.ns = m_txPdelayRespPtr->GetSendTime().ns % NS_PER_SEC;
-    pdelayRespFollowUpPtr->SetRequestReceiptTimestamp(sendTime);
-    pdelayRespFollowUpPtr->SetCorrectionField(m_txPdelayRespPtr->GetSendTime().ns_frac);
-    pdelayRespFollowUpPtr->SetRequestingPortIdentity(m_rcvdPdelayReqPtr->GetSourcePortIdentity());
+    m_txPdelayRespFollowUpPtr->SetRequestReceiptTimestamp(sendTime);
+    m_txPdelayRespFollowUpPtr->SetCorrectionField(m_txPdelayRespPtr->GetSendTime().ns_frac);
+    m_txPdelayRespFollowUpPtr->SetRequestingPortIdentity(m_rcvdPdelayReqPtr->GetSourcePortIdentity());
 
     /* a) sourcePortIdentity is set equal to the port identity of the port corresponding to this MD entity (see 8.5.2),
      * b) sequenceId is set equal to the sequenceId field of the corresponding Pdelay_Req message,
@@ -81,13 +74,11 @@ PtpMessagePDelayRespFollowUp* MDPdelayResp::SetPdelayRespFollowUp()
      * e) requestingPortIdentity is set equal to the sourcePortIdentity field of the corresponding Pdelay_Req
      * message, and
      * f) remaining parameters are set as specified in 11.4.2 and 11.4.6. */
-
-    return pdelayRespFollowUpPtr;
 }
 
-void MDPdelayResp::TxPdelayRespFollowUp(PtpMessagePDelayRespFollowUp* txFollowUpPtr)
+void MDPdelayResp::TxPdelayRespFollowUp()
 {
-    m_networkPort->SendGenericMessage(txFollowUpPtr);
+    m_networkPort->SendGenericMessage(m_txPdelayRespFollowUpPtr.get());
 }
 
 void MDPdelayResp::ProcessState()
@@ -111,9 +102,8 @@ void MDPdelayResp::ProcessState()
             if(m_rcvdPdelayReq)
             {
                 m_rcvdPdelayReq = false;
-                delete m_txPdelayRespPtr;
-                m_txPdelayRespPtr = SetPdelayResp();
-                TxPdelayResp(m_txPdelayRespPtr);
+                SetPdelayResp();
+                TxPdelayResp();
 
                 m_state = STATE_SENT_PDELAY_RESP_WAITING_FOR_TIMESTAMP;
             }
@@ -123,9 +113,8 @@ void MDPdelayResp::ProcessState()
             if(m_rcvdMDTimestampReceive)
             {
                 m_rcvdMDTimestampReceive = false;
-                delete m_txPdelayRespFollowUpPtr;
-                m_txPdelayRespFollowUpPtr = SetPdelayRespFollowUp();
-                TxPdelayRespFollowUp(m_txPdelayRespFollowUpPtr);
+                SetPdelayRespFollowUp();
+                TxPdelayRespFollowUp();
                 m_state = STATE_WAITING_FOR_PDELAY_REQ;
             }
             break;
@@ -139,8 +128,6 @@ void MDPdelayResp::ProcessState()
 
 void MDPdelayResp::SetPDelayRequest(IReceivePackage* package)
 {
-    delete m_rcvdPdelayReqPtr;
-    m_rcvdPdelayReqPtr = new PtpMessagePDelayReq();
     m_rcvdPdelayReqPtr->ParsePackage(package->GetBuffer());
     m_rcvdPdelayReqPtr->SetReceiveTime(package->GetTimestamp());
     m_rcvdPdelayReq = true;

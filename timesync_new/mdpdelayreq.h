@@ -2,6 +2,7 @@
 #define MDPDELAYREQ_H
 
 #include <cstdlib>
+#include <memory>
 
 #include "statemachinebase.h"
 #include "ptpmessage/ptpmessagepdelayreq.h"
@@ -43,7 +44,7 @@ private:
      * @brief A pointer to a structure whose members contain the values of the fields of the Pdelay_Resp
      * message whose receipt is indicated by rcvdPdelayResp (see 11.2.15.1.2).
      */
-    PtpMessagePDelayResp* m_rcvdPdelayRespPtr;
+    std::unique_ptr<PtpMessagePDelayResp> m_rcvdPdelayRespPtr;
 
     /**
      * @brief A Boolean variable that notifies the current state machine when a Pdelay_Resp_Follow_Up message is received.
@@ -55,12 +56,12 @@ private:
      * @brief A pointer to a structure whose members contain the values of the fields of the Pdelay_Resp_Follow_Up message
      * whose receipt is indicated by rcvdPdelayRespFollowUp.
      */
-    PtpMessagePDelayRespFollowUp* m_rcvdPdelayRespFollowUpPtr;
+    std::unique_ptr<PtpMessagePDelayRespFollowUp> m_rcvdPdelayRespFollowUpPtr;
 
     /**
      * @brief A pointer to a structure whose members contain the values of the fields of a Pdelay_Req message to be transmitted.
      */
-    PtpMessagePDelayReq* m_txPdelayReqPtr;
+    std::unique_ptr<PtpMessagePDelayReq> m_txPdelayReqPtr;
 
     /**
      * @brief A Boolean variable that notifies the current state machine when the <pdelayReqEventEgressTimestamp> for a
@@ -105,14 +106,14 @@ private:
      * transmitted, and returns a pointer, txPdelayReqPtr, to this structure.
      * @return A pointer to the created structure.
      */
-    PtpMessagePDelayReq* SetPdelayReq();
+    void SetPdelayReq();
 
     /**
      * @brief Transmits a Pdelay_Req message from the MD entity, containing the parameters in the structure pointed to by
      * txPdelayReqPtr.
      * @param txPdelayReqPtr The message to transmit.
      */
-    void TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr);
+    void TxPdelayReq();
 
     /**
      * @brief Computes neighborRateRatio.

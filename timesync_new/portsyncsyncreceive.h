@@ -31,11 +31,11 @@ private:
     /**
      * @brief A pointer to the received MDSyncReceive structure indicated by rcvdMDSync.
      */
-    MDSyncReceive* m_rcvdMDSyncPtr;
+    std::unique_ptr<MDSyncReceive> m_rcvdMDSyncPtr;
     /**
      * @brief A pointer to the PortSyncSync structure transmitted by the state machine.
      */
-    PortSyncSync* m_txPSSyncPtr;
+    std::unique_ptr<PortSyncSync> m_txPSSyncPtr;
     /**
      * @brief A Double variable that holds the ratio of the frequency of the grandmaster to the frequency of the LocalClock entity.
      * This frequency ratio is computed by (a) measuring the ratio of the grandmaster frequency to the LocalClock frequency at the
@@ -56,14 +56,14 @@ private:
      * @param syncReceiptTimeoutTimeInterval
      * @param rateRatio
      */
-    PortSyncSync* SetPSSyncPSSR (MDSyncReceive* rcvdMDSyncPtr, UScaledNs syncReceiptTimeoutTimeInterval, double rateRatio);
+    void SetPSSyncPSSR(MDSyncReceive* rcvdMDSyncPtr, UScaledNs syncReceiptTimeoutTimeInterval, double rateRatio);
 
     /**
      * @brief Transmits a copy of the PortSyncSync structure pointed to by txPSSyncPtr to the SiteSyncSync
      * state machine of this time-aware system.
      * @param txPSSyncPtr The structure to transmit.
      */
-    void TxPSSyncPSSR (PortSyncSync* txPSSyncPtr);
+    void TxPSSyncPSSR();
 };
 
 #endif // PORTSYNCSYNCRECEIVE_H

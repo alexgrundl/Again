@@ -27,7 +27,7 @@ private:
     /**
      * @brief A pointer to the PortSyncSync structure transmitted by the state machine.
      */
-    PortSyncSync* m_txPSSyncPtr;
+    std::unique_ptr<PortSyncSync> m_txPSSyncPtr;
 
 
     std::shared_ptr<SiteSyncSync> m_siteSyncSync;
@@ -38,13 +38,13 @@ private:
      * @param gmRateRatio
      * @return A pointer to the structure to be transmitted.
      */
-    PortSyncSync* SetPSSyncCMSS (double gmRateRatio);
+    void SetPSSyncCMSS(double gmRateRatio);
 
     /**
      * @brief Transmits a copy of the PortSyncSync structure pointed to by txPSSyncPtr to the SiteSync state machine.
      * @param txPSSyncPtr The structure to transmit.
      */
-    void TxPSSyncCMSS (PortSyncSync* txPSSyncPtr);
+    void TxPSSyncCMSS();
 };
 
 #endif // CLOCKMASTERSYNCSEND_H

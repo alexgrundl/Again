@@ -34,7 +34,7 @@ private:
     /**
      * @brief A pointer to the received PortSyncSync structure indicated by rcvdPSSync.
      */
-    PortSyncSync* m_rcvdPSSyncPtr;
+    std::unique_ptr<PortSyncSync> m_rcvdPSSyncPtr;
     /**
      * @brief A pointer to the PortSyncSync structure transmitted by the state machine.
      */

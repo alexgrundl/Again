@@ -5,42 +5,37 @@ ClockMasterSyncSend::ClockMasterSyncSend(TimeAwareSystem* timeAwareSystem, std::
 {
     m_syncSendTime.ns = 0;
     m_syncSendTime.ns_frac = 0;
-    m_txPSSyncPtr = NULL;
+    m_txPSSyncPtr = std::unique_ptr<PortSyncSync>(new PortSyncSync());
 
     m_siteSyncSync = siteSyncSync;
 }
 
 ClockMasterSyncSend::~ClockMasterSyncSend()
 {
-    delete m_txPSSyncPtr;
 }
 
-PortSyncSync* ClockMasterSyncSend::SetPSSyncCMSS(double gmRateRatio)
+void ClockMasterSyncSend::SetPSSyncCMSS(double gmRateRatio)
 {
-    PortSyncSync* txPSSyncPtr = new PortSyncSync();
-
-    txPSSyncPtr->localPortNumber = 0;
-    txPSSyncPtr->preciseOriginTimestamp.sec = m_timeAwareSystem->masterTime.sec;
-    txPSSyncPtr->preciseOriginTimestamp.ns = m_timeAwareSystem->masterTime.ns;
-    txPSSyncPtr->followUpCorrectionField = (ScaledNs)(m_timeAwareSystem->GetCurrentTime() - m_timeAwareSystem->localTime) * m_timeAwareSystem->gmRateRatio;
-    txPSSyncPtr->followUpCorrectionField.ns_frac += m_timeAwareSystem->masterTime.ns_frac;
-    memcpy(txPSSyncPtr->sourcePortIdentity.clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock));
-    txPSSyncPtr->sourcePortIdentity.portNumber = 0;
-    txPSSyncPtr->logMessageInterval = m_timeAwareSystem->clockMasterLogSyncInterval;
-    txPSSyncPtr->upstreamTxTime = m_timeAwareSystem->localTime;
-    txPSSyncPtr->syncReceiptTimeoutTime.ns = 0xFFFFFFFFFFFF;
-    txPSSyncPtr->syncReceiptTimeoutTime.ns_frac = 0xFFFF;
-    txPSSyncPtr->rateRatio = gmRateRatio;
-    txPSSyncPtr->gmTimeBaseIndicator = m_timeAwareSystem->clockSourceTimeBaseIndicator;
-    txPSSyncPtr->lastGmPhaseChange = m_timeAwareSystem->clockSourcePhaseOffset;
-    txPSSyncPtr->lastGmFreqChange = m_timeAwareSystem->clockSourceFreqOffset;
-
-    return txPSSyncPtr;
+    m_txPSSyncPtr->localPortNumber = 0;
+    m_txPSSyncPtr->preciseOriginTimestamp.sec = m_timeAwareSystem->masterTime.sec;
+    m_txPSSyncPtr->preciseOriginTimestamp.ns = m_timeAwareSystem->masterTime.ns;
+    m_txPSSyncPtr->followUpCorrectionField = (ScaledNs)(m_timeAwareSystem->GetCurrentTime() - m_timeAwareSystem->localTime) * m_timeAwareSystem->gmRateRatio;
+    m_txPSSyncPtr->followUpCorrectionField.ns_frac += m_timeAwareSystem->masterTime.ns_frac;
+    memcpy(m_txPSSyncPtr->sourcePortIdentity.clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock));
+    m_txPSSyncPtr->sourcePortIdentity.portNumber = 0;
+    m_txPSSyncPtr->logMessageInterval = m_timeAwareSystem->clockMasterLogSyncInterval;
+    m_txPSSyncPtr->upstreamTxTime = m_timeAwareSystem->localTime;
+    m_txPSSyncPtr->syncReceiptTimeoutTime.ns = 0xFFFFFFFFFFFF;
+    m_txPSSyncPtr->syncReceiptTimeoutTime.ns_frac = 0xFFFF;
+    m_txPSSyncPtr->rateRatio = gmRateRatio;
+    m_txPSSyncPtr->gmTimeBaseIndicator = m_timeAwareSystem->clockSourceTimeBaseIndicator;
+    m_txPSSyncPtr->lastGmPhaseChange = m_timeAwareSystem->clockSourcePhaseOffset;
+    m_txPSSyncPtr->lastGmFreqChange = m_timeAwareSystem->clockSourceFreqOffset;
 }
 
-void ClockMasterSyncSend::TxPSSyncCMSS(PortSyncSync* txPSSyncPtr)
+void ClockMasterSyncSend::TxPSSyncCMSS()
 {
-    m_siteSyncSync->SetSync(txPSSyncPtr);
+    m_siteSyncSync->SetSync(m_txPSSyncPtr.get());
 }
 
 void ClockMasterSyncSend::ProcessState()
@@ -57,8 +52,8 @@ void ClockMasterSyncSend::ProcessState()
         {
             m_state = STATE_SEND_SYNC_INDICATION;
 
-            m_txPSSyncPtr = SetPSSyncCMSS (m_timeAwareSystem->gmRateRatio);
-            TxPSSyncCMSS(m_txPSSyncPtr);
+            SetPSSyncCMSS(m_timeAwareSystem->gmRateRatio);
+            TxPSSyncCMSS();
             m_syncSendTime = m_timeAwareSystem->GetCurrentTime();
             m_syncSendTime.ns += 1000000000 * pow(2, m_timeAwareSystem->clockMasterLogSyncInterval);
         }

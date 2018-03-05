@@ -24,6 +24,7 @@
 #include "portannouncereceive.h"
 #include "portannounceinformation.h"
 #include "portroleselection.h"
+#include "portannouncetransmit.h"
 
 #include "ptpclock.h"
 
@@ -101,6 +102,12 @@ private:
 
 
     std::shared_ptr<PortRoleSelection> m_portRoleSelection;
+
+
+    std::vector<std::shared_ptr<PortAnnounceTransmit>> m_portAnnounceTransmit;
+
+
+    std::vector<std::shared_ptr<MDPortAnnounceTransmit>> m_mdPortAnnounceTransmit;
 
 
 

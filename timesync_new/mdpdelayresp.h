@@ -1,6 +1,8 @@
 #ifndef MDPDELAYRESP_H
 #define MDPDELAYRESP_H
 
+#include <memory>
+
 #include "statemachinebase.h"
 #include "ptpmessage/ptpmessagepdelayresp.h"
 #include "ptpmessage/ptpmessagepdelayrespfollowup.h"
@@ -39,16 +41,16 @@ private:
      * @brief A pointer to a structure whose members contain the values of the fields of a Pdelay_Resp message to be
      * transmitted.
      */
-    PtpMessagePDelayResp* m_txPdelayRespPtr;
+    std::unique_ptr<PtpMessagePDelayResp> m_txPdelayRespPtr;
 
     /**
      * @brief  Apointer to a structure whose members contain the values of the fields of a Pdelay_Resp_Follow_Up message
      * to be transmitted.
      */
-    PtpMessagePDelayRespFollowUp* m_txPdelayRespFollowUpPtr;
+    std::unique_ptr<PtpMessagePDelayRespFollowUp> m_txPdelayRespFollowUpPtr;
 
 
-    PtpMessagePDelayReq* m_rcvdPdelayReqPtr;
+    std::unique_ptr<PtpMessagePDelayReq> m_rcvdPdelayReqPtr;
 
 
     /**
@@ -56,28 +58,28 @@ private:
      * to be transmitted, and returns a pointer, txPdelayRespPtr, to this structure.
      * @return The created structure.
      */
-    PtpMessagePDelayResp* SetPdelayResp();
+    void SetPdelayResp();
 
     /**
      * @brief Transmits a Pdelay_Resp message from the MD entity, containing the parameters in the structure pointed
      * to by txPdelayRespPtr.
      * @param txPdelayRespPtr The structure to transmit.
      */
-    void TxPdelayResp(PtpMessagePDelayResp* txPdelayRespPtr);
+    void TxPdelayResp();
 
     /**
      * @brief Creates a structure containing the parameters of a Pdelay_Resp_Follow_Up message  to be transmitted,
      * and returns a pointer, txPdelayRespFollowUpPtr, to this structure.
      * @return The created structure.
      */
-    PtpMessagePDelayRespFollowUp* SetPdelayRespFollowUp();
+    void SetPdelayRespFollowUp();
 
     /**
      * @brief Transmits a Pdelay_Resp_Follow_Up message from the P2PPort entity containing the parameters in the structure
      * pointed to by txPdelayRespFollowUpPtr.
      * @param txFollowUpPtr The structure to transmit.
      */
-    void TxPdelayRespFollowUp(PtpMessagePDelayRespFollowUp* txFollowUpPtr);
+    void TxPdelayRespFollowUp();
 };
 
 #endif // MDPDELAYRESP_H

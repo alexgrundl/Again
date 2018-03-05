@@ -4,7 +4,7 @@ PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal*
     StateMachineBasePort(timeAwareSystem, port)
 {
     m_rcvdPSSync = false;
-    m_rcvdPSSyncPtr = NULL;
+    m_rcvdPSSyncPtr = std::unique_ptr<PortSyncSync>(new PortSyncSync());
     memset(m_lastSourcePortIdentity.clockIdentity, 0, sizeof(m_lastSourcePortIdentity.clockIdentity));
     m_lastSourcePortIdentity.portNumber = 0;
     m_lastPreciseOriginTimestamp.sec = 0;
@@ -21,7 +21,7 @@ PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal*
     m_lastGmPhaseChange.ns = 0;
     m_lastGmPhaseChange.ns_frac = 0;
     m_lastGmFreqChange = 1.0;
-    m_txMDSyncSendPtr = NULL;
+    m_txMDSyncSendPtr = std::unique_ptr<MDSyncSend>(new MDSyncSend());
     m_syncReceiptTimeoutTime.ns = 0;
     m_syncReceiptTimeoutTime.ns_frac = 0;
 
@@ -30,13 +30,10 @@ PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal*
 
 PortSyncSyncSend::~PortSyncSyncSend()
 {
-    delete m_txMDSyncSendPtr;
 }
 
-MDSyncSend* PortSyncSyncSend::SetMDSync()
+void PortSyncSyncSend::SetMDSync()
 {
-    MDSyncSend* txMDSyncSendPtr = new MDSyncSend();
-
     if(memcmp(m_lastSourcePortIdentity.clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock)) == 0)
     {
 //        memcpy(txMDSyncSendPtr->sourcePortIdentity.clockIdentity,  m_ports[m_portIndex].portIdentity.clockIdentity, sizeof( m_ports[m_portIndex].portIdentity.clockIdentity));
@@ -44,29 +41,37 @@ MDSyncSend* PortSyncSyncSend::SetMDSync()
     }
     else
     {
-        memcpy(txMDSyncSendPtr->sourcePortIdentity.clockIdentity, m_lastSourcePortIdentity.clockIdentity, sizeof(m_lastSourcePortIdentity.clockIdentity));
-        txMDSyncSendPtr->sourcePortIdentity.portNumber = m_lastSourcePortIdentity.portNumber;
+        memcpy(m_txMDSyncSendPtr->sourcePortIdentity.clockIdentity, m_lastSourcePortIdentity.clockIdentity, sizeof(m_lastSourcePortIdentity.clockIdentity));
+        m_txMDSyncSendPtr->sourcePortIdentity.portNumber = m_lastSourcePortIdentity.portNumber;
     }
-    txMDSyncSendPtr->logMessageInterval = m_portGlobal->currentLogSyncInterval;
-    txMDSyncSendPtr->preciseOriginTimestamp.sec = m_lastPreciseOriginTimestamp.sec;
-    txMDSyncSendPtr->preciseOriginTimestamp.ns = m_lastPreciseOriginTimestamp.ns;
-    txMDSyncSendPtr->rateRatio = m_lastRateRatio;
-    txMDSyncSendPtr->followUpCorrectionField.ns = m_lastFollowUpCorrectionField.ns;
-    txMDSyncSendPtr->followUpCorrectionField.ns_frac = m_lastFollowUpCorrectionField.ns_frac;
-    txMDSyncSendPtr->upstreamTxTime.ns = m_lastUpstreamTxTime.ns;
-    txMDSyncSendPtr->upstreamTxTime.ns_frac = m_lastUpstreamTxTime.ns_frac;
-
-    return txMDSyncSendPtr;
+    m_txMDSyncSendPtr->logMessageInterval = m_portGlobal->currentLogSyncInterval;
+    m_txMDSyncSendPtr->preciseOriginTimestamp.sec = m_lastPreciseOriginTimestamp.sec;
+    m_txMDSyncSendPtr->preciseOriginTimestamp.ns = m_lastPreciseOriginTimestamp.ns;
+    m_txMDSyncSendPtr->rateRatio = m_lastRateRatio;
+    m_txMDSyncSendPtr->followUpCorrectionField.ns = m_lastFollowUpCorrectionField.ns;
+    m_txMDSyncSendPtr->followUpCorrectionField.ns_frac = m_lastFollowUpCorrectionField.ns_frac;
+    m_txMDSyncSendPtr->upstreamTxTime.ns = m_lastUpstreamTxTime.ns;
+    m_txMDSyncSendPtr->upstreamTxTime.ns_frac = m_lastUpstreamTxTime.ns_frac;
 }
 
-void PortSyncSyncSend::TxMDSync(MDSyncSend* txMDSyncPtr)
+void PortSyncSyncSend::TxMDSync()
 {
-    m_mdSyncSendSM->SetMDSyncSend(txMDSyncPtr);
+    m_mdSyncSendSM->SetMDSyncSend(m_txMDSyncSendPtr.get());
 }
 
 void PortSyncSyncSend::ProcessSync(PortSyncSync* rcvd)
 {
-    m_rcvdPSSyncPtr = rcvd;
+    m_rcvdPSSyncPtr->followUpCorrectionField = rcvd->followUpCorrectionField;
+    m_rcvdPSSyncPtr->gmTimeBaseIndicator = rcvd->gmTimeBaseIndicator;
+    m_rcvdPSSyncPtr->lastGmFreqChange = rcvd->lastGmFreqChange;
+    m_rcvdPSSyncPtr->lastGmPhaseChange = rcvd->lastGmPhaseChange;
+    m_rcvdPSSyncPtr->localPortNumber = rcvd->localPortNumber;
+    m_rcvdPSSyncPtr->logMessageInterval = rcvd->logMessageInterval;
+    m_rcvdPSSyncPtr->preciseOriginTimestamp = rcvd->preciseOriginTimestamp;
+    m_rcvdPSSyncPtr->rateRatio = rcvd->rateRatio;
+    m_rcvdPSSyncPtr->sourcePortIdentity = rcvd->sourcePortIdentity;
+    m_rcvdPSSyncPtr->syncReceiptTimeoutTime = rcvd->syncReceiptTimeoutTime;
+    m_rcvdPSSyncPtr->upstreamTxTime = rcvd->upstreamTxTime;
     m_rcvdPSSync = true;
 }
 
@@ -139,7 +144,6 @@ void PortSyncSyncSend::ExecuteSendMDSyncState()
     }
     m_rcvdPSSync = false;
     m_lastSyncSentTime = m_timeAwareSystem->GetCurrentTime();
-    delete m_txMDSyncSendPtr;
-    m_txMDSyncSendPtr = SetMDSync();
-    TxMDSync(m_txMDSyncSendPtr);
+    SetMDSync();
+    TxMDSync();
 }

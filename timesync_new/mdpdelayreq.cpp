@@ -16,10 +16,10 @@ MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INe
     m_pdelayIntervalTimer.ns = 0;
     m_pdelayIntervalTimer.ns_frac = 0;
     m_rcvdPdelayResp = false;
-    m_rcvdPdelayRespPtr = NULL;
+    m_rcvdPdelayRespPtr = std::unique_ptr<PtpMessagePDelayResp>(new PtpMessagePDelayResp());
     m_rcvdPdelayRespFollowUp = false;
-    m_rcvdPdelayRespFollowUpPtr = NULL;
-    m_txPdelayReqPtr = NULL;
+    m_rcvdPdelayRespFollowUpPtr = std::unique_ptr<PtpMessagePDelayRespFollowUp>(new PtpMessagePDelayRespFollowUp());
+    m_txPdelayReqPtr = std::unique_ptr<PtpMessagePDelayReq>(new PtpMessagePDelayReq());
     m_rcvdMDTimestampReceive = false;
     m_pdelayReqSequenceId = 0;
     m_initPdelayRespReceived = false;
@@ -34,31 +34,24 @@ MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INe
 
 MDPdelayReq::~MDPdelayReq()
 {
-    delete m_txPdelayReqPtr;
-    delete m_rcvdPdelayRespPtr;
-    delete m_rcvdPdelayRespFollowUpPtr;
 }
 
-PtpMessagePDelayReq* MDPdelayReq::SetPdelayReq()
+void MDPdelayReq::SetPdelayReq()
 {
-    PtpMessagePDelayReq* pdelayReqPtr = new PtpMessagePDelayReq();
-
     PortIdentity identity;
     identity.portNumber = m_portGlobal->thisPort;
 
     PtpMessageBase::GetClockIdentity(m_networkPort->GetMAC(), identity.clockIdentity);
-    pdelayReqPtr->SetSourcePortIdentity(&identity);
+    m_txPdelayReqPtr->SetSourcePortIdentity(&identity);
     /* 1) sourcePortIdentity is set equal to the port identity of the port corresponding to this MD entity
         (see 8.5.2),
 
        3) remaining parameters are set as specified in 11.4.2 and 11.4.5. */
 
-    pdelayReqPtr->SetSequenceID(m_pdelayReqSequenceId);
-
-    return pdelayReqPtr;
+    m_txPdelayReqPtr->SetSequenceID(m_pdelayReqSequenceId);
 }
 
-void MDPdelayReq::TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr)
+void MDPdelayReq::TxPdelayReq()
 {
     /* transmits a Pdelay_Req message from the MD entity, containing the parameters in the structure pointed to by txPdelayReqPtr. */
 //    uint8_t sendbuf[1024];
@@ -127,7 +120,7 @@ void MDPdelayReq::TxPdelayReq(PtpMessagePDelayReq* txPdelayReqPtr)
     //txPdelayReqPtr->SetSendTime(m_timeAwareSystem->GetCurrentTime());
     /* End remove */
 
-    txPdelayReqPtr->SetSendTime(m_networkPort->SendEventMessage(txPdelayReqPtr));
+    m_txPdelayReqPtr->SetSendTime(m_networkPort->SendEventMessage(m_txPdelayReqPtr.get()));
 
     /* Remove in good code... */
     //m_txTimestamp = txPdelayReqPtr->GetSendTime();
@@ -212,9 +205,8 @@ void MDPdelayReq::ProcessState()
                 m_rcvdMDTimestampReceive = false;
                 srand(time(NULL));
                 m_pdelayReqSequenceId = rand() % 65536;
-                delete m_txPdelayReqPtr;
-                m_txPdelayReqPtr = SetPdelayReq();
-                TxPdelayReq(m_txPdelayReqPtr);
+                SetPdelayReq();
+                TxPdelayReq();
                 m_pdelayIntervalTimer = m_timeAwareSystem->GetCurrentTime();
                 m_lostResponses = 0;
                 m_portGlobal->isMeasuringDelay = false;
@@ -317,17 +309,14 @@ void MDPdelayReq::ExecuteResetState()
 void MDPdelayReq::ExecuteSendPDelayReqState()
 {
     m_pdelayReqSequenceId += 1;
-    delete m_txPdelayReqPtr;
-    m_txPdelayReqPtr = SetPdelayReq();
-    TxPdelayReq(m_txPdelayReqPtr);
+    SetPdelayReq();
+    TxPdelayReq();
     m_pdelayIntervalTimer = m_timeAwareSystem->GetCurrentTime();
 }
 
 
 void MDPdelayReq::SetPDelayResponse(IReceivePackage* package)
 {
-    delete m_rcvdPdelayRespPtr;
-    m_rcvdPdelayRespPtr = new PtpMessagePDelayResp();
     m_rcvdPdelayRespPtr->ParsePackage(package->GetBuffer());
     m_rcvdPdelayRespPtr->SetReceiveTime(package->GetTimestamp());
     m_rcvdPdelayResp = true;
@@ -335,8 +324,6 @@ void MDPdelayReq::SetPDelayResponse(IReceivePackage* package)
 
 void MDPdelayReq::SetPDelayResponseFollowUp(IReceivePackage* package)
 {
-    delete m_rcvdPdelayRespFollowUpPtr;
-    m_rcvdPdelayRespFollowUpPtr = new PtpMessagePDelayRespFollowUp();
     m_rcvdPdelayRespFollowUpPtr->ParsePackage(package->GetBuffer());
     m_rcvdPdelayRespFollowUpPtr->SetReceiveTime(package->GetTimestamp());
     m_rcvdPdelayRespFollowUp = true;

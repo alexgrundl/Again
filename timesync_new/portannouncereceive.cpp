@@ -1,7 +1,7 @@
 #include "portannouncereceive.h"
 
 PortAnnounceReceive::PortAnnounceReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port,
-                                         PortAnnounceInformation *portAnnounceInformation) : StateMachineBasePort(timeAwareSystem, port)
+                                         std::shared_ptr<PortAnnounceInformation> portAnnounceInformation) : StateMachineBasePort(timeAwareSystem, port)
 {
     m_rcvdAnnounce = false;
     m_portAnnounceInformation = portAnnounceInformation;

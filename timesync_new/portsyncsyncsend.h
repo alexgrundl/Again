@@ -32,7 +32,7 @@ private:
     /**
      * @brief A pointer to the received PortSyncSync structure indicated by rcvdPSSync.
      */
-    PortSyncSync* m_rcvdPSSyncPtr;
+    std::unique_ptr<PortSyncSync> m_rcvdPSSyncPtr;
 
     /**
      * @brief The sourcePortIdentity member of the most recently received PortSyncSync structure.
@@ -88,7 +88,7 @@ private:
     /**
      * @brief  A pointer to the MDSyncSend structure sent to the MD entity of this port.
      */
-    MDSyncSend* m_txMDSyncSendPtr;
+    std::unique_ptr<MDSyncSend> m_txMDSyncSendPtr;
 
     /**
      * @brief The value of the syncReceiptTimeoutTime member of the most recently received PortSyncSync structure.
@@ -104,13 +104,13 @@ private:
      * @brief Creates an MDSyncSend structure, and returns a pointer to this structure.
      * @return A pointer to the created structure.
      */
-    MDSyncSend* SetMDSync();
+    void SetMDSync();
 
     /**
      * @brief Transmits the MDSyncSend structure pointed to by txMDSyncSendPtr, to the MDSyncSendSM state machine of the MD entity of this port.
      * @param txMDSyncPtr The structure to transmit.
      */
-    void TxMDSync(MDSyncSend* txMDSyncPtr);
+    void TxMDSync();
 
 
     void ExecuteSendMDSyncState();

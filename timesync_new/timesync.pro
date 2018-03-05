@@ -35,7 +35,9 @@ SOURCES += main.cpp \
     portannounceinformation.cpp \
     portannouncereceive.cpp \
     portroleselection.cpp \
-    ptpmessage/ptpmessageannounce.cpp
+    ptpmessage/ptpmessageannounce.cpp \
+    portannouncetransmit.cpp \
+    mdportannouncetransmit.cpp
 
 HEADERS += \
     types.h \
@@ -76,5 +78,7 @@ HEADERS += \
     portannouncereceive.h \
     portroleselection.h \
     ptpmessage/ptpmessageannounce.h \
-    comm/netport.h
+    comm/netport.h \
+    portannouncetransmit.h \
+    mdportannouncetransmit.h
 

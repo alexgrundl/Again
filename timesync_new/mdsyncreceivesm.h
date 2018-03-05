@@ -49,17 +49,17 @@ private:
     /**
      * @brief A pointer to a structure whose members contain the values of the fields of the Sync message whose receipt is indicated by rcvdSync.
      */
-    PtpMessageSync* m_rcvdSyncPtr;
+    std::unique_ptr<PtpMessageSync> m_rcvdSyncPtr;
 
     /**
      * @brief A pointer to a structure whose members contain the values of the fields of the Follow_Up message whose receipt is indicated by rcvdFollowUp.
      */
-    PtpMessageFollowUp* m_rcvdFollowUpPtr;
+    std::unique_ptr<PtpMessageFollowUp> m_rcvdFollowUpPtr;
 
     /**
      * @brief A pointer to a structure whose members contain the values of the parameters of an MDSyncReceive structure to be transmitted.
      */
-    MDSyncReceive* m_txMDSyncReceivePtr;
+    std::unique_ptr<MDSyncReceive> m_txMDSyncReceivePtr;
 
     /**
      * @brief The sync interval for the upstream port that sent the received Sync message.
@@ -74,13 +74,13 @@ private:
      * @brief Creates an MDSyncReceive structure, and returns a pointer to this structure. The members of this structure are set as follows
      * @return The created MDSyncReceive structure.
      */
-    MDSyncReceive* SetMDSyncReceive();
+    void SetMDSyncReceive();
 
     /**
      * @brief Transmits an MDSyncReceive structure to the PortSyncSyncReceive state machine of the PortSync entity of this port.
      * @param txMDSyncReceivePtr The structure to transmit.
      */
-    void TxMDSyncReceive(MDSyncReceive* txMDSyncReceivePtr);
+    void TxMDSyncReceive();
 };
 
 #endif // MDSYNCRECEIVESM_H
