@@ -101,6 +101,7 @@ int main()
     port->rcvdMsg = false;
     port->updtInfo = true;
     port->announceReceiptTimeout = 3;
+    port->announceInterval.ns = NS_PER_SEC;
 
     port->portPriority.identity.priority1 = 255;
     port->portPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
@@ -118,6 +119,9 @@ int main()
     tas.selectedRole.push_back(PORT_ROLE_SLAVE);
     tas.selected.push_back(false);
     tas.reselect.push_back(false);
+
+//    NetworkPort* p = (NetworkPort*)networkPorts[0].get();
+//    p->SendGenericMessage(new PtpMessageAnnounce());
 
     StateMachineManager smManager(&tas, ports, networkPorts);
     PortManager portManager(networkPorts, &smManager);

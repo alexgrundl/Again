@@ -27,7 +27,7 @@ private:
     std::shared_ptr<PtpMessageAnnounce> m_txAnnounceMessage;
 
 
-    std::shared_ptr<MDPortAnnounceTransmit> m_portAnnounceTransmit;
+    std::shared_ptr<MDPortAnnounceTransmit> m_mdPortAnnounceTransmit;
 
 
     uint16_t m_sequenceID;

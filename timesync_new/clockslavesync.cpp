@@ -15,7 +15,11 @@ ClockSlaveSync::~ClockSlaveSync()
 
 void ClockSlaveSync::UpdateSlaveTime()
 {
-    if(!m_timeAwareSystem->gmPresent)
+    if(m_timeAwareSystem->gmPresent)
+    {
+
+    }
+    else
         m_timeAwareSystem->clockSlaveTime = m_timeAwareSystem->localTime;
 }
 

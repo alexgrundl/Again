@@ -2,6 +2,9 @@
 
 PtpMessageAnnounce::PtpMessageAnnounce()
 {
+    m_messageType = PTP_MESSSAGE_TYPE_ANNOUNCE;
+    m_messageLength = 68;
+
     m_currentUtcOffset = 0;
     m_grandmasterPriority1 = 255;
     m_grandmasterClockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
@@ -22,6 +25,7 @@ PtpMessageAnnounce::~PtpMessageAnnounce()
     {
         delete m_tlv.pathSequence[i];
     }
+    m_tlv.pathSequence.clear();
 }
 
 int16_t PtpMessageAnnounce::GetCurrentUtcOffset()
@@ -105,6 +109,8 @@ void PtpMessageAnnounce::SetPathSequence(std::vector<uint8_t*> pathSequence)
     {
         delete m_tlv.pathSequence[i];
     }
+    m_tlv.pathSequence.clear();
+    m_messageLength = 68;
 
     m_tlv.lengthField = pathSequence.size() * 8;
     for (std::vector<uint8_t*>::size_type i = 0; i < pathSequence.size(); ++i)
@@ -112,6 +118,7 @@ void PtpMessageAnnounce::SetPathSequence(std::vector<uint8_t*> pathSequence)
         uint8_t* clockIdentity = new uint8_t[8];
         memcpy(clockIdentity, pathSequence[i], 8);
         m_tlv.pathSequence.push_back(clockIdentity);
+        m_messageLength += 8;
     }
 }
 
@@ -168,6 +175,27 @@ void PtpMessageAnnounce::SetFrequencyTraceable(bool enable)
 void PtpMessageAnnounce::GetMessage(uint8_t *bytes)
 {
     GetHeader(bytes);
+
+    bytes[kMessageHeaderLength + 10] = m_currentUtcOffset << 8;
+    bytes[kMessageHeaderLength + 11] = m_currentUtcOffset;
+    bytes[kMessageHeaderLength + 13] = m_grandmasterPriority1;
+    bytes[kMessageHeaderLength + 14] = m_grandmasterClockQuality.clockClass;
+    bytes[kMessageHeaderLength + 15] = m_grandmasterClockQuality.clockAccuracy;
+    bytes[kMessageHeaderLength + 16] = m_grandmasterClockQuality.offsetScaledLogVariance << 8;
+    bytes[kMessageHeaderLength + 17] = m_grandmasterClockQuality.offsetScaledLogVariance;
+    bytes[kMessageHeaderLength + 18] = m_grandmasterPriority2;
+    memcpy(bytes + kMessageHeaderLength + 19, m_grandmasterIdentity, 8);
+    bytes[kMessageHeaderLength + 27] = m_stepsRemoved << 8;
+    bytes[kMessageHeaderLength + 28] = m_stepsRemoved;
+    bytes[kMessageHeaderLength + 29] = m_timeSource;
+    bytes[kMessageHeaderLength + 30] = m_tlv.tlvType << 8;
+    bytes[kMessageHeaderLength + 31] = m_tlv.tlvType;
+    bytes[kMessageHeaderLength + 32] = m_tlv.lengthField << 8;
+    bytes[kMessageHeaderLength + 33] = m_tlv.lengthField;
+    for (std::vector<uint8_t*>::size_type i = 0; i < m_tlv.pathSequence.size(); ++i)
+    {
+       memcpy(bytes + kMessageHeaderLength + 34, m_tlv.pathSequence[i], 8);
+    }
 }
 
 void PtpMessageAnnounce::ParsePackage(const uint8_t* bytes)
@@ -190,10 +218,14 @@ void PtpMessageAnnounce::ParsePackage(const uint8_t* bytes)
     {
         delete m_tlv.pathSequence[i];
     }
+    m_tlv.pathSequence.clear();
+    m_messageLength = 68;
+
     for (int i = 0; i < m_tlv.lengthField; i+=8)
     {
         uint8_t* clockIdentity = new uint8_t[8];
         memcpy(clockIdentity, bytes + kMessageHeaderLength + 34 + 8 * i, 8);
         m_tlv.pathSequence.push_back(clockIdentity);
+        m_messageLength += 8;
     }
 }

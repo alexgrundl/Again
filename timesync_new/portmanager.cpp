@@ -30,7 +30,8 @@ uint32_t PortManager::Receive(bool_t* pbIsRunning, pal::EventHandle_t pWaitHandl
             {
                 CLinuxReceivePackage package(128);
                 m_networkPorts[i]->ReceiveMessage(&package);
-                m_stateMachineManager->ProcessPackage(i, &package);
+                if(package.IsValid())
+                    m_stateMachineManager->ProcessPackage(i, &package);
             }
         }
     }

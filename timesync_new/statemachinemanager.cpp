@@ -123,8 +123,8 @@ void StateMachineManager::ProcessPackage(int portIndex, IReceivePackage* package
 
     if(domain == 0)
     {
-    switch(messageType)
-    {
+        switch(messageType)
+        {
         case PTP_MESSSAGE_TYPE_PDELAY_REQ:
             m_mdPdelayResp[portIndex]->SetPDelayRequest(package);
             break;

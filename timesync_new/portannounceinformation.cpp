@@ -173,7 +173,6 @@ void PortAnnounceInformation::ExecuteAgedState()
 void PortAnnounceInformation::ExecuteUpdateState()
 {
     m_portGlobal->portPriority = m_portGlobal->masterPriority;
-    printf("ggg: %u\n", m_portGlobal->portPriority.stepsRemoved);
     m_portGlobal->portStepsRemoved = m_timeAwareSystem->masterStepsRemoved;
     m_portGlobal->updtInfo = false;
     m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_MINE;

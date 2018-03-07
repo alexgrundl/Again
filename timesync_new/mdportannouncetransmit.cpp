@@ -10,6 +10,7 @@ MDPortAnnounceTransmit::MDPortAnnounceTransmit(TimeAwareSystem *timeAwareSystem,
 void MDPortAnnounceTransmit::SetAnnounce(std::shared_ptr<PtpMessageAnnounce> announceMessage)
 {
     m_txAnnounceMessage = announceMessage;
+    m_announceReceived = true;
 }
 
 void MDPortAnnounceTransmit::ProcessState()
@@ -25,13 +26,19 @@ void MDPortAnnounceTransmit::ProcessState()
         {
         case STATE_TRANSMIT_INIT:
             if(m_announceReceived)
+            {
+                m_announceReceived = false;
                 m_networkPort->SendGenericMessage(m_txAnnounceMessage.get());
-            m_state = STATE_TRANSMIT_ANNOUNCE;
+                m_state = STATE_TRANSMIT_ANNOUNCE;
+            }
             break;
 
         case STATE_TRANSMIT_ANNOUNCE:
             if(m_announceReceived)
+            {
+                m_announceReceived = false;
                 m_networkPort->SendGenericMessage(m_txAnnounceMessage.get());
+            }
             break;
 
         default:

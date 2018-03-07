@@ -3,7 +3,7 @@
 PortAnnounceTransmit::PortAnnounceTransmit(TimeAwareSystem *timeAwareSystem, PortGlobal *port,
                                            std::shared_ptr<MDPortAnnounceTransmit> portAnnounceTransmit) : StateMachineBasePort(timeAwareSystem, port)
 {
-    m_portAnnounceTransmit = portAnnounceTransmit;
+    m_mdPortAnnounceTransmit = portAnnounceTransmit;
     m_txAnnounceMessage = std::shared_ptr<PtpMessageAnnounce>(new PtpMessageAnnounce());
 }
 
@@ -36,6 +36,8 @@ void PortAnnounceTransmit::TxAnnounce()
     m_txAnnounceMessage->SetSequenceID(m_sequenceID);
 
     m_txAnnounceMessage->SetPathSequence(m_timeAwareSystem->pathTrace);
+
+    m_mdPortAnnounceTransmit->SetAnnounce(m_txAnnounceMessage);
 }
 
 void PortAnnounceTransmit::ProcessState()

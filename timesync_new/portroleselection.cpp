@@ -99,7 +99,6 @@ void PortRoleSelection::UpdtRolesTree()
         std::shared_ptr<PortGlobal> port = m_ports[i];
         port->masterPriority.identity = m_timeAwareSystem->gmPriority.identity;
         port->masterPriority.stepsRemoved = m_timeAwareSystem->gmPriority.stepsRemoved;
-        printf("hhh: %u\n", port->masterPriority.stepsRemoved);
         memcpy(port->masterPriority.sourcePortIdentity.clockIdentity, m_timeAwareSystem->systemPriority.sourcePortIdentity.clockIdentity,
                sizeof(m_timeAwareSystem->systemPriority.sourcePortIdentity.clockIdentity));
         port->masterPriority.sourcePortIdentity.portNumber = port->thisPort;
@@ -139,12 +138,12 @@ void PortRoleSelection::UpdtRolesTree()
              m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_DISABLED;
          else if(/*m_timeAwareSystem->gmPresent &&*/ port->infoIs == SPANNING_TREE_PORT_STATE_AGED)
          {
-             m_timeAwareSystem->selected[i] = PORT_ROLE_MASTER;
+             m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_MASTER;
              port->updtInfo = true;
          }
          else if(port->infoIs == SPANNING_TREE_PORT_STATE_MINE)
          {
-             m_timeAwareSystem->selected[i] = PORT_ROLE_MASTER;
+             m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_MASTER;
              if(port->portStepsRemoved != m_timeAwareSystem->masterStepsRemoved || bestPort == NULL || port != bestPort)
                  port->updtInfo = true;
          }
