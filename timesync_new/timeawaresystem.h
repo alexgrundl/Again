@@ -4,14 +4,27 @@
 #include <time.h>
 #include <vector>
 #include <string.h>
+#include <ptpclock.h>
 
 #include "types.h"
 
 class TimeAwareSystem
 {
 public:
+
     TimeAwareSystem();
 
+
+    ~TimeAwareSystem();
+
+
+    void AddPath(uint8_t* path);
+
+
+    void ClearPathTrace();
+
+
+    std::vector<uint8_t*> GetPathTrace();
 
 // private:
         /**
@@ -251,6 +264,11 @@ public:
          */
         PriorityVector lastGmPriority;
 
+
+        /** End announce. */
+
+private:
+
         /**
          * @brief An array that contains the clockIdentities of the successive time-aware systems that receive, process, and send Announce messages.
          * The data type for pathTrace is ClockIdentity[N], where N is the number of time-aware systems, including the grandmaster, that the Announce
@@ -259,8 +277,7 @@ public:
          */
         std::vector<uint8_t*> pathTrace;
 
-
-        /** End announce. */
+        PtpClock clockSource;
 };
 
 #endif // TIMEAWARESYSTEM_H

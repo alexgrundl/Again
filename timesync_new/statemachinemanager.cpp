@@ -1,7 +1,7 @@
 #include "statemachinemanager.h"
 
-StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<std::shared_ptr<PortGlobal>> ports,
-                                         std::vector<std::shared_ptr<INetworkInterfacePort>> networkPorts)
+StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<PortGlobal*> ports,
+                                         std::vector<INetworkInterfacePort*> networkPorts)
 {
     m_timeAwareSystem = timeAwareSystem;
     m_currentIndexClockUpdate = 0;
@@ -9,37 +9,35 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
     m_timeAwareSystem->localClockTickInterval.ns = (uint64_t)m_granularity_ms * 1000 * 1000;
     m_timeAwareSystem->localClockTickInterval.ns_frac = 0;
 
-    for (std::vector<std::shared_ptr<PortGlobal>>::size_type i = 0; i < ports.size(); ++i)
+    for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
     {
-        m_mdPdelayReq.push_back(std::shared_ptr<MDPdelayReq>(new MDPdelayReq(timeAwareSystem, ports[i].get(), networkPorts[i].get())));
-        m_mdPdelayResp.push_back(std::shared_ptr<MDPdelayResp>(new MDPdelayResp(timeAwareSystem, ports[i].get(), networkPorts[i].get())));
+        m_mdPdelayReq.push_back(new MDPdelayReq(timeAwareSystem, ports[i], networkPorts[i]));
+        m_mdPdelayResp.push_back(new MDPdelayResp(timeAwareSystem, ports[i], networkPorts[i]));
 
-        m_mdSyncSendSM.push_back(std::shared_ptr<MDSyncSendSM>(new MDSyncSendSM(timeAwareSystem, ports[i].get(), networkPorts[i].get())));
-        m_portSyncSyncSends.push_back(std::shared_ptr<PortSyncSyncSend>(new PortSyncSyncSend(timeAwareSystem, ports[i].get(), m_mdSyncSendSM[i])));
+        m_mdSyncSendSM.push_back(new MDSyncSendSM(timeAwareSystem, ports[i], networkPorts[i]));
+        m_portSyncSyncSends.push_back(new PortSyncSyncSend(timeAwareSystem, ports[i], m_mdSyncSendSM[i]));
     }
 
-    m_clockSlaveSync = std::shared_ptr<ClockSlaveSync>(new ClockSlaveSync(timeAwareSystem));
-    m_siteSyncSync = std::shared_ptr<SiteSyncSync>(new SiteSyncSync(timeAwareSystem, m_clockSlaveSync, m_portSyncSyncSends));
-    m_clockMasterSyncSend = std::shared_ptr<ClockMasterSyncSend>(new ClockMasterSyncSend(timeAwareSystem, m_siteSyncSync));
-    m_clockMasterSyncReceive = std::shared_ptr<ClockMasterSyncReceive>(new ClockMasterSyncReceive(m_timeAwareSystem));
-    m_clockMasterSyncOffset = std::shared_ptr<ClockMasterSyncOffset>(new ClockMasterSyncOffset(m_timeAwareSystem));
+    m_clockSlaveSync = new ClockSlaveSync(timeAwareSystem);
+    m_siteSyncSync = new SiteSyncSync(timeAwareSystem, m_clockSlaveSync, m_portSyncSyncSends);
+    m_clockMasterSyncSend = new ClockMasterSyncSend(timeAwareSystem, m_siteSyncSync);
+    m_clockMasterSyncReceive = new ClockMasterSyncReceive(m_timeAwareSystem);
+    m_clockMasterSyncOffset = new ClockMasterSyncOffset(m_timeAwareSystem);
 
-    for (std::vector<std::shared_ptr<PortGlobal>>::size_type i = 0; i < ports.size(); ++i)
+    for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
     {
-        m_portSyncSyncReceive.push_back(std::shared_ptr<PortSyncSyncReceive>(new PortSyncSyncReceive(timeAwareSystem, ports[i].get(), m_siteSyncSync)));
-        m_mdSyncReceiveSM.push_back(std::shared_ptr<MDSyncReceiveSM>(new MDSyncReceiveSM(timeAwareSystem, ports[i].get(),
-                                                m_portSyncSyncReceive[i], networkPorts[i].get())));
+        m_portSyncSyncReceive.push_back(new PortSyncSyncReceive(timeAwareSystem, ports[i], m_siteSyncSync));
+        m_mdSyncReceiveSM.push_back(new MDSyncReceiveSM(timeAwareSystem, ports[i], m_portSyncSyncReceive[i], networkPorts[i]));
     }
 
-    for (std::vector<std::shared_ptr<PortGlobal>>::size_type i = 0; i < ports.size(); ++i)
+    for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
     {
-        m_portAnnounceInformation.push_back(std::shared_ptr<PortAnnounceInformation>(new PortAnnounceInformation(timeAwareSystem, ports[i].get())));
-        m_portAnnounceReceive.push_back(std::shared_ptr<PortAnnounceReceive>(new PortAnnounceReceive(
-                                                                                 timeAwareSystem, ports[i].get(), m_portAnnounceInformation[i])));
-        m_mdPortAnnounceTransmit.push_back(std::shared_ptr<MDPortAnnounceTransmit>(new MDPortAnnounceTransmit(m_timeAwareSystem, ports[i].get(), networkPorts[i].get())));
-        m_portAnnounceTransmit.push_back(std::shared_ptr<PortAnnounceTransmit>(new PortAnnounceTransmit(m_timeAwareSystem, ports[i].get(), m_mdPortAnnounceTransmit[i])));
+        m_portAnnounceInformation.push_back(new PortAnnounceInformation(timeAwareSystem, ports[i]));
+        m_portAnnounceReceive.push_back(new PortAnnounceReceive(timeAwareSystem, ports[i], m_portAnnounceInformation[i]));
+        m_mdPortAnnounceTransmit.push_back(new MDPortAnnounceTransmit(m_timeAwareSystem, ports[i], networkPorts[i]));
+        m_portAnnounceTransmit.push_back(new PortAnnounceTransmit(m_timeAwareSystem, ports[i], m_mdPortAnnounceTransmit[i]));
     }
-    m_portRoleSelection = std::shared_ptr<PortRoleSelection>(new PortRoleSelection(m_timeAwareSystem, ports));
+    m_portRoleSelection = new PortRoleSelection(m_timeAwareSystem, ports);
 
     m_stateMachines.push_back(m_siteSyncSync);
     m_stateMachines.push_back(m_clockSlaveSync);
@@ -48,7 +46,7 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
     m_stateMachines.push_back(m_clockMasterSyncOffset);
 
 
-    for (std::vector<std::shared_ptr<PortGlobal>>::size_type i = 0; i < ports.size(); ++i)
+    for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
     {
         m_stateMachines.push_back(m_mdPdelayReq[i]);
         m_stateMachines.push_back(m_mdPdelayResp[i]);
@@ -72,6 +70,27 @@ StateMachineManager::~StateMachineManager()
     m_stateThread->Stop();
     delete m_stateThread;
     m_stateThread = NULL;
+
+    for (std::vector<MDPdelayReq*>::size_type i = 0; i < m_mdPdelayReq.size(); ++i)
+    {
+        delete m_mdPdelayReq[i];
+        delete m_mdPdelayResp[i];
+        delete m_mdSyncSendSM[i];
+        delete m_portSyncSyncSends[i];
+        delete m_portSyncSyncReceive[i];
+        delete m_mdSyncReceiveSM[i];
+        delete m_portAnnounceInformation[i];
+        delete m_portAnnounceReceive[i];
+        delete m_mdPortAnnounceTransmit[i];
+        delete m_portAnnounceTransmit[i];
+    }
+
+    delete m_clockSlaveSync;
+    delete m_siteSyncSync;
+    delete m_clockMasterSyncSend;
+    delete m_clockMasterSyncReceive;
+    delete m_clockMasterSyncOffset;
+    delete m_portRoleSelection;
 }
 
 void StateMachineManager::StartProcessing()
@@ -91,7 +110,7 @@ uint32_t StateMachineManager::Process(bool_t* pbIsRunning, pal::EventHandle_t pW
       {
           UpdateTimes();
 
-          for (std::vector<StateMachineBase>::size_type i = 0; i < m_stateMachines.size(); ++i)
+          for (std::vector<StateMachineBase*>::size_type i = 0; i < m_stateMachines.size(); ++i)
           {
               m_stateMachines[i]->ProcessState();
           }
@@ -104,7 +123,7 @@ uint32_t StateMachineManager::Process(bool_t* pbIsRunning, pal::EventHandle_t pW
 
 void StateMachineManager::InitialProcess()
 {
-    for (std::vector<StateMachineBase>::size_type i = 0; i < m_stateMachines.size(); ++i)
+    for (std::vector<StateMachineBase*>::size_type i = 0; i < m_stateMachines.size(); ++i)
     {
         m_stateMachines[i]->ProcessState();
     }
@@ -148,8 +167,7 @@ void StateMachineManager::ProcessPackage(int portIndex, IReceivePackage* package
 
 void StateMachineManager::UpdateTimes()
 {
-
-    PtpClock clock;
+    PtpClock clock("/dev/ptp5");
 
     m_currentIndexClockUpdate++;
     if(m_currentIndexClockUpdate == m_clockSourceTimeUpdate)

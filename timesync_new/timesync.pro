@@ -6,14 +6,14 @@ CONFIG -= qt
 LIBS += -pthread
 
 SOURCES += main.cpp \
-    sitesyncsync.cpp \
-    statemachinebase.cpp \
-    portsyncsyncreceive.cpp \
-    clockmastersyncsend.cpp \
-    clockmastersyncoffset.cpp \
-    clockmastersyncreceive.cpp \
-    portsyncsyncsend.cpp \
-    clockslavesync.cpp \
+    statemachines/sitesyncsync.cpp \
+    statemachines/statemachinebase.cpp \
+    statemachines/portsyncsyncreceive.cpp \
+    statemachines/clockmastersyncsend.cpp \
+    statemachines/clockmastersyncoffset.cpp \
+    statemachines/clockmastersyncreceive.cpp \
+    statemachines/portsyncsyncsend.cpp \
+    statemachines/clockslavesync.cpp \
     ptpmessage/ptpmessagebase.cpp \
     ptpmessage/ptpmessagefollowup.cpp \
     ptpmessage/ptpmessagepdelayreq.cpp \
@@ -21,35 +21,35 @@ SOURCES += main.cpp \
     ptpmessage/ptpmessagepdelayrespfollowup.cpp \
     ptpmessage/ptpmessagesync.cpp \
     ptpclock.cpp \
-    mdsyncreceivesm.cpp \
-    mdsyncsendsm.cpp \
+    statemachines/mdsyncreceivesm.cpp \
+    statemachines/mdsyncsendsm.cpp \
     c-platform/linux/platform_linux.cpp \
     c-extensions/ThreadWrapper.cpp \
     statemachinemanager.cpp \
-    mdpdelayreq.cpp \
-    mdpdelayresp.cpp \
+    statemachines/mdpdelayreq.cpp \
+    statemachines/mdpdelayresp.cpp \
     timeawaresystem.cpp \
     c-extensions/TimeMeas.cpp \
     comm/linux_netport.cpp \
     portmanager.cpp \
-    portannounceinformation.cpp \
-    portannouncereceive.cpp \
-    portroleselection.cpp \
+    statemachines/portannounceinformation.cpp \
+    statemachines/portannouncereceive.cpp \
+    statemachines/portroleselection.cpp \
     ptpmessage/ptpmessageannounce.cpp \
-    portannouncetransmit.cpp \
-    mdportannouncetransmit.cpp
+    statemachines/portannouncetransmit.cpp \
+    statemachines/mdportannouncetransmit.cpp
 
 HEADERS += \
     types.h \
-    sitesyncsync.h \
+    statemachines/sitesyncsync.h \
     commstructs.h \
-    statemachinebase.h \
-    portsyncsyncreceive.h \
-    clockmastersyncsend.h \
-    clockmastersyncoffset.h \
-    clockmastersyncreceive.h \
-    portsyncsyncsend.h \
-    clockslavesync.h \
+    statemachines/statemachinebase.h \
+    statemachines/portsyncsyncreceive.h \
+    statemachines/clockmastersyncsend.h \
+    statemachines/clockmastersyncoffset.h \
+    statemachines/clockmastersyncreceive.h \
+    statemachines/portsyncsyncsend.h \
+    statemachines/clockslavesync.h \
     interfaces.h \
     ptpmessage/ptpmessagebase.h \
     ptpmessage/ptpmessagefollowup.h \
@@ -59,26 +59,29 @@ HEADERS += \
     ptpmessage/ptpmessagesync.h \
     ptpmessage/ptpmessagetype.h \
     ptpclock.h \
-    mdsyncreceivesm.h \
-    mdsyncsendsm.h \
+    statemachines/mdsyncreceivesm.h \
+    statemachines/mdsyncsendsm.h \
     c-platform/linux/platform_linux.h \
     c-platform/platform.h \
     c-platform/platform_types.h \
     c-extensions/commondefs.h \
     c-extensions/ThreadWrapper.h \
     statemachinemanager.h \
-    mdpdelayreq.h \
-    mdpdelayresp.h \
+    statemachines/mdpdelayreq.h \
+    statemachines/mdpdelayresp.h \
     timeawaresystem.h \
     c-extensions/TimeMeas.h \
     comm/netport.h \
     comm/linux_netport.h \
     portmanager.h \
-    portannounceinformation.h \
-    portannouncereceive.h \
-    portroleselection.h \
+    statemachines/portannounceinformation.h \
+    statemachines/portannouncereceive.h \
+    statemachines/portroleselection.h \
     ptpmessage/ptpmessageannounce.h \
     comm/netport.h \
-    portannouncetransmit.h \
-    mdportannouncetransmit.h
+    statemachines/portannouncetransmit.h \
+    statemachines/mdportannouncetransmit.h \
+    c-extensions/autolock.h \
+    c-extensions/locked_deque.h \
+    c-extensions/locked_map.h
 

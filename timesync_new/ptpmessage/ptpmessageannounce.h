@@ -80,6 +80,9 @@ public:
     AnnounceTLV GetTLV();
 
 
+    std::vector<uint8_t *> GetPathSequence();
+
+
     void SetPathSequence(std::vector<uint8_t*> pathSequence);
 
 
@@ -111,6 +114,7 @@ public:
 
 
     void SetFrequencyTraceable(bool enable);
+
 
 private:
 

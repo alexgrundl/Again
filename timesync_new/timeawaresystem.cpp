@@ -2,6 +2,7 @@
 
 TimeAwareSystem::TimeAwareSystem()
 {
+
     BEGIN = true;
 //    clockMasterSyncInterval.ns = 0;
 //    clockMasterSyncInterval.ns_frac = 0;
@@ -35,7 +36,7 @@ TimeAwareSystem::TimeAwareSystem()
     masterTime.ns = 0;
     masterTime.ns_frac = 0;
     memset(thisClock, 255, sizeof(thisClock));
-    clockMasterLogSyncInterval = 0;
+    clockMasterLogSyncInterval = -3;
 
 
     masterStepsRemoved = 0;
@@ -86,8 +87,14 @@ TimeAwareSystem::TimeAwareSystem()
     memset(lastGmPriority.sourcePortIdentity.clockIdentity, 255, sizeof(lastGmPriority.sourcePortIdentity.clockIdentity));
     lastGmPriority.sourcePortIdentity.portNumber = UINT16_MAX;
     lastGmPriority.portNumber = UINT16_MAX;
+
+    selectedRole.push_back(PORT_ROLE_SLAVE);
 }
 
+TimeAwareSystem::~TimeAwareSystem()
+{
+    ClearPathTrace();
+}
 
 UScaledNs TimeAwareSystem::GetCurrentTime()
 {
@@ -102,3 +109,24 @@ UScaledNs TimeAwareSystem::GetCurrentTime()
     return uscaled;
 }
 
+void TimeAwareSystem::AddPath(uint8_t* path)
+{
+    uint8_t* pathToAdd = new uint8_t[8];
+    memcpy(pathToAdd, path, 8);
+
+    this->pathTrace.push_back(pathToAdd);
+}
+
+void TimeAwareSystem::ClearPathTrace()
+{
+    for (std::vector<uint8_t*>::size_type i = 0; i < pathTrace.size(); ++i)
+    {
+        delete[] pathTrace[i];
+    }
+    pathTrace.clear();
+}
+
+std::vector<uint8_t*> TimeAwareSystem::GetPathTrace()
+{
+    return pathTrace;
+}

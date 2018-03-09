@@ -5,26 +5,26 @@
 #include <memory>
 
 #include "c-extensions/ThreadWrapper.h"
-#include "statemachinebase.h"
+#include "statemachines/statemachinebase.h"
 #include "ptpmessage/ptpmessagepdelayreq.h"
 #include "ptpmessage/ptpmessagepdelayresp.h"
 #include "ptpmessage/ptpmessagepdelayrespfollowup.h"
 
-#include "clockmastersyncoffset.h"
-#include "clockmastersyncreceive.h"
-#include "clockmastersyncsend.h"
-#include "clockslavesync.h"
-#include "mdpdelayreq.h"
-#include "mdpdelayresp.h"
-#include "mdsyncreceivesm.h"
-#include "mdsyncsendsm.h"
-#include "portsyncsyncreceive.h"
-#include "portsyncsyncsend.h"
-#include "sitesyncsync.h"
-#include "portannouncereceive.h"
-#include "portannounceinformation.h"
-#include "portroleselection.h"
-#include "portannouncetransmit.h"
+#include "statemachines/clockmastersyncoffset.h"
+#include "statemachines/clockmastersyncreceive.h"
+#include "statemachines/clockmastersyncsend.h"
+#include "statemachines/clockslavesync.h"
+#include "statemachines/mdpdelayreq.h"
+#include "statemachines/mdpdelayresp.h"
+#include "statemachines/mdsyncreceivesm.h"
+#include "statemachines/mdsyncsendsm.h"
+#include "statemachines/portsyncsyncreceive.h"
+#include "statemachines/portsyncsyncsend.h"
+#include "statemachines/sitesyncsync.h"
+#include "statemachines/portannouncereceive.h"
+#include "statemachines/portannounceinformation.h"
+#include "statemachines/portroleselection.h"
+#include "statemachines/portannouncetransmit.h"
 
 #include "ptpclock.h"
 
@@ -32,8 +32,8 @@ class StateMachineManager
 {
 public:
 
-    StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<std::shared_ptr<PortGlobal>> ports,
-                        std::vector<std::shared_ptr<INetworkInterfacePort>> networkPorts);
+    StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<PortGlobal*> ports,
+                        std::vector<INetworkInterfacePort*> networkPorts);
 
 
     ~StateMachineManager();
@@ -61,60 +61,60 @@ private:
     TimeAwareSystem* m_timeAwareSystem;
 
 
-    std::vector<std::shared_ptr<MDSyncSendSM>> m_mdSyncSendSM;
+    std::vector<MDSyncSendSM*> m_mdSyncSendSM;
 
 
-    std::vector<std::shared_ptr<MDSyncReceiveSM>> m_mdSyncReceiveSM;
+    std::vector<MDSyncReceiveSM*> m_mdSyncReceiveSM;
 
 
-    std::vector<std::shared_ptr<PortSyncSyncSend>> m_portSyncSyncSends;
+    std::vector<PortSyncSyncSend*> m_portSyncSyncSends;
 
 
-    std::vector<std::shared_ptr<PortSyncSyncReceive>> m_portSyncSyncReceive;
+    std::vector<PortSyncSyncReceive*> m_portSyncSyncReceive;
 
 
-    std::vector<std::shared_ptr<MDPdelayReq>> m_mdPdelayReq;
+    std::vector<MDPdelayReq*> m_mdPdelayReq;
 
 
-    std::vector<std::shared_ptr<MDPdelayResp>> m_mdPdelayResp;
+    std::vector<MDPdelayResp*> m_mdPdelayResp;
 
 
-    std::shared_ptr<ClockSlaveSync> m_clockSlaveSync;
+    ClockSlaveSync* m_clockSlaveSync;
 
 
-    std::shared_ptr<SiteSyncSync> m_siteSyncSync;
+    SiteSyncSync* m_siteSyncSync;
 
 
-    std::shared_ptr<ClockMasterSyncSend> m_clockMasterSyncSend;
+    ClockMasterSyncSend* m_clockMasterSyncSend;
 
 
-    std::shared_ptr<ClockMasterSyncReceive> m_clockMasterSyncReceive;
+    ClockMasterSyncReceive* m_clockMasterSyncReceive;
 
 
-    std::shared_ptr<ClockMasterSyncOffset> m_clockMasterSyncOffset;
+    ClockMasterSyncOffset* m_clockMasterSyncOffset;
 
 
 
-    std::vector<std::shared_ptr<PortAnnounceReceive>> m_portAnnounceReceive;
+    std::vector<PortAnnounceReceive*> m_portAnnounceReceive;
 
 
-    std::vector<std::shared_ptr<PortAnnounceInformation>> m_portAnnounceInformation;
+    std::vector<PortAnnounceInformation*> m_portAnnounceInformation;
 
 
-    std::shared_ptr<PortRoleSelection> m_portRoleSelection;
+    PortRoleSelection* m_portRoleSelection;
 
 
-    std::vector<std::shared_ptr<PortAnnounceTransmit>> m_portAnnounceTransmit;
+    std::vector<PortAnnounceTransmit*> m_portAnnounceTransmit;
 
 
-    std::vector<std::shared_ptr<MDPortAnnounceTransmit>> m_mdPortAnnounceTransmit;
+    std::vector<MDPortAnnounceTransmit*> m_mdPortAnnounceTransmit;
 
 
 
     CThreadWrapper<StateMachineManager>* m_stateThread;
 
 
-    std::vector<std::shared_ptr<StateMachineBase>> m_stateMachines;
+    std::vector<StateMachineBase*> m_stateMachines;
 
 
     uint32_t Process(bool_t *pbIsRunning, pal::EventHandle_t pWaitHandle);

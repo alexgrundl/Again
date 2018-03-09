@@ -23,7 +23,7 @@ PtpMessageAnnounce::~PtpMessageAnnounce()
 {
     for (std::vector<uint8_t*>::size_type i = 0; i < m_tlv.pathSequence.size(); ++i)
     {
-        delete m_tlv.pathSequence[i];
+        delete[] m_tlv.pathSequence[i];
     }
     m_tlv.pathSequence.clear();
 }
@@ -103,11 +103,16 @@ PtpMessageAnnounce::AnnounceTLV PtpMessageAnnounce::GetTLV()
     return m_tlv;
 }
 
+std::vector<uint8_t*> PtpMessageAnnounce::GetPathSequence()
+{
+    return m_tlv.pathSequence;
+}
+
 void PtpMessageAnnounce::SetPathSequence(std::vector<uint8_t*> pathSequence)
 {
     for (std::vector<uint8_t*>::size_type i = 0; i < m_tlv.pathSequence.size(); ++i)
     {
-        delete m_tlv.pathSequence[i];
+        delete[] m_tlv.pathSequence[i];
     }
     m_tlv.pathSequence.clear();
     m_messageLength = 68;
@@ -194,7 +199,7 @@ void PtpMessageAnnounce::GetMessage(uint8_t *bytes)
     bytes[kMessageHeaderLength + 33] = m_tlv.lengthField;
     for (std::vector<uint8_t*>::size_type i = 0; i < m_tlv.pathSequence.size(); ++i)
     {
-       memcpy(bytes + kMessageHeaderLength + 34, m_tlv.pathSequence[i], 8);
+       memcpy(bytes + kMessageHeaderLength + 34 + 8 * i, m_tlv.pathSequence[i], 8);
     }
 }
 
@@ -216,7 +221,7 @@ void PtpMessageAnnounce::ParsePackage(const uint8_t* bytes)
 
     for (std::vector<uint8_t*>::size_type i = 0; i < m_tlv.pathSequence.size(); ++i)
     {
-        delete m_tlv.pathSequence[i];
+        delete[] m_tlv.pathSequence[i];
     }
     m_tlv.pathSequence.clear();
     m_messageLength = 68;

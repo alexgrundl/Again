@@ -1,15 +1,13 @@
 #include "portmanager.h"
 
-PortManager::PortManager(std::vector<std::shared_ptr<INetworkInterfacePort>> networkPorts, StateMachineManager* stateMachineManager)
+PortManager::PortManager(INetworkInterfacePort* networkPort, StateMachineManager* stateMachineManager, int portIndex)
 {
-    m_networkPorts = networkPorts;
+    m_networkPort = networkPort;
     m_stateMachineManager = stateMachineManager;
+    m_portIndex = portIndex;
 
-    for (std::vector<std::shared_ptr<INetworkInterfacePort>>::size_type i = 0; i < networkPorts.size(); ++i)
-    {
-        m_portThread = new CThreadWrapper<PortManager>(this, &PortManager::Receive,
-                                                       std::string("Port manager thread ") + std::to_string(i + 1));
-    }
+    m_portThread = std::unique_ptr<CThreadWrapper<PortManager>>(new CThreadWrapper<PortManager>(this,
+        &PortManager::Receive, std::string("Port manager thread ") + std::to_string(portIndex)));
 }
 
 void PortManager::StartReceiving()
@@ -26,14 +24,13 @@ uint32_t PortManager::Receive(bool_t* pbIsRunning, pal::EventHandle_t pWaitHandl
         dwWaitResult = pal::EventWait(pWaitHandle, 10);
         if(dwWaitResult == pal::EventWaitTimeout)
         {
-            for (std::vector<NetworkPort*>::size_type i = 0; i < m_networkPorts.size(); ++i)
-            {
-                CLinuxReceivePackage package(128);
-                m_networkPorts[i]->ReceiveMessage(&package);
-                if(package.IsValid())
-                    m_stateMachineManager->ProcessPackage(i, &package);
-            }
+            CLinuxReceivePackage package(128);
+            m_networkPort->ReceiveMessage(&package);
+            if(package.IsValid())
+                m_stateMachineManager->ProcessPackage(m_portIndex, &package);
         }
+        else
+            sleep(1);
     }
 
     return 0;

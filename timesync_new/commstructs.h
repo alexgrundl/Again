@@ -113,7 +113,7 @@ struct PortGlobal
     /**
      * @brief The portNumber of the current port.
      */
-    uint16_t thisPort;
+//    uint16_t thisPort;
 
 
     /**
@@ -293,6 +293,9 @@ struct PortGlobal
     uint8_t announceReceiptTimeout;
 
     /** End announce */
+
+
+    PortIdentity identity;
 };
 
 #endif // COMM_STRUCTS
