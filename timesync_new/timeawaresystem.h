@@ -276,8 +276,6 @@ private:
          * NOTE—N is equal to stepsRemoved+1 (see 10.5.3.2.6). The size of the pathTrace array can change after each reception of an Announce message.
          */
         std::vector<uint8_t*> pathTrace;
-
-        PtpClock clockSource;
 };
 
 #endif // TIMEAWARESYSTEM_H

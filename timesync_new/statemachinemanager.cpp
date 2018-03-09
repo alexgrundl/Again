@@ -1,13 +1,15 @@
 #include "statemachinemanager.h"
 
 StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<PortGlobal*> ports,
-                                         std::vector<INetworkInterfacePort*> networkPorts)
+                                         std::vector<INetworkInterfacePort*> networkPorts, std::string ptpMasterClockPath)
 {
     m_timeAwareSystem = timeAwareSystem;
     m_currentIndexClockUpdate = 0;
 
     m_timeAwareSystem->localClockTickInterval.ns = (uint64_t)m_granularity_ms * 1000 * 1000;
     m_timeAwareSystem->localClockTickInterval.ns_frac = 0;
+
+    clockMaster.Open(ptpMasterClockPath);
 
     for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
     {
@@ -167,14 +169,12 @@ void StateMachineManager::ProcessPackage(int portIndex, IReceivePackage* package
 
 void StateMachineManager::UpdateTimes()
 {
-    PtpClock clock("/dev/ptp5");
-
     m_currentIndexClockUpdate++;
     if(m_currentIndexClockUpdate == m_clockSourceTimeUpdate)
     {
         m_currentIndexClockUpdate = 0;
 
-        clock.Invoke(&clockSourceParams);
+        clockMaster.Invoke(&clockSourceParams);
         m_clockMasterSyncReceive->SetClockSourceRequest(&clockSourceParams);
     }
     else

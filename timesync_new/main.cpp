@@ -17,6 +17,8 @@
 
 using namespace std;
 
+const char* ifnameMasterClock = "enp15s0";
+
 bool check_wireless(const char* ifname, char* protocol)
 {
   int sock = -1;
@@ -44,6 +46,7 @@ bool check_wireless(const char* ifname, char* protocol)
 
 int main()
 {
+    std::string ptpMasterClockPath = "/dev/ptp";
     TimeAwareSystem tas;
     std::vector<INetworkInterfacePort*> networkPorts;
     std::vector<PortGlobal*> ports;
@@ -99,12 +102,18 @@ int main()
             tas.reselect.push_back(false);
 
             printf("Name: %s\n", next->ifa_name);
+
+            if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
+            {
+                PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), tas.thisClock);
+                ptpMasterClockPath += std::to_string(((NetworkPort*)networkPort)->GetPtpClockIndex());
+            }
         }
         next = next->ifa_next;
     }
 
 
-    StateMachineManager smManager(&tas, ports, networkPorts);
+    StateMachineManager smManager(&tas, ports, networkPorts, ptpMasterClockPath);
     smManager.StartProcessing();
 
     std::vector<PortManager*> portManagers;
