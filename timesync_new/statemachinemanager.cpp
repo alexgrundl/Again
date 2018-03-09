@@ -18,7 +18,7 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
         m_portSyncSyncSends.push_back(new PortSyncSyncSend(timeAwareSystem, ports[i], m_mdSyncSendSM[i]));
     }
 
-    m_clockSlaveSync = new ClockSlaveSync(timeAwareSystem);
+    m_clockSlaveSync = new ClockSlaveSync(timeAwareSystem, ports);
     m_siteSyncSync = new SiteSyncSync(timeAwareSystem, m_clockSlaveSync, m_portSyncSyncSends);
     m_clockMasterSyncSend = new ClockMasterSyncSend(timeAwareSystem, m_siteSyncSync);
     m_clockMasterSyncReceive = new ClockMasterSyncReceive(m_timeAwareSystem);

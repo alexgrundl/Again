@@ -9,7 +9,7 @@ class ClockSlaveSync : public StateMachineBase
 {
 public:
 
-    ClockSlaveSync(TimeAwareSystem *timeAwareSystem);
+    ClockSlaveSync(TimeAwareSystem *timeAwareSystem, std::vector<PortGlobal*> ports);
 
 
     virtual ~ClockSlaveSync();
@@ -51,6 +51,9 @@ private:
      * @brief A pointer to the received PortSyncSync structure.
      */
     PortSyncSync* m_rcvdPSSyncPtr;
+
+
+    std::vector<PortGlobal*> m_ports;
 };
 
 #endif // CLOCKSLAVESYNC_H

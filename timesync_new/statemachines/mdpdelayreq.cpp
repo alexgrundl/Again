@@ -75,11 +75,11 @@ double MDPdelayReq::ComputePdelayRateRatio()
     currentResponderEventTimeCorrected.ns_frac = m_rcvdPdelayRespFollowUpPtr->GetCorrectionField();
     if(m_pdelayRespTime.ns > 0 && m_pdelayRespFollowUpCorrTime.ns > 0)
     {
-        m_portGlobal->neighborRateRatio = (currentResponderEventTimeCorrected - m_pdelayRespFollowUpCorrTime) /
+        pdelayRateRatio = (currentResponderEventTimeCorrected - m_pdelayRespFollowUpCorrTime) /
                 (m_rcvdPdelayRespPtr->GetReceiveTime() - m_pdelayRespTime);
         m_neighborRateRatioValid = true;
 
-        printf("neighborRateRatio port %i: %0.7f\n", m_portGlobal->identity.portNumber, m_portGlobal->neighborRateRatio);
+        printf("neighborRateRatio port %i: %0.7f\n", m_portGlobal->identity.portNumber, pdelayRateRatio);
     }
     else
         m_neighborRateRatioValid = false;

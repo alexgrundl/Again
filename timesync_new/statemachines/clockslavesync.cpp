@@ -1,11 +1,13 @@
 #include "clockslavesync.h"
 
-ClockSlaveSync::ClockSlaveSync(TimeAwareSystem* timeAwareSystem) :
+ClockSlaveSync::ClockSlaveSync(TimeAwareSystem* timeAwareSystem, std::vector<PortGlobal*> ports) :
     StateMachineBase(timeAwareSystem)
 {
     m_rcvdPSSync = false;
     m_rcvdLocalClockTick = false;
     m_rcvdPSSyncPtr = new PortSyncSync();
+
+    m_ports = ports;
 }
 
 ClockSlaveSync::~ClockSlaveSync()
@@ -57,12 +59,21 @@ void ClockSlaveSync::ProcessState()
         {
             if (m_rcvdPSSync)
             {
-                /* Why do we have to use neighborPropDelay and neighborRateRatio?? Thought this is an instance "per time-aware system"??
-                Now chose port 0 but there's something wrong, here... */
-        //                m_timeAwareSystem->syncReceiptTime = m_rcvdPSSyncPtr->preciseOriginTimestamp + m_rcvdPSSyncPtr->followUpCorrectionField +
-        //                m_ports[0].neighborPropDelay * (m_rcvdPSSyncPtr->rateRatio / m_ports[0].neighborRateRatio) + m_ports[0].delayAsymmetry;
-        //                m_timeAwareSystem->syncReceiptLocalTime = m_rcvdPSSyncPtr->upstreamTxTime + m_ports[0].neighborPropDelay /
-        //                        m_ports[0].neighborRateRatio + m_ports[0].delayAsymmetry / m_rcvdPSSyncPtr->rateRatio;
+                UScaledNs neighborPropDelay = {0, 0};
+                double neighborRateRatio = 0;
+                UScaledNs delayAsymmetry = {0, 0};
+
+                if(m_rcvdPSSyncPtr->localPortNumber > 0)
+                {
+                    neighborPropDelay = m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->neighborPropDelay;
+                    neighborRateRatio = m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->neighborRateRatio;
+                    delayAsymmetry = m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->delayAsymmetry;
+                }
+
+                /* Why do we have to use neighborPropDelay and neighborRateRatio?? Thought this is an instance "per time-aware system"?? */
+                m_timeAwareSystem->syncReceiptTime = m_rcvdPSSyncPtr->preciseOriginTimestamp + m_rcvdPSSyncPtr->followUpCorrectionField +
+                        neighborPropDelay * (m_rcvdPSSyncPtr->rateRatio / neighborRateRatio) + delayAsymmetry;
+                m_timeAwareSystem->syncReceiptLocalTime = m_rcvdPSSyncPtr->upstreamTxTime + neighborPropDelay / neighborRateRatio + delayAsymmetry / m_rcvdPSSyncPtr->rateRatio;
                 /* End why do ... */
 
                 m_timeAwareSystem->gmTimeBaseIndicator = m_rcvdPSSyncPtr->gmTimeBaseIndicator;
