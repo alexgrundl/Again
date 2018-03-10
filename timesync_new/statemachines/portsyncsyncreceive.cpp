@@ -66,7 +66,7 @@ void PortSyncSyncReceive::ProcessState()
             if(m_rcvdMDSync && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable
                     && (m_state == STATE_DISCARD ||
                         (memcmp(m_rcvdMDSyncPtr->sourcePortIdentity.clockIdentity, m_timeAwareSystem->gmPriority.sourcePortIdentity.clockIdentity,
-                                sizeof(m_rcvdMDSyncPtr->sourcePortIdentity.clockIdentity)) == 0 && m_rcvdMDSyncPtr->sourcePortIdentity.portNumber ==
+                                CLOCK_ID_LENGTH) == 0 && m_rcvdMDSyncPtr->sourcePortIdentity.portNumber ==
                          m_timeAwareSystem->gmPriority.sourcePortIdentity.portNumber)))
             {
                 m_rcvdMDSync = false;

@@ -15,7 +15,7 @@ void PortRoleSelection::UpdtRoleDisabledTree()
 {
     for (std::vector<PortRole>::size_type i = 0; i < m_ports.size(); ++i)
     {
-        m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_DISABLED;
+        m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_DISABLED);
 
         m_timeAwareSystem->lastGmPriority.identity.priority1 = 255;
         m_timeAwareSystem->lastGmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
@@ -29,7 +29,7 @@ void PortRoleSelection::UpdtRoleDisabledTree()
         m_timeAwareSystem->lastGmPriority.portNumber = UINT16_MAX;
 
         m_timeAwareSystem->ClearPathTrace();
-        m_timeAwareSystem->AddPath(m_timeAwareSystem->thisClock);
+        m_timeAwareSystem->AddPath(m_timeAwareSystem->GetClockIdentity());
     }
 }
 
@@ -65,7 +65,7 @@ void PortRoleSelection::UpdtRolesTree()
         PriorityVector gmPathPriortiy = port->portPriority;
         gmPathPriortiy.stepsRemoved++;
 
-        if(memcmp(gmPathPriortiy.sourcePortIdentity.clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock)) != 0 &&
+        if(memcmp(gmPathPriortiy.sourcePortIdentity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH) != 0 &&
                 bestGmPriority.Compare(gmPathPriortiy) == SystemIdentity::INFO_INFERIOR)
         {
             bestGmPriority = gmPathPriortiy;
@@ -100,7 +100,7 @@ void PortRoleSelection::UpdtRolesTree()
         port->masterPriority.identity = m_timeAwareSystem->gmPriority.identity;
         port->masterPriority.stepsRemoved = m_timeAwareSystem->gmPriority.stepsRemoved;
         memcpy(port->masterPriority.sourcePortIdentity.clockIdentity, m_timeAwareSystem->systemPriority.sourcePortIdentity.clockIdentity,
-               sizeof(m_timeAwareSystem->systemPriority.sourcePortIdentity.clockIdentity));
+               CLOCK_ID_LENGTH);
         port->masterPriority.sourcePortIdentity.portNumber = port->identity.portNumber;
     }
 
@@ -135,15 +135,15 @@ void PortRoleSelection::UpdtRolesTree()
      {
          PortGlobal* port = m_ports[i];
          if(port->infoIs == SPANNING_TREE_PORT_STATE_DISABLED)
-             m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_DISABLED;
+             m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_DISABLED);
          else if(port->infoIs == SPANNING_TREE_PORT_STATE_AGED)
          {
-             m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_MASTER;
+             m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_MASTER);
              port->updtInfo = true;
          }
          else if(port->infoIs == SPANNING_TREE_PORT_STATE_MINE)
          {
-             m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_MASTER;
+             m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_MASTER);
              if(port->portStepsRemoved != m_timeAwareSystem->masterStepsRemoved || bestPort == NULL || port != bestPort)
                  port->updtInfo = true;
          }
@@ -152,19 +152,19 @@ void PortRoleSelection::UpdtRolesTree()
          {
              if(port == bestPort)
              {
-                 m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_SLAVE;
+                 m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_SLAVE);
                  port->updtInfo = false;
 
                  portIsSlave = true;
              }
              else if(port->masterPriority.Compare(port->portPriority) != SystemIdentity::INFO_SUPERIOR)
              {
-                 m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_PASSIVE;
+                 m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_PASSIVE);
                  port->updtInfo = false;
              }
              else
              {
-                 m_timeAwareSystem->selectedRole[i + 1] = PORT_ROLE_MASTER;
+                 m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_MASTER);
                  port->updtInfo = true;
              }
          }
@@ -173,24 +173,24 @@ void PortRoleSelection::UpdtRolesTree()
      /** Updates gmPresent as follows:
       * 10) gmPresent is set to TRUE if the priority1 field of the rootSystemIdentity of the gmPriorityVector is less than 255.
       * 11) gmPresent is set to FALSE if the priority1 field of the rootSystemIdentity of the gmPriorityVector is equal to 255. */
-     m_timeAwareSystem->gmPresent = m_timeAwareSystem->systemPriority.identity.priority1 < 255;
+     m_timeAwareSystem->SetGmPresent(m_timeAwareSystem->systemPriority.identity.priority1 < 255);
 
      /** Assigns the port role for port 0, and sets selectedRole[0], as follows:
       * 12) if selectedRole[j] is set to SlavePort for any port with portNumber j, j = 1, 2, ..., numberPorts, selectedRole[0] is set to PassivePort.
       * 13) if selectedRole[j] is not set to SlavePort for any port with portNumber j, j = 1, 2, ..., numberPorts, selectedRole[0] is set to SlavePort. */
-    m_timeAwareSystem->selectedRole[0] = portIsSlave ? PORT_ROLE_PASSIVE : PORT_ROLE_SLAVE;
+    m_timeAwareSystem->SetSelectedRole(0, portIsSlave ? PORT_ROLE_PASSIVE : PORT_ROLE_SLAVE);
 
     /** If the clockIentity member of the systemIdentity (see 10.3.2) member of gmPriority (see 10.3.8.19) is equal to thisClock (see 10.2.3.22), i.e.,
      * if the current time-aware system is the grandmaster, the pathTrace array is set to contain the single element thisClock (see 10.2.3.22). */
     if(bestPort == NULL)
     {
         m_timeAwareSystem->ClearPathTrace();
-        m_timeAwareSystem->AddPath(m_timeAwareSystem->thisClock);
+        m_timeAwareSystem->AddPath(m_timeAwareSystem->GetClockIdentity());
     }
 
-    for (std::vector<PortRole>::size_type i = 0; i < m_timeAwareSystem->selectedRole.size(); ++i)
+    for (std::vector<PortRole>::size_type i = 0; i <= m_ports.size(); ++i)
     {
-        printf("Port role %lu, %i\n", i, m_timeAwareSystem->selectedRole[i]);
+        printf("Port role %lu, %i\n", i, m_timeAwareSystem->GetSelectedRole(i));
     }
 }
 

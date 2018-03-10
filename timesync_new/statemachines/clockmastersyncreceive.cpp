@@ -23,24 +23,24 @@ ClockMasterSyncReceive::~ClockMasterSyncReceive()
 void ClockMasterSyncReceive::ComputeGmRateRatio()
 {
     if(m_sourceTimeOld.ns > 0 && m_localTimeOld.ns > 0 &&
-            m_timeAwareSystem->localTime.ns != m_localTimeOld.ns)
+            m_timeAwareSystem->GetLocalTime().ns != m_localTimeOld.ns)
     {
-        m_timeAwareSystem->gmRateRatio = (m_rcvdClockSourceReqPtr->sourceTime - m_sourceTimeOld) /
-                (m_timeAwareSystem->localTime - m_localTimeOld);
+        m_timeAwareSystem->SetGmRateRatio((m_rcvdClockSourceReqPtr->sourceTime - m_sourceTimeOld) /
+                (m_timeAwareSystem->GetLocalTime() - m_localTimeOld));
     }
 
     m_sourceTimeOld = m_rcvdClockSourceReqPtr->sourceTime;
-    m_localTimeOld = m_timeAwareSystem->localTime;
+    m_localTimeOld = m_timeAwareSystem->GetLocalTime();
 }
 
 void ClockMasterSyncReceive::UpdateMasterTime()
 {
     if(m_rcvdClockSourceReq)
     {
-        m_timeAwareSystem->masterTime = m_rcvdClockSourceReqPtr->sourceTime;
+        m_timeAwareSystem->SetMasterTime(m_rcvdClockSourceReqPtr->sourceTime);
     }
     else if(m_rcvdLocalClockTick)
-        m_timeAwareSystem->masterTime += m_timeAwareSystem->localClockTickInterval / m_timeAwareSystem->gmRateRatio;
+        m_timeAwareSystem->IncreaseMasterTime(m_timeAwareSystem->GetLocalClockTickInterval() / m_timeAwareSystem->GetGmRateRatio());
 }
 
 void ClockMasterSyncReceive::ProcessState()
@@ -48,12 +48,9 @@ void ClockMasterSyncReceive::ProcessState()
     if(m_timeAwareSystem->BEGIN)
     {
         m_state = STATE_INITIALIZING;
-        m_timeAwareSystem->masterTime.sec = 0;
-        m_timeAwareSystem->masterTime.ns = 0;
-        m_timeAwareSystem->masterTime.ns_frac = 0;
-        m_timeAwareSystem->localTime.ns = 0;/*16 +*/
-        m_timeAwareSystem->localTime.ns_frac = 0;
-        m_timeAwareSystem->clockSourceTimeBaseIndicatorOld = 0;
+        m_timeAwareSystem->SetMasterTime({0, 0, 0});
+        m_timeAwareSystem->SetLocalTime({0, 0});
+        m_timeAwareSystem->SetClockSourceTimeBaseIndicatorOld(0);
         m_rcvdClockSourceReq = false;
         m_rcvdLocalClockTick = false;
     }
@@ -63,14 +60,14 @@ void ClockMasterSyncReceive::ProcessState()
         {
             m_state = STATE_RECEIVE_SOURCE_TIME;
             UpdateMasterTime();
-            m_timeAwareSystem->localTime = m_timeAwareSystem->GetCurrentTime();
+            m_timeAwareSystem->SetLocalTime(m_timeAwareSystem->GetCurrentTime());
             if (m_rcvdClockSourceReq)
             {
                 ComputeGmRateRatio();
-                m_timeAwareSystem->clockSourceTimeBaseIndicatorOld = m_timeAwareSystem->clockSourceTimeBaseIndicator;
-                m_timeAwareSystem->clockSourceTimeBaseIndicator = m_rcvdClockSourceReqPtr->timeBaseIndicator;
-                m_timeAwareSystem->clockSourceLastGmPhaseChange = m_rcvdClockSourceReqPtr->lastGmPhaseChange;
-                m_timeAwareSystem->clockSourceLastGmFreqChange = m_rcvdClockSourceReqPtr->lastGmFreqChange;
+                m_timeAwareSystem->SetClockSourceTimeBaseIndicatorOld(m_timeAwareSystem->GetClockSourceTimeBaseIndicator());
+                m_timeAwareSystem->SetClockSourceTimeBaseIndicator(m_rcvdClockSourceReqPtr->timeBaseIndicator);
+                m_timeAwareSystem->SetClockSourceLastGmPhaseChange(m_rcvdClockSourceReqPtr->lastGmPhaseChange);
+                m_timeAwareSystem->SetClockSourceLastGmFreqChange(m_rcvdClockSourceReqPtr->lastGmFreqChange);
             }
             m_rcvdClockSourceReq = false;
             m_rcvdLocalClockTick = false;

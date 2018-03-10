@@ -124,15 +124,12 @@ void PtpMessageBase::SetCorrectionField(int64_t value)
 
 PortIdentity PtpMessageBase::GetSourcePortIdentity()
 {
-//    memcpy(value->clockIdentity, m_sourcePortIdentity.clockIdentity, sizeof(m_sourcePortIdentity.clockIdentity));
-//    value->portNumber = m_sourcePortIdentity.portNumber;
-
     return m_sourcePortIdentity;
 }
 
 void PtpMessageBase::SetSourcePortIdentity(PortIdentity* value)
 {
-    memcpy(m_sourcePortIdentity.clockIdentity, value->clockIdentity, sizeof(value->clockIdentity));
+    memcpy(m_sourcePortIdentity.clockIdentity, value->clockIdentity, CLOCK_ID_LENGTH);
     m_sourcePortIdentity.portNumber = value->portNumber;
 }
 
@@ -197,6 +194,6 @@ void PtpMessageBase::GetClockIdentity(const uint8_t* portMac, uint8_t* clockIden
 
 bool PtpMessageBase::IsPortIdentityEqual(PortIdentity* identity1, PortIdentity* identity2)
 {
-    return memcmp(identity1->clockIdentity, identity2->clockIdentity, sizeof(identity2->clockIdentity)) == 0 &&
+    return memcmp(identity1->clockIdentity, identity2->clockIdentity, CLOCK_ID_LENGTH) == 0 &&
             identity1->portNumber == identity2->portNumber;
 }

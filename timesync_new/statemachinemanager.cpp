@@ -6,8 +6,7 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
     m_timeAwareSystem = timeAwareSystem;
     m_currentIndexClockUpdate = 0;
 
-    m_timeAwareSystem->localClockTickInterval.ns = (uint64_t)m_granularity_ms * 1000 * 1000;
-    m_timeAwareSystem->localClockTickInterval.ns_frac = 0;
+    m_timeAwareSystem->SetLocalClockTickInterval({(uint64_t)m_granularity_ms * 1000 * 1000, 0});
 
     clockMaster.Open(ptpMasterClockPath);
 
@@ -107,7 +106,7 @@ uint32_t StateMachineManager::Process(bool_t* pbIsRunning, pal::EventHandle_t pW
     InitialProcess();
     while(*pbIsRunning)
     {
-      dwWaitResult = pal::EventWait(pWaitHandle, m_timeAwareSystem->localClockTickInterval.ns / 1000000);
+      dwWaitResult = pal::EventWait(pWaitHandle, m_timeAwareSystem->GetLocalClockTickInterval().ns / 1000000);
       if(dwWaitResult == pal::EventWaitTimeout)
       {
           UpdateTimes();

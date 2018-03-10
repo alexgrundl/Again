@@ -31,16 +31,16 @@ void ClockMasterSyncOffset::ProcessState()
         {
             m_state = STATE_SEND_SYNC_INDICATION;
             m_rcvdSyncReceiptTime = false;
-            if(m_timeAwareSystem->selectedRole[0] == PORT_ROLE_PASSIVE)
+            if(m_timeAwareSystem->GetSelectedRole(0) == PORT_ROLE_PASSIVE)
             {
                 /* We chose masterTime. Standard says "sourceTime" but I think they meant "masterTime"??? */
-                m_timeAwareSystem->clockSourcePhaseOffset = m_timeAwareSystem->masterTime - m_timeAwareSystem->syncReceiptTime;
-                m_timeAwareSystem->clockSourceFreqOffset = ComputeClockSourceFreqOffset();
+                m_timeAwareSystem->SetClockSourcePhaseOffset(m_timeAwareSystem->GetMasterTime() - m_timeAwareSystem->GetSyncReceiptTime());
+                m_timeAwareSystem->SetClockSourceFreqOffset(ComputeClockSourceFreqOffset());
             }
-            else if (m_timeAwareSystem->clockSourceTimeBaseIndicator != m_timeAwareSystem->clockSourceTimeBaseIndicatorOld)
+            else if (m_timeAwareSystem->GetClockSourceTimeBaseIndicator() != m_timeAwareSystem->GetClockSourceTimeBaseIndicatorOld())
             {
-                m_timeAwareSystem->clockSourcePhaseOffset = m_timeAwareSystem->clockSourceLastGmPhaseChange;
-                m_timeAwareSystem->clockSourceFreqOffset = m_timeAwareSystem->clockSourceLastGmFreqChange;
+                m_timeAwareSystem->SetClockSourcePhaseOffset(m_timeAwareSystem->GetClockSourceLastGmPhaseChange());
+                m_timeAwareSystem->SetClockSourceFreqOffset(m_timeAwareSystem->GetClockSourceLastGmFreqChange());
             }
         }
     }

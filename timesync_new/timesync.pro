@@ -7,6 +7,7 @@ LIBS += -pthread
 
 INCLUDEPATH += c-extensions
 INCLUDEPATH += c-platform
+INCLUDEPATH += types
 
 SOURCES += main.cpp \
     statemachines/sitesyncsync.cpp \
@@ -40,10 +41,14 @@ SOURCES += main.cpp \
     statemachines/portroleselection.cpp \
     ptpmessage/ptpmessageannounce.cpp \
     statemachines/portannouncetransmit.cpp \
-    statemachines/mdportannouncetransmit.cpp
+    statemachines/mdportannouncetransmit.cpp \
+    types/scaledns.cpp \
+    types/timestamp.cpp \
+    types/uscaledns.cpp \
+    types/extendedtimestamp.cpp
 
 HEADERS += \
-    types.h \
+    types/types.h \
     statemachines/sitesyncsync.h \
     commstructs.h \
     statemachines/statemachinebase.h \
@@ -86,5 +91,9 @@ HEADERS += \
     statemachines/mdportannouncetransmit.h \
     c-extensions/autolock.h \
     c-extensions/locked_deque.h \
-    c-extensions/locked_map.h
+    c-extensions/locked_map.h \
+    types/scaledns.h \
+    types/timestamp.h \
+    types/uscaledns.h \
+    types/extendedtimestamp.h
 

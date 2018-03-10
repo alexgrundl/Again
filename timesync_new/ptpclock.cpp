@@ -21,6 +21,8 @@ bool PtpClock::Open(std::string clockPath)
 {
     m_clockPath = clockPath;
     m_clockFD = open(clockPath.c_str(), O_RDWR);
+
+    return m_clockFD != -1;
 }
 
 void PtpClock::Invoke(ClockSourceTimeParams* params)

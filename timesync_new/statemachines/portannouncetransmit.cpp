@@ -16,7 +16,7 @@ void PortAnnounceTransmit::TxAnnounce()
 {
     PortIdentity portIdentity;
 
-    memcpy(portIdentity.clockIdentity, m_timeAwareSystem->thisClock, 8);
+    memcpy(portIdentity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH);
     portIdentity.portNumber = m_portGlobal->identity.portNumber;
     m_txAnnounceMessage->SetSourcePortIdentity(&portIdentity);
 
@@ -71,10 +71,10 @@ void PortAnnounceTransmit::ProcessState()
             if(m_timeAwareSystem->GetCurrentTime() >= m_announceSendTime && m_timeAwareSystem->selected[m_portGlobal->identity.portNumber - 1] &&
                     !m_portGlobal->updtInfo)
             {
-                m_portGlobal->newInfo = m_portGlobal->newInfo || m_timeAwareSystem->selectedRole[m_portGlobal->identity.portNumber] == PORT_ROLE_MASTER;
+                m_portGlobal->newInfo = m_portGlobal->newInfo || m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER;
                 m_state = STATE_TRANSMIT_PERIODIC;
             }
-            else if(m_portGlobal->newInfo && (m_timeAwareSystem->selectedRole[m_portGlobal->identity.portNumber] == PORT_ROLE_MASTER) &&
+            else if(m_portGlobal->newInfo && (m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER) &&
                     (m_timeAwareSystem->GetCurrentTime() < m_announceSendTime) && m_timeAwareSystem->selected[m_portGlobal->identity.portNumber - 1]
                     && !m_portGlobal->updtInfo)
             {

@@ -160,10 +160,10 @@ void MDPdelayReq::ProcessState()
             break;
 
         case STATE_WAITING_FOR_PDELAY_RESP:
-            uint8_t portClockIdentity[8];
+            uint8_t portClockIdentity[CLOCK_ID_LENGTH];
             PtpMessageBase::GetClockIdentity(m_networkPort->GetMAC(), portClockIdentity);
             if(m_rcvdPdelayResp && (m_rcvdPdelayRespPtr->GetSequenceID() == m_txPdelayReqPtr->GetSequenceID())
-                    && memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, sizeof(portClockIdentity)) == 0 &&
+                    && memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, CLOCK_ID_LENGTH) == 0 &&
                     (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber == m_portGlobal->identity.portNumber))
             {
                 m_rcvdPdelayResp = false;
@@ -171,7 +171,7 @@ void MDPdelayReq::ProcessState()
             }
             else if((m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval) ||
                     (m_rcvdPdelayResp &&
-                    (memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, sizeof(portClockIdentity)) != 0 ||
+                    (memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, CLOCK_ID_LENGTH) != 0 ||
                     (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber != m_portGlobal->identity.portNumber) ||
                     (m_rcvdPdelayRespPtr->GetSequenceID() != m_txPdelayReqPtr->GetSequenceID()))))
             {
@@ -183,7 +183,7 @@ void MDPdelayReq::ProcessState()
         case STATE_WAITING_FOR_PDELAY_RESP_FOLLOW_UP:
             if(m_rcvdPdelayRespFollowUp && m_rcvdPdelayRespFollowUpPtr->GetSequenceID() == m_txPdelayReqPtr->GetSequenceID() &&
                     memcmp(m_rcvdPdelayRespFollowUpPtr->GetSourcePortIdentity().clockIdentity, m_rcvdPdelayRespPtr->GetSourcePortIdentity().clockIdentity,
-                           sizeof(m_rcvdPdelayRespPtr->GetSourcePortIdentity().clockIdentity)) == 0 &&
+                           CLOCK_ID_LENGTH) == 0 &&
                     m_rcvdPdelayRespFollowUpPtr->GetSourcePortIdentity().portNumber == m_rcvdPdelayRespPtr->GetSourcePortIdentity().portNumber)
             {
                 m_rcvdPdelayRespFollowUp = false;
@@ -194,7 +194,8 @@ void MDPdelayReq::ProcessState()
                 m_lostResponses = 0;
                 m_portGlobal->isMeasuringDelay = true;
                 if ((m_portGlobal->neighborPropDelay <= m_portGlobal->neighborPropDelayThresh) &&
-                (m_rcvdPdelayRespPtr->GetSourcePortIdentity().clockIdentity != m_timeAwareSystem->thisClock) && m_neighborRateRatioValid)
+                        memcmp(m_rcvdPdelayRespPtr->GetSourcePortIdentity().clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH) != 0
+                        && m_neighborRateRatioValid)
                     m_portGlobal->asCapable = true;
                 else
                     m_portGlobal->asCapable = false;

@@ -14,7 +14,7 @@ PortAnnounceReceive::~PortAnnounceReceive()
 
 bool PortAnnounceReceive::QualifyAnnounce(PtpMessageAnnounce* rcvdAnnouncePtr)
 {
-    if(memcmp(rcvdAnnouncePtr->GetSourcePortIdentity().clockIdentity, m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock)) == 0)
+    if(memcmp(rcvdAnnouncePtr->GetSourcePortIdentity().clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH) == 0)
         return false;
     else if(rcvdAnnouncePtr->GetStepsRemoved() >= 255)
         return false;
@@ -22,7 +22,7 @@ bool PortAnnounceReceive::QualifyAnnounce(PtpMessageAnnounce* rcvdAnnouncePtr)
     PtpMessageAnnounce::AnnounceTLV tlv = rcvdAnnouncePtr->GetTLV();
     for (std::vector<int>::size_type i = 0; i < tlv.pathSequence.size(); ++i)
     {
-        if(memcmp(tlv.pathSequence[i], m_timeAwareSystem->thisClock, sizeof(m_timeAwareSystem->thisClock)) == 0)
+        if(memcmp(tlv.pathSequence[i], m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH) == 0)
             return false;
     }
 
@@ -33,14 +33,14 @@ bool PortAnnounceReceive::QualifyAnnounce(PtpMessageAnnounce* rcvdAnnouncePtr)
     m_timeAwareSystem->ClearPathTrace();
     for (std::vector<uint8_t*>::size_type i = 0; i < tlv.pathSequence.size(); ++i)
     {
-        if(m_timeAwareSystem->selectedRole[m_portGlobal->identity.portNumber] == PORT_ROLE_SLAVE)
+        if(m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_SLAVE)
         {
             m_timeAwareSystem->AddPath(tlv.pathSequence[i]);
             pathSequenceCopied = true;
         }
     }
     if(pathSequenceCopied)
-        m_timeAwareSystem->AddPath(m_timeAwareSystem->thisClock);
+        m_timeAwareSystem->AddPath(m_timeAwareSystem->GetClockIdentity());
 
 
     return true;

@@ -14,7 +14,7 @@ MDPortAnnounceTransmit::~MDPortAnnounceTransmit()
 
 void MDPortAnnounceTransmit::SetAnnounce(PtpMessageAnnounce* announceMessage)
 {
-    uint8_t gmIdentity[8];
+    uint8_t gmIdentity[CLOCK_ID_LENGTH];
 
     m_txAnnounceMessage->SetCurrentUtcOffset(announceMessage->GetCurrentUtcOffset());
     m_txAnnounceMessage->SetGrandmasterPriority1(announceMessage->GetGrandmasterPriority1());

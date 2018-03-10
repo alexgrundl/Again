@@ -17,12 +17,12 @@ ClockSlaveSync::~ClockSlaveSync()
 
 void ClockSlaveSync::UpdateSlaveTime()
 {
-    if(m_timeAwareSystem->gmPresent)
+    if(m_timeAwareSystem->IsGmPresent())
     {
 
     }
     else
-        m_timeAwareSystem->clockSlaveTime = m_timeAwareSystem->localTime;
+        m_timeAwareSystem->SetClockSlaveTime(m_timeAwareSystem->GetLocalTime());
 }
 
 void ClockSlaveSync::InvokeApplicationInterfaceFunction (void* functionName)
@@ -71,14 +71,14 @@ void ClockSlaveSync::ProcessState()
                 }
 
                 /* Why do we have to use neighborPropDelay and neighborRateRatio?? Thought this is an instance "per time-aware system"?? */
-                m_timeAwareSystem->syncReceiptTime = m_rcvdPSSyncPtr->preciseOriginTimestamp + m_rcvdPSSyncPtr->followUpCorrectionField +
-                        neighborPropDelay * (m_rcvdPSSyncPtr->rateRatio / neighborRateRatio) + delayAsymmetry;
-                m_timeAwareSystem->syncReceiptLocalTime = m_rcvdPSSyncPtr->upstreamTxTime + neighborPropDelay / neighborRateRatio + delayAsymmetry / m_rcvdPSSyncPtr->rateRatio;
+                m_timeAwareSystem->SetSyncReceiptTime(m_rcvdPSSyncPtr->preciseOriginTimestamp + m_rcvdPSSyncPtr->followUpCorrectionField +
+                        neighborPropDelay * (m_rcvdPSSyncPtr->rateRatio / neighborRateRatio) + delayAsymmetry);
+                m_timeAwareSystem->SetSyncReceiptLocalTime(m_rcvdPSSyncPtr->upstreamTxTime + neighborPropDelay / neighborRateRatio + delayAsymmetry / m_rcvdPSSyncPtr->rateRatio);
                 /* End why do ... */
 
-                m_timeAwareSystem->gmTimeBaseIndicator = m_rcvdPSSyncPtr->gmTimeBaseIndicator;
-                m_timeAwareSystem->lastGmPhaseChange = m_rcvdPSSyncPtr->lastGmPhaseChange;
-                m_timeAwareSystem->lastGmFreqChange = m_rcvdPSSyncPtr->lastGmFreqChange;
+                m_timeAwareSystem->SetGmTimeBaseIndicator(m_rcvdPSSyncPtr->gmTimeBaseIndicator);
+                m_timeAwareSystem->SetLastGmPhaseChange(m_rcvdPSSyncPtr->lastGmPhaseChange);
+                m_timeAwareSystem->SetLastGmFreqChange(m_rcvdPSSyncPtr->lastGmFreqChange);
                 InvokeApplicationInterfaceFunction (NULL);//ClockTargetPhaseDiscontinuity.result);
             }
             if(m_rcvdLocalClockTick)

@@ -143,7 +143,7 @@ private:
      * @brief The value is the value of the clockIdentity component of the rootSystemIdentity of the gmPriorityVector (see 10.3.5) of the time-aware
      * system that transmits the Announce message.
      */
-    uint8_t m_grandmasterIdentity[8];
+    uint8_t m_grandmasterIdentity[CLOCK_ID_LENGTH];
 
     /**
      * @brief The value is the value of masterStepsRemoved (see 10.3.8.3) for the time-aware system that transmits the Announce message.

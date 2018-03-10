@@ -60,9 +60,9 @@ TimeAwareSystem::TimeAwareSystem()
     systemPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
     systemPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
     systemPriority.identity.priority2 = 255;
-    memset(systemPriority.identity.clockIdentity, 255, sizeof(systemPriority.identity.clockIdentity));
+    memset(systemPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
     systemPriority.stepsRemoved = 0;
-    memset(systemPriority.sourcePortIdentity.clockIdentity, 255, sizeof(systemPriority.sourcePortIdentity.clockIdentity));
+    memset(systemPriority.sourcePortIdentity.clockIdentity, 255, CLOCK_ID_LENGTH);
     systemPriority.sourcePortIdentity.portNumber = 0;
     systemPriority.portNumber = 0;
 
@@ -71,9 +71,9 @@ TimeAwareSystem::TimeAwareSystem()
     gmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
     gmPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
     gmPriority.identity.priority2 = 255;
-    memset(gmPriority.identity.clockIdentity, 255, sizeof(gmPriority.identity.clockIdentity));
+    memset(gmPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
     gmPriority.stepsRemoved = UINT16_MAX;
-    memset(gmPriority.sourcePortIdentity.clockIdentity, 255, sizeof(gmPriority.sourcePortIdentity.clockIdentity));
+    memset(gmPriority.sourcePortIdentity.clockIdentity, 255, CLOCK_ID_LENGTH);
     gmPriority.sourcePortIdentity.portNumber = UINT16_MAX;
     gmPriority.portNumber = UINT16_MAX;
 
@@ -82,9 +82,9 @@ TimeAwareSystem::TimeAwareSystem()
     lastGmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
     lastGmPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
     lastGmPriority.identity.priority2 = 255;
-    memset(lastGmPriority.identity.clockIdentity, 255, sizeof(lastGmPriority.identity.clockIdentity));
+    memset(lastGmPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
     lastGmPriority.stepsRemoved = UINT16_MAX;
-    memset(lastGmPriority.sourcePortIdentity.clockIdentity, 255, sizeof(lastGmPriority.sourcePortIdentity.clockIdentity));
+    memset(lastGmPriority.sourcePortIdentity.clockIdentity, 255, CLOCK_ID_LENGTH);
     lastGmPriority.sourcePortIdentity.portNumber = UINT16_MAX;
     lastGmPriority.portNumber = UINT16_MAX;
 
@@ -94,6 +94,96 @@ TimeAwareSystem::TimeAwareSystem()
 TimeAwareSystem::~TimeAwareSystem()
 {
     ClearPathTrace();
+}
+
+ExtendedTimestamp TimeAwareSystem::GetClockSlaveTime()
+{
+    return clockSlaveTime;
+}
+
+void TimeAwareSystem::SetClockSlaveTime(ExtendedTimestamp time)
+{
+    clockSlaveTime = time;
+}
+
+ExtendedTimestamp TimeAwareSystem::GetSyncReceiptTime()
+{
+    return syncReceiptTime;
+}
+
+void TimeAwareSystem::SetSyncReceiptTime(ExtendedTimestamp time)
+{
+    syncReceiptTime = time;
+}
+
+UScaledNs TimeAwareSystem::GetSyncReceiptLocalTime()
+{
+    return syncReceiptLocalTime;
+}
+
+void TimeAwareSystem::SetSyncReceiptLocalTime(UScaledNs time)
+{
+    syncReceiptLocalTime = time;
+}
+
+double TimeAwareSystem::GetClockSourceFreqOffset()
+{
+    return clockSourceFreqOffset;
+}
+
+void TimeAwareSystem::SetClockSourceFreqOffset(double offset)
+{
+    clockSourceFreqOffset = offset;
+}
+
+ScaledNs TimeAwareSystem::GetClockSourcePhaseOffset()
+{
+    return clockSourcePhaseOffset;
+}
+
+void TimeAwareSystem::SetClockSourcePhaseOffset(ScaledNs offset)
+{
+    clockSourcePhaseOffset = offset;
+}
+
+uint16_t TimeAwareSystem::GetClockSourceTimeBaseIndicator()
+{
+    return clockSourceTimeBaseIndicator;
+}
+
+void TimeAwareSystem::SetClockSourceTimeBaseIndicator(uint16_t indicator)
+{
+    clockSourceTimeBaseIndicator = indicator;
+}
+
+uint16_t TimeAwareSystem::GetClockSourceTimeBaseIndicatorOld()
+{
+    return clockSourceTimeBaseIndicatorOld;
+}
+
+void TimeAwareSystem::SetClockSourceTimeBaseIndicatorOld(uint16_t indicator)
+{
+    clockSourceTimeBaseIndicatorOld = indicator;
+}
+
+ScaledNs TimeAwareSystem::GetClockSourceLastGmPhaseChange()
+{
+    return clockSourceLastGmPhaseChange;
+}
+
+void TimeAwareSystem::SetClockSourceLastGmPhaseChange(ScaledNs value)
+{
+    clockSourceLastGmPhaseChange = value;
+}
+
+double TimeAwareSystem::GetClockSourceLastGmFreqChange()
+{
+    return clockSourceLastGmFreqChange;
+}
+
+void TimeAwareSystem::SetClockSourceLastGmFreqChange(double value)
+{
+    clockSourceLastGmFreqChange = value;
 }
 
 UScaledNs TimeAwareSystem::GetCurrentTime()
@@ -109,12 +199,133 @@ UScaledNs TimeAwareSystem::GetCurrentTime()
     return uscaled;
 }
 
-void TimeAwareSystem::AddPath(uint8_t* path)
+bool TimeAwareSystem::IsGmPresent()
 {
-    uint8_t* pathToAdd = new uint8_t[8];
-    memcpy(pathToAdd, path, 8);
+    return gmPresent;
+}
+
+void TimeAwareSystem::SetGmPresent(bool present)
+{
+    gmPresent = present;
+}
+
+double TimeAwareSystem::GetGmRateRatio()
+{
+    return gmRateRatio;
+}
+
+void TimeAwareSystem::SetGmRateRatio(double ratio)
+{
+    gmRateRatio = ratio;
+}
+
+uint16_t TimeAwareSystem::GetGmTimeBaseIndicator()
+{
+    return gmTimeBaseIndicator;
+}
+
+void TimeAwareSystem::SetGmTimeBaseIndicator(uint16_t indicator)
+{
+    gmTimeBaseIndicator = indicator;
+}
+
+ScaledNs TimeAwareSystem::GetLastGmPhaseChange()
+{
+    return lastGmPhaseChange;
+}
+
+void TimeAwareSystem::SetLastGmPhaseChange(ScaledNs value)
+{
+    lastGmPhaseChange = value;
+}
+
+double TimeAwareSystem::GetLastGmFreqChange()
+{
+    return lastGmFreqChange;
+}
+
+void TimeAwareSystem::SetLastGmFreqChange(double value)
+{
+    lastGmFreqChange = value;
+}
+
+TimeInterval TimeAwareSystem::GetLocalClockTickInterval()
+{
+    return localClockTickInterval;
+}
+
+void TimeAwareSystem::SetLocalClockTickInterval(TimeInterval interval)
+{
+    localClockTickInterval = interval;
+}
+
+UScaledNs TimeAwareSystem::GetLocalTime()
+{
+    return localTime;
+}
+
+void TimeAwareSystem::SetLocalTime(UScaledNs time)
+{
+    localTime = time;
+}
+
+void TimeAwareSystem::AddSelectedRole(PortRole role)
+{
+    selectedRole.push_back(role);
+}
+
+PortRole TimeAwareSystem::GetSelectedRole(int index)
+{
+    return (std::vector<PortRole>::size_type)index < selectedRole.size() ? selectedRole[index] : PORT_ROLE_DISABLED;
+}
+
+void TimeAwareSystem::SetSelectedRole(int index, PortRole role)
+{
+    if((std::vector<PortRole>::size_type)index < selectedRole.size())
+            selectedRole[index] = role;
+}
+
+ExtendedTimestamp TimeAwareSystem::GetMasterTime()
+{
+    return masterTime;
+}
+
+void TimeAwareSystem::SetMasterTime(ExtendedTimestamp time)
+{
+    masterTime = time;
+}
+
+void TimeAwareSystem::IncreaseMasterTime(TimeInterval interval)
+{
+    masterTime += interval;
+}
+
+const uint8_t* TimeAwareSystem::GetClockIdentity()
+{
+    return thisClock;
+}
+
+void TimeAwareSystem::SetClockIdentity(uint8_t* identity)
+{
+    memcpy(thisClock, identity, CLOCK_ID_LENGTH);
+}
+
+void TimeAwareSystem::AddPath(const uint8_t* path)
+{
+    uint8_t* pathToAdd = new uint8_t[CLOCK_ID_LENGTH];
+    memcpy(pathToAdd, path, CLOCK_ID_LENGTH);
 
     this->pathTrace.push_back(pathToAdd);
+}
+
+int8_t TimeAwareSystem::GetClockMasterLogSyncInterval()
+{
+    return clockMasterLogSyncInterval;
+}
+
+void TimeAwareSystem::SetClockMasterLogSyncInterval(int8_t interval)
+{
+    clockMasterLogSyncInterval = interval;
 }
 
 void TimeAwareSystem::ClearPathTrace()

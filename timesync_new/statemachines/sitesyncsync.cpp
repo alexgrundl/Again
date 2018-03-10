@@ -82,8 +82,8 @@ void SiteSyncSync::ProcessState()
     }
     else
     {
-        if(m_rcvdPSSync && m_timeAwareSystem->selectedRole[m_rcvdPSSyncPtr->localPortNumber] == PORT_ROLE_SLAVE
-                &&  m_timeAwareSystem->gmPresent)
+        if(m_rcvdPSSync && m_timeAwareSystem->GetSelectedRole(m_rcvdPSSyncPtr->localPortNumber) == PORT_ROLE_SLAVE
+                &&  m_timeAwareSystem->IsGmPresent())
         {
             m_rcvdPSSync = false;
             SetPSSyncSend(m_rcvdPSSyncPtr);

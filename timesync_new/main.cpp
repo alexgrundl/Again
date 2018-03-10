@@ -97,15 +97,17 @@ int main()
 
             ports.push_back(port);
 
-            tas.selectedRole.push_back(PORT_ROLE_SLAVE);
+            tas.AddSelectedRole(PORT_ROLE_SLAVE);
             tas.selected.push_back(false);
             tas.reselect.push_back(false);
 
             printf("Name: %s\n", next->ifa_name);
 
-            if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
+            if(strcmp(ifnameMasterClock, next->ifa_name) != 0)
             {
-                PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), tas.thisClock);
+                uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
+                PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
+                tas.SetClockIdentity(clockIdentityFromMAC);
                 ptpMasterClockPath += std::to_string(((NetworkPort*)networkPort)->GetPtpClockIndex());
             }
         }
