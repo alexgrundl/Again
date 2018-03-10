@@ -10,7 +10,7 @@
 #include "ptpclock.h"
 #include "ptpmessage/ptpmessagesync.h"
 #include "ptpmessage/ptpmessagefollowup.h"
-#include "c-extensions/ThreadWrapper.h"
+#include "ThreadWrapper.h"
 #include "statemachinemanager.h"
 #include "comm/linux_netport.h"
 #include "portmanager.h"
@@ -111,6 +111,7 @@ int main()
         }
         next = next->ifa_next;
     }
+    freeifaddrs(addrs);
 
 
     StateMachineManager smManager(&tas, ports, networkPorts, ptpMasterClockPath);

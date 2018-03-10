@@ -7,7 +7,7 @@
 #include "statemachinebase.h"
 #include "portsyncsyncsend.h"
 #include "clockslavesync.h"
-#include "../c-extensions/locked_deque.h"
+#include "locked_deque.h"
 
 class SiteSyncSync : public StateMachineBase
 {

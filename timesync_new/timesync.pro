@@ -5,6 +5,9 @@ CONFIG -= qt
 
 LIBS += -pthread
 
+INCLUDEPATH += c-extensions
+INCLUDEPATH += c-platform
+
 SOURCES += main.cpp \
     statemachines/sitesyncsync.cpp \
     statemachines/statemachinebase.cpp \

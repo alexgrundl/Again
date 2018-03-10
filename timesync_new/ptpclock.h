@@ -14,7 +14,9 @@
 #define FD_TO_CLOCKID(fd) ((~(clockid_t) (fd) << 3) | CLOCKFD)
 #define CLOCKID_TO_FD(clk) ((unsigned int) ~((clk) >> 3))
 
+#ifndef ADJ_SETOFFSET
 #define ADJ_SETOFFSET   0x100
+#endif
 #define ADJ_NANO        0x2000
 
 class PtpClock : public ClockSourceTime
