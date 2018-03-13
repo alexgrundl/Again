@@ -5,7 +5,7 @@
 #include <time.h>
 
 #include "types.h"
-#include "ptpmessage/ptpmessageannounce.h"
+#include "ptpmessageannounce.h"
 
 struct MDSyncSend
 {

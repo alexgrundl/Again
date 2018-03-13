@@ -3,16 +3,15 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <sys/ioctl.h>
-#include <net/if.h>
 #include <memory>
 #include <linux/wireless.h>
 
 #include "ptpclock.h"
-#include "ptpmessage/ptpmessagesync.h"
-#include "ptpmessage/ptpmessagefollowup.h"
+#include "ptpmessagesync.h"
+#include "ptpmessagefollowup.h"
 #include "ThreadWrapper.h"
 #include "statemachinemanager.h"
-#include "comm/linux_netport.h"
+#include "linux_netport.h"
 #include "portmanager.h"
 
 using namespace std;

@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "statemachinebase.h"
-#include "ptpmessage/ptpmessageannounce.h"
+#include "ptpmessageannounce.h"
 #include "portannounceinformation.h"
 
 class PortAnnounceReceive : public StateMachineBasePort

@@ -2,7 +2,7 @@
 #define PORTANNOUNCEINFORMATION_H
 
 #include "statemachinebase.h"
-#include "ptpmessage/ptpmessageannounce.h"
+#include "ptpmessageannounce.h"
 
 class PortAnnounceInformation : public StateMachineBasePort
 {

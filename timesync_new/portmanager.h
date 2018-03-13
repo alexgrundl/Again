@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "ThreadWrapper.h"
-#include "comm/linux_netport.h"
+#include "linux_netport.h"
 #include "statemachinemanager.h"
 
 class PortManager

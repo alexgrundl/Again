@@ -5,9 +5,9 @@
 #include <memory>
 
 #include "statemachinebase.h"
-#include "ptpmessage/ptpmessagepdelayreq.h"
-#include "ptpmessage/ptpmessagepdelayresp.h"
-#include "ptpmessage/ptpmessagepdelayrespfollowup.h"
+#include "ptpmessagepdelayreq.h"
+#include "ptpmessagepdelayresp.h"
+#include "ptpmessagepdelayrespfollowup.h"
 
 class MDPdelayReq : public StateMachineBaseMD
 {

@@ -3,8 +3,8 @@
 
 #include "statemachinebase.h"
 #include "portsyncsyncreceive.h"
-#include "ptpmessage/ptpmessagesync.h"
-#include "ptpmessage/ptpmessagefollowup.h"
+#include "ptpmessagesync.h"
+#include "ptpmessagefollowup.h"
 
 class MDSyncReceiveSM : public StateMachineBaseMD
 {

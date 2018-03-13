@@ -8,6 +8,9 @@ LIBS += -pthread
 INCLUDEPATH += c-extensions
 INCLUDEPATH += c-platform
 INCLUDEPATH += types
+INCLUDEPATH += statemachines
+INCLUDEPATH += ptpmessage
+INCLUDEPATH += comm
 
 SOURCES += main.cpp \
     statemachines/sitesyncsync.cpp \

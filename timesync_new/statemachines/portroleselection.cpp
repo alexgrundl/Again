@@ -190,8 +190,21 @@ void PortRoleSelection::UpdtRolesTree()
 
     for (std::vector<PortRole>::size_type i = 0; i <= m_ports.size(); ++i)
     {
-        printf("Port role %lu, %i\n", i, m_timeAwareSystem->GetSelectedRole(i));
+        PortRole portRole = m_timeAwareSystem->GetSelectedRole(i);
+        printf("Port role %lu, %s\n", i, GetStrPortRole(portRole));
     }
+}
+
+const char* PortRoleSelection::GetStrPortRole(PortRole role)
+{
+    if(role == PORT_ROLE_DISABLED)
+        return "Disabled";
+    else if(role == PORT_ROLE_MASTER)
+        return "Master";
+    else if(role == PORT_ROLE_PASSIVE)
+        return "Passive";
+    else
+        return "Slave";
 }
 
 void PortRoleSelection::ProcessState()

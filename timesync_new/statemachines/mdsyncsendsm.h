@@ -5,8 +5,8 @@
 #include <memory>
 
 #include "statemachinebase.h"
-#include "ptpmessage/ptpmessagesync.h"
-#include "ptpmessage/ptpmessagefollowup.h"
+#include "ptpmessagesync.h"
+#include "ptpmessagefollowup.h"
 
 class MDSyncSendSM : public StateMachineBaseMD
 {

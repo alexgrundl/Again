@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "statemachinebase.h"
-#include "ptpmessage/ptpmessageannounce.h"
+#include "ptpmessageannounce.h"
 
 class PortRoleSelection : public StateMachineBase
 {
@@ -43,6 +43,9 @@ public:
 private:
 
     std::vector<PortGlobal*> m_ports;
+
+
+    const char* GetStrPortRole(PortRole role);
 };
 
 #endif // PORTROLESELECTION_H
