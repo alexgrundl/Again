@@ -21,7 +21,7 @@ PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal*
     m_lastGmPhaseChange.ns = 0;
     m_lastGmPhaseChange.ns_frac = 0;
     m_lastGmFreqChange = 1.0;
-    m_txMDSyncSendPtr = std::unique_ptr<MDSyncSend>(new MDSyncSend());
+    m_txMDSyncSendPtr = new MDSyncSend();
     m_syncReceiptTimeoutTime.ns = 0;
     m_syncReceiptTimeoutTime.ns_frac = 0;
 
@@ -30,6 +30,7 @@ PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal*
 
 PortSyncSyncSend::~PortSyncSyncSend()
 {
+    delete m_txMDSyncSendPtr;
 }
 
 void PortSyncSyncSend::SetMDSync()
@@ -56,7 +57,7 @@ void PortSyncSyncSend::SetMDSync()
 
 void PortSyncSyncSend::TxMDSync()
 {
-    m_mdSyncSendSM->SetMDSyncSend(m_txMDSyncSendPtr.get());
+    m_mdSyncSendSM->SetMDSyncSend(m_txMDSyncSendPtr);
 }
 
 void PortSyncSyncSend::ProcessSync(PortSyncSync* rcvd)

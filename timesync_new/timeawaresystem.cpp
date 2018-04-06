@@ -89,11 +89,14 @@ TimeAwareSystem::TimeAwareSystem()
     lastGmPriority.portNumber = UINT16_MAX;
 
     selectedRole.push_back(PORT_ROLE_SLAVE);
+
+    clockLocal = NULL;
 }
 
 TimeAwareSystem::~TimeAwareSystem()
 {
     ClearPathTrace();
+    delete clockLocal;
 }
 
 ExtendedTimestamp TimeAwareSystem::GetClockSlaveTime()
@@ -191,7 +194,10 @@ UScaledNs TimeAwareSystem::GetCurrentTime()
     struct timespec ts;
     UScaledNs uscaled;
 
-    clock_gettime(CLOCK_MONOTONIC, &ts);
+    if(clockLocal != NULL)
+        clockLocal->GetTime(&ts);
+    else
+        clock_gettime(CLOCK_MONOTONIC, &ts);
 
     uscaled.ns = (uint64_t)ts.tv_sec * 1000000000 + ts.tv_nsec;
     uscaled.ns_frac = 0;
@@ -217,6 +223,7 @@ double TimeAwareSystem::GetGmRateRatio()
 void TimeAwareSystem::SetGmRateRatio(double ratio)
 {
     gmRateRatio = ratio;
+    printf("GMRateRatio: %f\n", gmRateRatio);
 }
 
 uint16_t TimeAwareSystem::GetGmTimeBaseIndicator()
@@ -340,4 +347,10 @@ void TimeAwareSystem::ClearPathTrace()
 std::vector<uint8_t*> TimeAwareSystem::GetPathTrace()
 {
     return pathTrace;
+}
+
+void TimeAwareSystem::InitLocalClock(std::string strClockPath)
+{
+    delete clockLocal;
+    clockLocal = new PtpClock(strClockPath);
 }

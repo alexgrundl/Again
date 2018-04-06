@@ -33,7 +33,7 @@ class StateMachineManager
 public:
 
     StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<PortGlobal*> ports,
-                        std::vector<INetworkInterfacePort*> networkPorts, std::string ptpMasterClockPath);
+                        std::vector<INetworkInterfacePort*> networkPorts);
 
 
     ~StateMachineManager();
@@ -117,16 +117,13 @@ private:
     std::vector<StateMachineBase*> m_stateMachines;
 
 
-    PtpClock clockMaster;
-
-
     uint32_t Process(bool_t *pbIsRunning, pal::EventHandle_t pWaitHandle);
 
 
     void InitialProcess();
 
 
-    void UpdateTimes();
+//    void UpdateTimes();
 };
 
 #endif // STATEMACHINEMANAGER_H

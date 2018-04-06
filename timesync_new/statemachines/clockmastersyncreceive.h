@@ -63,6 +63,9 @@ private:
      * is received, and can be incremented by localClockTickInterval divided by gmRateRatio when rcvdLocalClockTick is TRUE.
      */
     void UpdateMasterTime();
+
+
+    void GetClockSourceTime();
 };
 
 #endif // CLOCKMASTERSYNCRECEIVE_H

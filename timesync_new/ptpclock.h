@@ -29,7 +29,7 @@ public:
     PtpClock(std::string clockPath);
 
 
-    ~PtpClock();
+    virtual ~PtpClock();
 
 
     void Invoke(ClockSourceTimeParams* params);
@@ -42,6 +42,9 @@ public:
 
 
     bool Open(std::string clockPath);
+
+
+    void GetTime(struct timespec* ts);
 
 private:
 

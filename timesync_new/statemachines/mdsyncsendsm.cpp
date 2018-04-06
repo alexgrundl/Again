@@ -7,7 +7,7 @@ MDSyncSendSM::MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, I
     m_rcvdMDSyncPtr = new MDSyncSend();
     m_txSyncPtr = new PtpMessageSync();
     m_rcvdMDTimestampReceive = false;
-    m_rcvdMDTimestampReceivePtr = new MDTimestampReceive();
+//    m_rcvdMDTimestampReceivePtr = new MDTimestampReceive();
     m_txFollowUpPtr = new PtpMessageFollowUp();
 }
 
@@ -15,7 +15,7 @@ MDSyncSendSM::~MDSyncSendSM()
 {
     delete m_rcvdMDSyncPtr;
     delete m_txSyncPtr;
-    delete m_rcvdMDTimestampReceivePtr;
+//    delete m_rcvdMDTimestampReceivePtr;
     delete m_txFollowUpPtr;
 }
 
@@ -31,10 +31,10 @@ void MDSyncSendSM::SetFollowUp()
 {
     ScaledNs correctionScaled;
 
-    correctionScaled = m_rcvdMDSyncPtr->followUpCorrectionField + ((*m_rcvdMDTimestampReceivePtr) - m_rcvdMDSyncPtr->upstreamTxTime) * m_rcvdMDSyncPtr->rateRatio;
+    correctionScaled = m_rcvdMDSyncPtr->followUpCorrectionField + (m_txSyncPtr->GetSendTime() - m_rcvdMDSyncPtr->upstreamTxTime) * m_rcvdMDSyncPtr->rateRatio;
     m_txFollowUpPtr->SetCorrectionField(correctionScaled.ns);
     m_txFollowUpPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
-    m_txFollowUpPtr->SetSequenceID(m_portGlobal->syncSequenceId);
+    m_txFollowUpPtr->SetSequenceID(m_txSyncPtr->GetSequenceID());
     m_txFollowUpPtr->SetLogMessageInterval(m_rcvdMDSyncPtr->logMessageInterval);
     m_txFollowUpPtr->SetPreciseOriginTimestamp(m_rcvdMDSyncPtr->preciseOriginTimestamp);
 
@@ -47,12 +47,17 @@ void MDSyncSendSM::SetFollowUp()
 
 void MDSyncSendSM::TxFollowUp()
 {
-
+    m_networkPort->SendGenericMessage(m_txFollowUpPtr);
 }
 
 void MDSyncSendSM::TxSync()
 {
+    m_txSyncPtr->SetSendTime(m_networkPort->SendEventMessage(m_txSyncPtr));
 
+    if(m_txSyncPtr->GetSendTime().ns > 0)
+        printf("Sync SendTime Port %u: %lu\n", ((NetworkPort*)m_networkPort)->GetPtpClockIndex(), m_txSyncPtr->GetSendTime().ns);
+
+    m_rcvdMDTimestampReceive = true;
 }
 
 void MDSyncSendSM::SetMDSyncSend(MDSyncSend* rcvdMDSyncPtr)
@@ -67,13 +72,6 @@ void MDSyncSendSM::SetMDSyncSend(MDSyncSend* rcvdMDSyncPtr)
     m_rcvdMDSyncPtr->sourcePortIdentity = rcvdMDSyncPtr->sourcePortIdentity;
     m_rcvdMDSyncPtr->upstreamTxTime = rcvdMDSyncPtr->upstreamTxTime;
     m_rcvdMDSync = true;
-}
-
-void MDSyncSendSM::SetMDTimestampReceive(MDTimestampReceive* rcvdMDTimestampReceivePtr)
-{
-    m_rcvdMDTimestampReceivePtr->ns = rcvdMDTimestampReceivePtr->ns;
-    m_rcvdMDTimestampReceivePtr->ns_frac = rcvdMDTimestampReceivePtr->ns_frac;
-    m_rcvdMDTimestampReceive = true;
 }
 
 void MDSyncSendSM::ProcessState()

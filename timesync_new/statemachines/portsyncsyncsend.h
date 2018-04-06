@@ -88,7 +88,7 @@ private:
     /**
      * @brief  A pointer to the MDSyncSend structure sent to the MD entity of this port.
      */
-    std::unique_ptr<MDSyncSend> m_txMDSyncSendPtr;
+    MDSyncSend* m_txMDSyncSendPtr;
 
     /**
      * @brief The value of the syncReceiptTimeoutTime member of the most recently received PortSyncSync structure.

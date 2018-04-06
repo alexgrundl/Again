@@ -23,9 +23,6 @@ public:
 
     void SetMDSyncSend(MDSyncSend* rcvdMDSyncPtr);
 
-
-    void SetMDTimestampReceive(MDTimestampReceive* rcvdMDTimestampReceivePtr);
-
 private:
 
     /**
@@ -46,7 +43,7 @@ private:
     /**
      * @brief A pointer to the received MDTimestampReceive structure.
      */
-    MDTimestampReceive* m_rcvdMDTimestampReceivePtr;
+//    MDTimestampReceive* m_rcvdMDTimestampReceivePtr;
     /**
      * @brief A pointer to a structure whose members contain the values of the fields of a Follow_Up message to be transmitted.
      */

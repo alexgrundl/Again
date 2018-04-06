@@ -16,8 +16,8 @@ PtpMessageSync::~PtpMessageSync()
 void PtpMessageSync::GetMessage(uint8_t *bytes)
 {
     GetHeader(bytes);
-//    for(int i = 0; i < 20; i++)
-//        bytes[kMessageHeaderLength + i] = 0;
+    for(int i = 0; i < 10; i++)
+        bytes[kMessageHeaderLength + i] = 0;
 }
 
 void PtpMessageSync::ParsePackage(const uint8_t* bytes)

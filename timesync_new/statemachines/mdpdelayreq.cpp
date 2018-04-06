@@ -59,7 +59,7 @@ void MDPdelayReq::TxPdelayReq()
     m_txPdelayReqPtr->SetSendTime(m_networkPort->SendEventMessage(m_txPdelayReqPtr));
 
     if(m_txPdelayReqPtr->GetSendTime().ns > 0)
-        printf("SendTime Port %u: %lu\n", ((NetworkPort*)m_networkPort)->GetPtpClockIndex(), m_txPdelayReqPtr->GetSendTime().ns);
+        printf("PDelay SendTime Port %u: %lu\n", ((NetworkPort*)m_networkPort)->GetPtpClockIndex(), m_txPdelayReqPtr->GetSendTime().ns);
 
 //    if(txPdelayReqPtr->GetSendTime().ns > 0)
         m_rcvdMDTimestampReceive = true;

@@ -1,14 +1,12 @@
 #include "statemachinemanager.h"
 
 StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<PortGlobal*> ports,
-                                         std::vector<INetworkInterfacePort*> networkPorts, std::string ptpMasterClockPath)
+                                         std::vector<INetworkInterfacePort*> networkPorts)
 {
     m_timeAwareSystem = timeAwareSystem;
     m_currentIndexClockUpdate = 0;
 
     m_timeAwareSystem->SetLocalClockTickInterval({(uint64_t)m_granularity_ms * 1000 * 1000, 0});
-
-    clockMaster.Open(ptpMasterClockPath);
 
     for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
     {
@@ -109,7 +107,7 @@ uint32_t StateMachineManager::Process(bool_t* pbIsRunning, pal::EventHandle_t pW
       dwWaitResult = pal::EventWait(pWaitHandle, m_timeAwareSystem->GetLocalClockTickInterval().ns / 1000000);
       if(dwWaitResult == pal::EventWaitTimeout)
       {
-          UpdateTimes();
+//          UpdateTimes();
 
           for (std::vector<StateMachineBase*>::size_type i = 0; i < m_stateMachines.size(); ++i)
           {
@@ -166,16 +164,16 @@ void StateMachineManager::ProcessPackage(int portIndex, IReceivePackage* package
     }
 }
 
-void StateMachineManager::UpdateTimes()
-{
-    m_currentIndexClockUpdate++;
-    if(m_currentIndexClockUpdate == m_clockSourceTimeUpdate)
-    {
-        m_currentIndexClockUpdate = 0;
+//void StateMachineManager::UpdateTimes()
+//{
+//    m_currentIndexClockUpdate++;
+//    if(m_currentIndexClockUpdate == m_clockSourceTimeUpdate)
+//    {
+//        m_currentIndexClockUpdate = 0;
 
-        clockMaster.Invoke(&clockSourceParams);
-        m_clockMasterSyncReceive->SetClockSourceRequest(&clockSourceParams);
-    }
-    else
-        m_clockMasterSyncReceive->SignalLocalClockUpdate();
-}
+//        clockMaster.Invoke(&clockSourceParams);
+//        m_clockMasterSyncReceive->SetClockSourceRequest(&clockSourceParams);
+//    }
+////    else
+////        m_clockMasterSyncReceive->SignalLocalClockUpdate();
+//}

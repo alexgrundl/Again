@@ -74,7 +74,7 @@ void SiteSyncSync::SetSync(PortSyncSync* rcvd)
 
 void SiteSyncSync::ProcessState()
 {
-    //pal::LockedRegionEnter(m_lock);
+    pal::LockedRegionEnter(m_lock);
     if(m_timeAwareSystem->BEGIN)
     {
         m_state = STATE_INITIALIZING;
@@ -92,5 +92,5 @@ void SiteSyncSync::ProcessState()
             m_state = STATE_RECEIVING_SYNC;
         }
     }
-    //pal::LockedRegionLeave(m_lock);
+    pal::LockedRegionLeave(m_lock);
 }

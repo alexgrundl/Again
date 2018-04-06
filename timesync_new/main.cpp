@@ -59,6 +59,8 @@ int main()
         if (next->ifa_addr && next->ifa_addr->sa_family == AF_PACKET &&
                 (next->ifa_flags & IFF_LOOPBACK) == 0 && !check_wireless(next->ifa_name, NULL))
         {
+            if(strcmp(next->ifa_name, "enp3s0f1") == 0 || strcmp(next->ifa_name, "enp3s0f1") == 0)
+            {
             INetworkInterfacePort* networkPort = new NetworkPort(next->ifa_name);
             networkPort->Initialize();
             networkPorts.push_back(networkPort);
@@ -102,12 +104,14 @@ int main()
 
             printf("Name: %s\n", next->ifa_name);
 
-            if(strcmp(ifnameMasterClock, next->ifa_name) != 0)
+            if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
             {
                 uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
                 PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
-                tas.SetClockIdentity(clockIdentityFromMAC);
                 ptpMasterClockPath += std::to_string(((NetworkPort*)networkPort)->GetPtpClockIndex());
+                tas.SetClockIdentity(clockIdentityFromMAC);
+                tas.InitLocalClock(ptpMasterClockPath);
+            }
             }
         }
         next = next->ifa_next;
@@ -115,7 +119,7 @@ int main()
     freeifaddrs(addrs);
 
 
-    StateMachineManager smManager(&tas, ports, networkPorts, ptpMasterClockPath);
+    StateMachineManager smManager(&tas, ports, networkPorts);
     smManager.StartProcessing();
 
     std::vector<PortManager*> portManagers;

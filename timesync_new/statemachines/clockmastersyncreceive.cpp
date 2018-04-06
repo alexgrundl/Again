@@ -28,6 +28,7 @@ void ClockMasterSyncReceive::ComputeGmRateRatio()
         m_timeAwareSystem->SetGmRateRatio((m_rcvdClockSourceReqPtr->sourceTime - m_sourceTimeOld) /
                 (m_timeAwareSystem->GetLocalTime() - m_localTimeOld));
     }
+    printf("GMRateRatio: %f\n", m_timeAwareSystem->GetGmRateRatio());
 
     m_sourceTimeOld = m_rcvdClockSourceReqPtr->sourceTime;
     m_localTimeOld = m_timeAwareSystem->GetLocalTime();

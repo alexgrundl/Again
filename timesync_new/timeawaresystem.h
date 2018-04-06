@@ -302,6 +302,9 @@ public:
 
     /** End announce. */
 
+
+    void InitLocalClock(std::string strClockPath);
+
 private:
 
     /**
@@ -420,6 +423,9 @@ private:
      * NOTE—N is equal to stepsRemoved+1 (see 10.5.3.2.6). The size of the pathTrace array can change after each reception of an Announce message.
      */
     std::vector<uint8_t*> pathTrace;
+
+
+    PtpClock* clockLocal;
 };
 
 #endif // TIMEAWARESYSTEM_H

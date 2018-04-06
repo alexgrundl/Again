@@ -29,7 +29,7 @@ void PtpClock::Invoke(ClockSourceTimeParams* params)
 {
     struct timespec ts;
 
-    clock_gettime(FD_TO_CLOCKID(m_clockFD), &ts);
+    GetTime(&ts);
 //    printf("sec: %lu; nsec: %lu\n", ts.tv_sec, ts.tv_nsec);
 //    AdjustPhase(-2 * NS_PER_SEC);
 //    clock_gettime(FD_TO_CLOCKID(m_clockFD), &ts);
@@ -42,6 +42,11 @@ void PtpClock::Invoke(ClockSourceTimeParams* params)
     params->lastGmFreqChange = 1.0;
     params->lastGmPhaseChange.ns = 0;
     params->lastGmPhaseChange.ns_frac = 0;
+}
+
+void PtpClock::GetTime(struct timespec* ts)
+{
+    clock_gettime(FD_TO_CLOCKID(m_clockFD), ts);
 }
 
 void PtpClock::AdjustPhase(int64_t nanoseconds)
