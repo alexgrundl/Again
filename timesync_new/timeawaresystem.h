@@ -305,6 +305,9 @@ public:
 
     void InitLocalClock(std::string strClockPath);
 
+
+    PtpClock* GetLocalClock();
+
 private:
 
     /**

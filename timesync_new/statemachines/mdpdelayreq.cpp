@@ -57,12 +57,7 @@ void MDPdelayReq::SetPdelayReq()
 void MDPdelayReq::TxPdelayReq()
 {
     m_txPdelayReqPtr->SetSendTime(m_networkPort->SendEventMessage(m_txPdelayReqPtr));
-
-    if(m_txPdelayReqPtr->GetSendTime().ns > 0)
-        printf("PDelay SendTime Port %u: %lu\n", ((NetworkPort*)m_networkPort)->GetPtpClockIndex(), m_txPdelayReqPtr->GetSendTime().ns);
-
-//    if(txPdelayReqPtr->GetSendTime().ns > 0)
-        m_rcvdMDTimestampReceive = true;
+    m_rcvdMDTimestampReceive = true;
 }
 
 double MDPdelayReq::ComputePdelayRateRatio()
@@ -79,7 +74,7 @@ double MDPdelayReq::ComputePdelayRateRatio()
                 (m_rcvdPdelayRespPtr->GetReceiveTime() - m_pdelayRespTime);
         m_neighborRateRatioValid = true;
 
-        printf("neighborRateRatio port %i: %0.7f\n", m_portGlobal->identity.portNumber, pdelayRateRatio);
+        printf("neighborRateRatio port %i: %0.9f\n", m_portGlobal->identity.portNumber, pdelayRateRatio);
     }
     else
         m_neighborRateRatioValid = false;

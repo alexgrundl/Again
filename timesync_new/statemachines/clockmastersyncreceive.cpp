@@ -28,7 +28,7 @@ void ClockMasterSyncReceive::ComputeGmRateRatio()
         m_timeAwareSystem->SetGmRateRatio((m_rcvdClockSourceReqPtr->sourceTime - m_sourceTimeOld) /
                 (m_timeAwareSystem->GetLocalTime() - m_localTimeOld));
     }
-    printf("GMRateRatio: %f\n", m_timeAwareSystem->GetGmRateRatio());
+    //printf("GMRateRatio: %f\n", m_timeAwareSystem->GetGmRateRatio());
 
     m_sourceTimeOld = m_rcvdClockSourceReqPtr->sourceTime;
     m_localTimeOld = m_timeAwareSystem->GetLocalTime();
@@ -44,6 +44,7 @@ void ClockMasterSyncReceive::UpdateMasterTime()
         m_timeAwareSystem->IncreaseMasterTime(m_timeAwareSystem->GetLocalClockTickInterval() / m_timeAwareSystem->GetGmRateRatio());
 }
 
+int i = 0;
 void ClockMasterSyncReceive::ProcessState()
 {
     if(m_timeAwareSystem->BEGIN)
@@ -57,11 +58,18 @@ void ClockMasterSyncReceive::ProcessState()
     }
     else
     {
+        /* Should be invoked elsewhere. Just for testing... */
+        ClockSourceTimeParams params;
+        m_timeAwareSystem->GetLocalClock()->Invoke(&params);
+        SetClockSourceRequest(&params);
+
         if(m_rcvdClockSourceReq || m_rcvdLocalClockTick)
         {
             m_state = STATE_RECEIVE_SOURCE_TIME;
             UpdateMasterTime();
-            m_timeAwareSystem->SetLocalTime(m_timeAwareSystem->GetCurrentTime());
+            //For now as we work with the local clock as master. With GPS, e.g., you'd have to set
+            //master time to GPS time and local time to the NIC time corresponding to this GPS time.
+            m_timeAwareSystem->SetLocalTime((UScaledNs)m_rcvdClockSourceReqPtr->sourceTime);//m_timeAwareSystem->GetCurrentTime());
             if (m_rcvdClockSourceReq)
             {
                 ComputeGmRateRatio();

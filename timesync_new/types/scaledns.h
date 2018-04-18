@@ -19,6 +19,8 @@ struct ScaledNs
 
     ScaledNs operator+(const ScaledNs& scaled) const;
 
+    ScaledNs operator-(const ScaledNs& scaled) const;
+
     ScaledNs operator+=(ScaledNs scaled);
 
     ScaledNs operator/(double d) const;

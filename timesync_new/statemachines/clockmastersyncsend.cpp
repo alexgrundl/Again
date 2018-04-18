@@ -18,16 +18,24 @@ ClockMasterSyncSend::~ClockMasterSyncSend()
 void ClockMasterSyncSend::SetPSSyncCMSS(double gmRateRatio)
 {
     ExtendedTimestamp masterTime = m_timeAwareSystem->GetMasterTime();
+    UScaledNs localTime = m_timeAwareSystem->GetLocalTime();
 
     m_txPSSyncPtr->localPortNumber = 0;
     m_txPSSyncPtr->preciseOriginTimestamp.sec = masterTime.sec;
     m_txPSSyncPtr->preciseOriginTimestamp.ns = masterTime.ns;
-    m_txPSSyncPtr->followUpCorrectionField = (ScaledNs)(m_timeAwareSystem->GetCurrentTime() - m_timeAwareSystem->GetLocalTime()) * m_timeAwareSystem->GetGmRateRatio();
-    m_txPSSyncPtr->followUpCorrectionField.ns_frac += masterTime.ns_frac;
+
+    /* We remove this for now as this seems wrong. "masterTime" and "localTime" have the resolution given through the calls
+     * to "ClockMasterSyncReceive.SetClockSourceRequest()". Current time is free running. So, when sending the follow up message,
+     * we calculate the correction field wrongly, then!
+     */
+//    m_txPSSyncPtr->followUpCorrectionField = (ScaledNs)(m_timeAwareSystem->GetCurrentTime() - localTime) * m_timeAwareSystem->GetGmRateRatio();
+//    m_txPSSyncPtr->followUpCorrectionField.ns_frac += masterTime.ns_frac;
+
+    m_txPSSyncPtr->followUpCorrectionField = {0, 0};
     memcpy(m_txPSSyncPtr->sourcePortIdentity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH);
     m_txPSSyncPtr->sourcePortIdentity.portNumber = 0;
     m_txPSSyncPtr->logMessageInterval = m_timeAwareSystem->GetClockMasterLogSyncInterval();
-    m_txPSSyncPtr->upstreamTxTime = m_timeAwareSystem->GetLocalTime();
+    m_txPSSyncPtr->upstreamTxTime = localTime;
     m_txPSSyncPtr->syncReceiptTimeoutTime.ns = 0xFFFFFFFFFFFF;
     m_txPSSyncPtr->syncReceiptTimeoutTime.ns_frac = 0xFFFF;
     m_txPSSyncPtr->rateRatio = gmRateRatio;

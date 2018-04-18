@@ -59,7 +59,7 @@ int main()
         if (next->ifa_addr && next->ifa_addr->sa_family == AF_PACKET &&
                 (next->ifa_flags & IFF_LOOPBACK) == 0 && !check_wireless(next->ifa_name, NULL))
         {
-            if(strcmp(next->ifa_name, "enp3s0f1") == 0 || strcmp(next->ifa_name, "enp3s0f1") == 0)
+            if(strcmp(next->ifa_name, "enp15s0") == 0)
             {
             INetworkInterfacePort* networkPort = new NetworkPort(next->ifa_name);
             networkPort->Initialize();

@@ -48,7 +48,8 @@ SOURCES += main.cpp \
     types/scaledns.cpp \
     types/timestamp.cpp \
     types/uscaledns.cpp \
-    types/extendedtimestamp.cpp
+    types/extendedtimestamp.cpp \
+    statemachines/timecontrol.cpp
 
 HEADERS += \
     types/types.h \
@@ -98,5 +99,6 @@ HEADERS += \
     types/scaledns.h \
     types/timestamp.h \
     types/uscaledns.h \
-    types/extendedtimestamp.h
+    types/extendedtimestamp.h \
+    statemachines/timecontrol.h
 

@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "statemachinebase.h"
+#include "timecontrol.h"
 
 class ClockSlaveSync : public StateMachineBase
 {
@@ -54,6 +55,15 @@ private:
 
 
     std::vector<PortGlobal*> m_ports;
+
+
+    TimeControl m_timeControl;
+
+
+    ExtendedTimestamp m_lastSyncReceiptTime;
+
+
+    UScaledNs m_lastSyncReceiptLocalTime;
 };
 
 #endif // CLOCKSLAVESYNC_H

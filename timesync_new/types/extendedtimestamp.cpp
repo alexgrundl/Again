@@ -69,8 +69,16 @@ double ExtendedTimestamp::operator/(const UScaledNs uscaled) const
 ExtendedTimestamp::operator ScaledNs() const
 {
     ScaledNs scaled;
-    scaled.ns = sec * 1000000000 + ns;
+    scaled.ns = sec * NS_PER_SEC + ns;
     scaled.ns_frac = ns_frac;
     return scaled;
+}
+
+ExtendedTimestamp::operator UScaledNs() const
+{
+    UScaledNs uscaled;
+    uscaled.ns = sec * NS_PER_SEC + ns;
+    uscaled.ns_frac = ns_frac;
+    return uscaled;
 }
 

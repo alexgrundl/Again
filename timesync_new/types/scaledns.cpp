@@ -27,6 +27,18 @@ ScaledNs ScaledNs::operator+(const ScaledNs& scaled) const
     return scaled_new;
 }
 
+ScaledNs ScaledNs::operator-(const ScaledNs& scaled) const
+{
+    ScaledNs scaled_new = *this;
+
+    scaled_new.ns -= scaled.ns;
+    uint16_t ns_frac_new = ns_frac - scaled.ns_frac;
+    if(ns_frac < ns_frac_new)
+        scaled_new.ns--;
+    scaled_new.ns_frac = ns_frac_new;
+    return scaled_new;
+}
+
 ScaledNs ScaledNs::operator+=(ScaledNs scaled)
 {
     ns += scaled.ns;

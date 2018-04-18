@@ -8,6 +8,9 @@ ClockSlaveSync::ClockSlaveSync(TimeAwareSystem* timeAwareSystem, std::vector<Por
     m_rcvdPSSyncPtr = new PortSyncSync();
 
     m_ports = ports;
+    m_lastSyncReceiptTime = {0, 0, 0};
+    m_lastSyncReceiptLocalTime = {0, 0};
+    m_timeControl.SetPtpClock(m_timeAwareSystem->GetLocalClock());
 }
 
 ClockSlaveSync::~ClockSlaveSync()
@@ -80,6 +83,17 @@ void ClockSlaveSync::ProcessState()
                 m_timeAwareSystem->SetLastGmPhaseChange(m_rcvdPSSyncPtr->lastGmPhaseChange);
                 m_timeAwareSystem->SetLastGmFreqChange(m_rcvdPSSyncPtr->lastGmFreqChange);
                 InvokeApplicationInterfaceFunction (NULL);//ClockTargetPhaseDiscontinuity.result);
+
+                if(m_rcvdPSSyncPtr->localPortNumber != 0)
+                {
+                    ScaledNs remoteLocalDelta = m_timeAwareSystem->GetSyncReceiptTime() - m_timeAwareSystem->GetSyncReceiptLocalTime();
+                    double remoteLocalRate = m_lastSyncReceiptLocalTime.ns > 0 && (m_timeAwareSystem->GetSyncReceiptLocalTime() - m_lastSyncReceiptLocalTime).ns > 0 ?
+                                (m_timeAwareSystem->GetSyncReceiptTime() - m_lastSyncReceiptTime) / (m_timeAwareSystem->GetSyncReceiptLocalTime() - m_lastSyncReceiptLocalTime) : 1.0;
+                    m_timeControl.Syntonize(remoteLocalDelta, remoteLocalRate);
+                    m_lastSyncReceiptTime = m_timeAwareSystem->GetSyncReceiptTime();
+                    m_lastSyncReceiptLocalTime = m_timeAwareSystem->GetSyncReceiptLocalTime();
+                    printf("Diff Port %u: %li\n", m_rcvdPSSyncPtr->localPortNumber, remoteLocalDelta.ns);
+                }
             }
             if(m_rcvdLocalClockTick)
                 UpdateSlaveTime();

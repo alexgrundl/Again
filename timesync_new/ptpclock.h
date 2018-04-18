@@ -7,6 +7,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <linux/ptp_clock.h>
+#include <sys/ioctl.h>
+#include <string.h>
 
 #include "interfaces.h"
 
@@ -45,6 +48,18 @@ public:
 
 
     void GetTime(struct timespec* ts);
+
+
+    bool StartPPS(int pinIndex, int channel, struct ptp_clock_time* period);
+
+
+    bool StartPPS();
+
+
+    bool StopPPS(int pinIndex, int channel);
+
+
+    bool StopPPS();
 
 private:
 

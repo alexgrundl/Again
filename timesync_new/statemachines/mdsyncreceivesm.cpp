@@ -28,15 +28,15 @@ void MDSyncReceiveSM::SetMDSyncReceive()
 {
     PtpMessageFollowUp::FollowUpTLV tlv;
 
-    m_txMDSyncReceivePtr->followUpCorrectionField.ns = m_rcvdFollowUpPtr->GetCorrectionField();
-    m_txMDSyncReceivePtr->followUpCorrectionField.ns_frac = 0;
+    m_txMDSyncReceivePtr->followUpCorrectionField.ns = m_rcvdFollowUpPtr->GetCorrectionField() >> 16;
+    m_txMDSyncReceivePtr->followUpCorrectionField.ns_frac = m_rcvdFollowUpPtr->GetCorrectionField() & 0xFFFF;
     m_txMDSyncReceivePtr->sourcePortIdentity = m_rcvdSyncPtr->GetSourcePortIdentity();
     m_txMDSyncReceivePtr->logMessageInterval = m_rcvdSyncPtr->GetLogMessageInterval();
     m_txMDSyncReceivePtr->preciseOriginTimestamp = m_rcvdFollowUpPtr->GetPreciseOriginTimestamp();
     m_rcvdFollowUpPtr->GetFollowUpTLV(&tlv);
     m_txMDSyncReceivePtr->rateRatio = tlv.cumulativeScaledRateOffset * pow(2, -41) + 1.0;
 
-    m_txMDSyncReceivePtr->upstreamTxTime = (m_rcvdSyncPtr->GetReceiveTime() - m_portGlobal->neighborPropDelay) / m_portGlobal->neighborRateRatio;
+    m_txMDSyncReceivePtr->upstreamTxTime = m_rcvdSyncPtr->GetReceiveTime() - (m_portGlobal->neighborPropDelay / m_portGlobal->neighborRateRatio);
     /** upstreamTxTime is set equal to the <syncEventIngressTimestamp> for the most recently received
     Sync message, minus the mean propagation time on the link attached to this port
     (neighborPropDelay, see 10.2.4.7) divided by neighborRateRatio (see 10.2.4.6), minus

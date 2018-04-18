@@ -56,8 +56,9 @@ Timestamp Timestamp::operator*=(double d)
 Timestamp::operator ExtendedTimestamp() const
 {
     ExtendedTimestamp timestamp;
-    timestamp.sec = ns / NS_PER_SEC;
-    timestamp.ns = ns % NS_PER_SEC;
+    timestamp.sec = sec;
+    timestamp.ns = ns;
+    timestamp.ns_frac = 0;
 
     return timestamp;
 }

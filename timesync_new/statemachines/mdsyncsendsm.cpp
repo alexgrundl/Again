@@ -31,8 +31,10 @@ void MDSyncSendSM::SetFollowUp()
 {
     ScaledNs correctionScaled;
 
+    printf("m_rcvdMDSyncPtr->followUpCorrectionField: %lu\n", m_rcvdMDSyncPtr->followUpCorrectionField.ns);
     correctionScaled = m_rcvdMDSyncPtr->followUpCorrectionField + (m_txSyncPtr->GetSendTime() - m_rcvdMDSyncPtr->upstreamTxTime) * m_rcvdMDSyncPtr->rateRatio;
-    m_txFollowUpPtr->SetCorrectionField(correctionScaled.ns);
+
+    m_txFollowUpPtr->SetCorrectionField((correctionScaled.ns << 16) + correctionScaled.ns_frac);
     m_txFollowUpPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
     m_txFollowUpPtr->SetSequenceID(m_txSyncPtr->GetSequenceID());
     m_txFollowUpPtr->SetLogMessageInterval(m_rcvdMDSyncPtr->logMessageInterval);

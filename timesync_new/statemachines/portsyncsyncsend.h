@@ -32,7 +32,7 @@ private:
     /**
      * @brief A pointer to the received PortSyncSync structure indicated by rcvdPSSync.
      */
-    std::unique_ptr<PortSyncSync> m_rcvdPSSyncPtr;
+    PortSyncSync* m_rcvdPSSyncPtr;
 
     /**
      * @brief The sourcePortIdentity member of the most recently received PortSyncSync structure.

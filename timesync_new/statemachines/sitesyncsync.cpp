@@ -44,7 +44,7 @@ void SiteSyncSync::SetPSSyncSend (PortSyncSync* rcvdPSSyncIndPtr)
 
 void SiteSyncSync::TxPSSync()
 {
-    for (std::deque<PortSyncSync*>::size_type i = 0; i < m_txPSSyncPtrs.size(); ++i)
+    while(m_txPSSyncPtrs.size() > 0)
     {
         PortSyncSync* txPSSyncPtr;
         m_txPSSyncPtrs.pop_front(txPSSyncPtr);

@@ -4,7 +4,7 @@ PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal*
     StateMachineBasePort(timeAwareSystem, port)
 {
     m_rcvdPSSync = false;
-    m_rcvdPSSyncPtr = std::unique_ptr<PortSyncSync>(new PortSyncSync());
+    m_rcvdPSSyncPtr = new PortSyncSync();
     memset(m_lastSourcePortIdentity.clockIdentity, 0, sizeof(m_lastSourcePortIdentity.clockIdentity));
     m_lastSourcePortIdentity.portNumber = 0;
     m_lastPreciseOriginTimestamp.sec = 0;
@@ -26,11 +26,15 @@ PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal*
     m_syncReceiptTimeoutTime.ns_frac = 0;
 
     m_mdSyncSendSM = mdSyncSendSM;
+
+    //Remove when "LinkDelaySyncIntervalSetting" and "initiallogsyncinterval" are implemented..
+    m_portGlobal->syncInterval = {125 * 1000 * 1000, 0};
 }
 
 PortSyncSyncSend::~PortSyncSyncSend()
 {
     delete m_txMDSyncSendPtr;
+    delete m_rcvdPSSyncPtr;
 }
 
 void PortSyncSyncSend::SetMDSync()
@@ -142,6 +146,7 @@ void PortSyncSyncSend::ExecuteSendMDSyncState()
         m_lastGmTimeBaseIndicator = m_rcvdPSSyncPtr->gmTimeBaseIndicator;
         m_lastGmPhaseChange = m_rcvdPSSyncPtr->lastGmPhaseChange;
         m_lastGmFreqChange = m_rcvdPSSyncPtr->lastGmFreqChange;
+        m_lastSourcePortIdentity = m_rcvdPSSyncPtr->sourcePortIdentity;
     }
     m_rcvdPSSync = false;
     m_lastSyncSentTime = m_timeAwareSystem->GetCurrentTime();

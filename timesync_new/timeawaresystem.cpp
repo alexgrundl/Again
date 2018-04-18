@@ -96,6 +96,8 @@ TimeAwareSystem::TimeAwareSystem()
 TimeAwareSystem::~TimeAwareSystem()
 {
     ClearPathTrace();
+
+    clockLocal->StopPPS();
     delete clockLocal;
 }
 
@@ -223,7 +225,6 @@ double TimeAwareSystem::GetGmRateRatio()
 void TimeAwareSystem::SetGmRateRatio(double ratio)
 {
     gmRateRatio = ratio;
-    printf("GMRateRatio: %f\n", gmRateRatio);
 }
 
 uint16_t TimeAwareSystem::GetGmTimeBaseIndicator()
@@ -353,4 +354,11 @@ void TimeAwareSystem::InitLocalClock(std::string strClockPath)
 {
     delete clockLocal;
     clockLocal = new PtpClock(strClockPath);
+    clockLocal->StopPPS();
+    clockLocal->StartPPS();
+}
+
+PtpClock* TimeAwareSystem::GetLocalClock()
+{
+    return clockLocal;
 }

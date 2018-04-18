@@ -24,6 +24,8 @@ struct ExtendedTimestamp
     double operator/(const UScaledNs uscaled) const;
 
     operator ScaledNs() const;
+
+    operator UScaledNs() const;
 };
 
 #endif // EXTENDEDTIMESTAMP_H
