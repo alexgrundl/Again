@@ -17,6 +17,8 @@ PtpMessageAnnounce::PtpMessageAnnounce()
 
     m_tlv.tlvType = TLV_TYPE_PATH_TRACE;
     m_tlv.lengthField = 0;
+
+    m_control = 5;
 }
 
 PtpMessageAnnounce::~PtpMessageAnnounce()
@@ -181,21 +183,21 @@ void PtpMessageAnnounce::GetMessage(uint8_t *bytes)
 {
     GetHeader(bytes);
 
-    bytes[kMessageHeaderLength + 10] = m_currentUtcOffset << 8;
+    bytes[kMessageHeaderLength + 10] = m_currentUtcOffset >> 8;
     bytes[kMessageHeaderLength + 11] = m_currentUtcOffset;
     bytes[kMessageHeaderLength + 13] = m_grandmasterPriority1;
     bytes[kMessageHeaderLength + 14] = m_grandmasterClockQuality.clockClass;
     bytes[kMessageHeaderLength + 15] = m_grandmasterClockQuality.clockAccuracy;
-    bytes[kMessageHeaderLength + 16] = m_grandmasterClockQuality.offsetScaledLogVariance << 8;
+    bytes[kMessageHeaderLength + 16] = m_grandmasterClockQuality.offsetScaledLogVariance >> 8;
     bytes[kMessageHeaderLength + 17] = m_grandmasterClockQuality.offsetScaledLogVariance;
     bytes[kMessageHeaderLength + 18] = m_grandmasterPriority2;
     memcpy(bytes + kMessageHeaderLength + 19, m_grandmasterIdentity, CLOCK_ID_LENGTH);
-    bytes[kMessageHeaderLength + 27] = m_stepsRemoved << 8;
+    bytes[kMessageHeaderLength + 27] = m_stepsRemoved >> 8;
     bytes[kMessageHeaderLength + 28] = m_stepsRemoved;
     bytes[kMessageHeaderLength + 29] = m_timeSource;
-    bytes[kMessageHeaderLength + 30] = m_tlv.tlvType << 8;
+    bytes[kMessageHeaderLength + 30] = m_tlv.tlvType >> 8;
     bytes[kMessageHeaderLength + 31] = m_tlv.tlvType;
-    bytes[kMessageHeaderLength + 32] = m_tlv.lengthField << 8;
+    bytes[kMessageHeaderLength + 32] = m_tlv.lengthField >> 8;
     bytes[kMessageHeaderLength + 33] = m_tlv.lengthField;
     for (std::vector<uint8_t*>::size_type i = 0; i < m_tlv.pathSequence.size(); ++i)
     {

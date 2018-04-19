@@ -40,7 +40,6 @@ void PortAnnounceTransmit::TxAnnounce()
     m_txAnnounceMessage->SetSequenceID(m_sequenceID);
 
     m_txAnnounceMessage->SetPathSequence(m_timeAwareSystem->GetPathTrace());
-    printf("Path trace size: %lu\n", m_timeAwareSystem->GetPathTrace().size());
 
     m_mdPortAnnounceTransmit->SetAnnounce(m_txAnnounceMessage);
 }

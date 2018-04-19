@@ -36,12 +36,12 @@ private:
     /**
      * @brief A pointer to the received PortSyncSync structure indicated by rcvdPSSync.
      */
-    PortSyncSync* m_rcvdPSSyncPtr;
+    btool::locked_deque<PortSyncSync*> m_rcvdPSSyncPtrs;
 
     /**
      * @brief List of pointers to be transmitted to the ClockSlaveSync and PortSyncSync structures.
      */
-    btool::locked_deque<PortSyncSync*> m_txPSSyncPtrs;
+    PortSyncSync* m_txPSSyncPtr;
 
 
     ClockSlaveSync* m_clockSlaveSync;

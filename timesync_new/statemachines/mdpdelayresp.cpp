@@ -23,7 +23,7 @@ void MDPdelayResp::SetPdelayResp()
     Timestamp receiveTime;
 
     identity.portNumber = m_portGlobal->identity.portNumber;
-    memset(identity.clockIdentity, 0, sizeof(identity.clockIdentity));
+    memcpy(identity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), sizeof(identity.clockIdentity));
 
     m_txPdelayRespPtr->SetSourcePortIdentity(&identity);
     m_txPdelayRespPtr->SetSequenceID(m_rcvdPdelayReqPtr->GetSequenceID());
@@ -49,7 +49,7 @@ void MDPdelayResp::SetPdelayRespFollowUp()
     Timestamp sendTime;
 
     identity.portNumber = m_portGlobal->identity.portNumber;
-    memset(identity.clockIdentity, 0, sizeof(identity.clockIdentity));
+    memcpy(identity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), sizeof(identity.clockIdentity));
 
     m_txPdelayRespFollowUpPtr->SetSourcePortIdentity(&identity);
     m_txPdelayRespFollowUpPtr->SetSequenceID(m_rcvdPdelayReqPtr->GetSequenceID());

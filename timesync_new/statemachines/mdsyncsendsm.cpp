@@ -31,7 +31,7 @@ void MDSyncSendSM::SetFollowUp()
 {
     ScaledNs correctionScaled;
 
-    printf("m_rcvdMDSyncPtr->followUpCorrectionField: %lu\n", m_rcvdMDSyncPtr->followUpCorrectionField.ns);
+    //printf("m_rcvdMDSyncPtr->followUpCorrectionField: %lu\n", m_rcvdMDSyncPtr->followUpCorrectionField.ns);
     correctionScaled = m_rcvdMDSyncPtr->followUpCorrectionField + (m_txSyncPtr->GetSendTime() - m_rcvdMDSyncPtr->upstreamTxTime) * m_rcvdMDSyncPtr->rateRatio;
 
     m_txFollowUpPtr->SetCorrectionField((correctionScaled.ns << 16) + correctionScaled.ns_frac);
@@ -56,8 +56,8 @@ void MDSyncSendSM::TxSync()
 {
     m_txSyncPtr->SetSendTime(m_networkPort->SendEventMessage(m_txSyncPtr));
 
-    if(m_txSyncPtr->GetSendTime().ns > 0)
-        printf("Sync SendTime Port %u: %lu\n", ((NetworkPort*)m_networkPort)->GetPtpClockIndex(), m_txSyncPtr->GetSendTime().ns);
+//    if(m_txSyncPtr->GetSendTime().ns > 0)
+//        printf("Sync SendTime Port %u: %lu\n", ((NetworkPort*)m_networkPort)->GetPtpClockIndex(), m_txSyncPtr->GetSendTime().ns);
 
     m_rcvdMDTimestampReceive = true;
 }

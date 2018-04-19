@@ -74,7 +74,7 @@ double MDPdelayReq::ComputePdelayRateRatio()
                 (m_rcvdPdelayRespPtr->GetReceiveTime() - m_pdelayRespTime);
         m_neighborRateRatioValid = true;
 
-        printf("neighborRateRatio port %i: %0.9f\n", m_portGlobal->identity.portNumber, pdelayRateRatio);
+        //printf("neighborRateRatio port %i: %0.9f\n", m_portGlobal->identity.portNumber, pdelayRateRatio);
     }
     else
         m_neighborRateRatioValid = false;
@@ -113,7 +113,7 @@ UScaledNs MDPdelayReq::ComputePropTime()
     propTime.ns = tsPropTime.sec * NS_PER_SEC + tsPropTime.ns;
     propTime.ns_frac = 0;
 
-    printf("PropTime port %i: %lu\n", m_portGlobal->identity.portNumber, propTime.ns);
+    //printf("PropTime port %i: %lu\n", m_portGlobal->identity.portNumber, propTime.ns);
 
     return propTime;
 }

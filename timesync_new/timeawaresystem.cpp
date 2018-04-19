@@ -316,6 +316,7 @@ const uint8_t* TimeAwareSystem::GetClockIdentity()
 void TimeAwareSystem::SetClockIdentity(uint8_t* identity)
 {
     memcpy(thisClock, identity, CLOCK_ID_LENGTH);
+    memcpy(systemPriority.identity.clockIdentity, identity, CLOCK_ID_LENGTH);
 }
 
 void TimeAwareSystem::AddPath(const uint8_t* path)

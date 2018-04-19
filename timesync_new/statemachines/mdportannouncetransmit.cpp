@@ -15,6 +15,13 @@ MDPortAnnounceTransmit::~MDPortAnnounceTransmit()
 void MDPortAnnounceTransmit::SetAnnounce(PtpMessageAnnounce* announceMessage)
 {
     uint8_t gmIdentity[CLOCK_ID_LENGTH];
+    PortIdentity sourcePortIdentity = announceMessage->GetSourcePortIdentity();
+
+    m_txAnnounceMessage->SetDomainNumber(announceMessage->GetDomainNumber());
+    m_txAnnounceMessage->SetCorrectionField(announceMessage->GetCorrectionField());
+    m_txAnnounceMessage->SetSourcePortIdentity(&sourcePortIdentity);
+    m_txAnnounceMessage->SetSequenceID(announceMessage->GetSequenceID());
+    m_txAnnounceMessage->SetLogMessageInterval(announceMessage->GetLogMessageInterval());
 
     m_txAnnounceMessage->SetCurrentUtcOffset(announceMessage->GetCurrentUtcOffset());
     m_txAnnounceMessage->SetGrandmasterPriority1(announceMessage->GetGrandmasterPriority1());
