@@ -4,13 +4,14 @@
 #include <memory>
 
 #include "statemachinebase.h"
+#include "clockmastersyncoffset.h"
 #include "timecontrol.h"
 
 class ClockSlaveSync : public StateMachineBase
 {
 public:
 
-    ClockSlaveSync(TimeAwareSystem *timeAwareSystem, std::vector<PortGlobal*> ports);
+    ClockSlaveSync(TimeAwareSystem *timeAwareSystem, std::vector<PortGlobal*> ports, ClockMasterSyncOffset* clockMasterSyncOffset);
 
 
     virtual ~ClockSlaveSync();
@@ -55,6 +56,9 @@ private:
 
 
     std::vector<PortGlobal*> m_ports;
+
+
+    ClockMasterSyncOffset* m_clockMasterSyncOffset;
 
 
     TimeControl m_timeControl;

@@ -5,6 +5,7 @@
 #include <sys/ioctl.h>
 #include <memory>
 #include <linux/wireless.h>
+#include <signal.h>
 
 #include "ptpclock.h"
 #include "ptpmessagesync.h"
@@ -17,6 +18,30 @@
 using namespace std;
 
 const char* ifnameMasterClock = "enp15s0";
+
+void wait_for_signals()
+{
+    sigset_t set;
+    int sig;
+    sigemptyset(&set);
+    sigaddset(&set, SIGINT);
+
+    if (pthread_sigmask(SIG_BLOCK, &set, NULL) != 0)
+    {
+        perror("pthread_sigmask()");
+        return;
+    }
+
+    do {
+        sig = 0;
+
+        if (sigwait(&set, &sig) != 0) {
+            perror("sigwait()");
+            return;
+        }
+
+    } while (sig != SIGINT);
+}
 
 bool check_wireless(const char* ifname, char* protocol)
 {
@@ -45,7 +70,6 @@ bool check_wireless(const char* ifname, char* protocol)
 
 int main()
 {
-    std::string ptpMasterClockPath = "/dev/ptp";
     TimeAwareSystem tas;
     std::vector<INetworkInterfacePort*> networkPorts;
     std::vector<PortGlobal*> ports;
@@ -108,9 +132,8 @@ int main()
             {
                 uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
                 PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
-                ptpMasterClockPath += std::to_string(((NetworkPort*)networkPort)->GetPtpClockIndex());
                 tas.SetClockIdentity(clockIdentityFromMAC);
-                tas.InitLocalClock(ptpMasterClockPath);
+                tas.InitLocalClock(((NetworkPort*)networkPort)->GetPtpClockIndex());
             }
             }
         }
@@ -129,10 +152,7 @@ int main()
             portManagers[i]->StartReceiving();
     }
 
-    while(true)
-    {
-        usleep(1000 * 10);
-    }
+    wait_for_signals();
 
     return 0;
 }

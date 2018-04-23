@@ -2,12 +2,8 @@
 
 PtpClock::PtpClock()
 {
+    ptpClockRootPath = "/dev/ptp";
     m_clockFD = -1;
-}
-
-PtpClock::PtpClock(std::string clockPath)
-{
-    Open(clockPath);
 }
 
 PtpClock::~PtpClock()
@@ -17,10 +13,10 @@ PtpClock::~PtpClock()
 }
 
 
-bool PtpClock::Open(std::string clockPath)
+bool PtpClock::Open(int clockIndex)
 {
-    m_clockPath = clockPath;
-    m_clockFD = open(clockPath.c_str(), O_RDWR);
+    m_clockPath = ptpClockRootPath + std::to_string(clockIndex);
+    m_clockFD = open(m_clockPath.c_str(), O_RDWR);
 
     return m_clockFD != -1;
 }
@@ -68,6 +64,50 @@ void PtpClock::AdjustFrequency(double ppm)
     tx.freq += long(fmodf(ppm, 1.0) * 65536.0);
 
     clock_adjtime(FD_TO_CLOCKID(m_clockFD), &tx);
+}
+
+bool PtpClock::GetSystemAndDeviceTime(struct timespec* tsSystem, struct timespec* tsDevice)
+{
+    struct ptp_clock_time *firstTime;
+    struct ptp_clock_time *systemTime = NULL, *deviceTime = NULL;
+    int64_t interval = LLONG_MAX;
+    struct ptp_sys_offset offset;
+
+    memset( &offset, 0, sizeof(offset));
+    offset.n_samples = PTP_MAX_SAMPLES;
+
+    if( ioctl( m_clockFD, PTP_SYS_OFFSET, &offset ) == -1 )
+        return false;
+
+    firstTime = &offset.ts[0];
+    for(uint32_t i = 0; i < offset.n_samples; ++i )
+    {
+        int64_t intervalTemp;
+        ptp_clock_time* systemTime1 = firstTime+2*i;
+        ptp_clock_time* deviceTimeTemp = firstTime+2*i+1;
+        ptp_clock_time* systemTime2 = firstTime+2*i+2;
+
+        intervalTemp = abs(systemTime2->sec * NS_PER_SEC + systemTime2->nsec - systemTime1->sec * NS_PER_SEC - systemTime1->nsec);
+        if( intervalTemp < interval )
+        {
+            systemTime = systemTime1;
+            deviceTime = deviceTimeTemp;
+            interval = intervalTemp;
+        }
+    }
+
+    if (deviceTime)
+    {
+        tsDevice->tv_sec = deviceTime->sec;
+        tsDevice->tv_nsec = deviceTime->nsec;
+    }
+    if (systemTime)
+    {
+        tsSystem->tv_sec = systemTime->sec;
+        tsSystem->tv_nsec = systemTime->nsec;
+    }
+
+    return true;
 }
 
 bool PtpClock::StartPPS(int pinIndex, int channel, struct ptp_clock_time* period)

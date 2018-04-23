@@ -17,11 +17,11 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
         m_portSyncSyncSends.push_back(new PortSyncSyncSend(timeAwareSystem, ports[i], m_mdSyncSendSM[i]));
     }
 
-    m_clockSlaveSync = new ClockSlaveSync(timeAwareSystem, ports);
-    m_siteSyncSync = new SiteSyncSync(timeAwareSystem, m_clockSlaveSync, m_portSyncSyncSends);
-    m_clockMasterSyncSend = new ClockMasterSyncSend(timeAwareSystem, m_siteSyncSync);
     m_clockMasterSyncReceive = new ClockMasterSyncReceive(m_timeAwareSystem);
     m_clockMasterSyncOffset = new ClockMasterSyncOffset(m_timeAwareSystem);
+    m_clockSlaveSync = new ClockSlaveSync(timeAwareSystem, ports, m_clockMasterSyncOffset);
+    m_siteSyncSync = new SiteSyncSync(timeAwareSystem, m_clockSlaveSync, m_portSyncSyncSends);
+    m_clockMasterSyncSend = new ClockMasterSyncSend(timeAwareSystem, m_siteSyncSync);
 
     for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
     {
@@ -35,6 +35,8 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
         m_portAnnounceReceive.push_back(new PortAnnounceReceive(timeAwareSystem, ports[i], m_portAnnounceInformation[i]));
         m_mdPortAnnounceTransmit.push_back(new MDPortAnnounceTransmit(m_timeAwareSystem, ports[i], networkPorts[i]));
         m_portAnnounceTransmit.push_back(new PortAnnounceTransmit(m_timeAwareSystem, ports[i], m_mdPortAnnounceTransmit[i]));
+
+        m_portIPC.push_back(new PortIPC(m_timeAwareSystem, ports[i], networkPorts[i]));
     }
     m_portRoleSelection = new PortRoleSelection(m_timeAwareSystem, ports);
 
@@ -58,6 +60,8 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
         m_stateMachines.push_back(m_portAnnounceReceive[i]);
         m_stateMachines.push_back(m_mdPortAnnounceTransmit[i]);
         m_stateMachines.push_back(m_portAnnounceTransmit[i]);
+
+        m_stateMachines.push_back(m_portIPC[i]);
     }
     m_stateMachines.push_back(m_portRoleSelection);
 
@@ -82,6 +86,8 @@ StateMachineManager::~StateMachineManager()
         delete m_portAnnounceReceive[i];
         delete m_mdPortAnnounceTransmit[i];
         delete m_portAnnounceTransmit[i];
+
+        delete m_portIPC[i];
     }
 
     delete m_clockSlaveSync;

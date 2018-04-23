@@ -25,6 +25,7 @@
 #include "portannounceinformation.h"
 #include "portroleselection.h"
 #include "portannouncetransmit.h"
+#include "portipc.h"
 
 #include "ptpclock.h"
 
@@ -108,6 +109,9 @@ private:
 
 
     std::vector<MDPortAnnounceTransmit*> m_mdPortAnnounceTransmit;
+
+
+    std::vector<PortIPC*> m_portIPC;
 
 
 

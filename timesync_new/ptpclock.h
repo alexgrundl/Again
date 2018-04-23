@@ -10,6 +10,7 @@
 #include <linux/ptp_clock.h>
 #include <sys/ioctl.h>
 #include <string.h>
+#include <limits.h>
 
 #include "interfaces.h"
 
@@ -29,9 +30,6 @@ public:
     PtpClock();
 
 
-    PtpClock(std::string clockPath);
-
-
     virtual ~PtpClock();
 
 
@@ -44,10 +42,13 @@ public:
     void AdjustFrequency(double ppm);
 
 
-    bool Open(std::string clockPath);
+    bool Open(int clockIndex);
 
 
     void GetTime(struct timespec* ts);
+
+
+    bool GetSystemAndDeviceTime(struct timespec* tsSystem, struct timespec* tsDevice);
 
 
     bool StartPPS(int pinIndex, int channel, struct ptp_clock_time* period);
@@ -62,6 +63,9 @@ public:
     bool StopPPS();
 
 private:
+
+    std::string ptpClockRootPath;
+
 
     std::string m_clockPath;
 

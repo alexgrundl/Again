@@ -7,6 +7,7 @@
 #include <ptpclock.h>
 
 #include "types.h"
+#include "linuxsharedmemoryipc.h"
 
 class TimeAwareSystem
 {
@@ -303,7 +304,7 @@ public:
     /** End announce. */
 
 
-    void InitLocalClock(std::string strClockPath);
+    void InitLocalClock(int clockIndex);
 
 
     PtpClock* GetLocalClock();

@@ -3,7 +3,7 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-LIBS += -pthread
+LIBS += -pthread -lrt
 
 INCLUDEPATH += c-extensions
 INCLUDEPATH += c-platform
@@ -11,6 +11,7 @@ INCLUDEPATH += types
 INCLUDEPATH += statemachines
 INCLUDEPATH += ptpmessage
 INCLUDEPATH += comm
+INCLUDEPATH += ipc
 
 SOURCES += main.cpp \
     statemachines/sitesyncsync.cpp \
@@ -49,7 +50,9 @@ SOURCES += main.cpp \
     types/timestamp.cpp \
     types/uscaledns.cpp \
     types/extendedtimestamp.cpp \
-    statemachines/timecontrol.cpp
+    statemachines/timecontrol.cpp \
+    ipc/linuxsharedmemoryipc.cpp \
+    statemachines/portipc.cpp
 
 HEADERS += \
     types/types.h \
@@ -100,5 +103,11 @@ HEADERS += \
     types/timestamp.h \
     types/uscaledns.h \
     types/extendedtimestamp.h \
-    statemachines/timecontrol.h
+    statemachines/timecontrol.h \
+    ipc/ipcdef.hpp \
+    ipc/ptptypes.hpp \
+    ipc/avbts_osipc.hpp \
+    ipc/linuxipcarg.h \
+    ipc/linuxsharedmemoryipc.h \
+    statemachines/portipc.h
 

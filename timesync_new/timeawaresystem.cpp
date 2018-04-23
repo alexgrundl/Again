@@ -351,10 +351,11 @@ std::vector<uint8_t*> TimeAwareSystem::GetPathTrace()
     return pathTrace;
 }
 
-void TimeAwareSystem::InitLocalClock(std::string strClockPath)
+void TimeAwareSystem::InitLocalClock(int clockIndex)
 {
     delete clockLocal;
-    clockLocal = new PtpClock(strClockPath);
+    clockLocal = new PtpClock();
+    clockLocal->Open(clockIndex);
     clockLocal->StopPPS();
     clockLocal->StartPPS();
 }

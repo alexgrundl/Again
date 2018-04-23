@@ -296,6 +296,18 @@ struct PortGlobal
 
 
     PortIdentity identity;
+
+
+    uint32_t syncCount;
+
+
+    uint32_t pdelayCount;
+
+
+    ScaledNs remoteLocalDelta;
+
+
+    double remoteLocalRate;
 };
 
 #endif // COMM_STRUCTS

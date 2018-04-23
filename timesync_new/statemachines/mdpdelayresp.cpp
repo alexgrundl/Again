@@ -114,5 +114,6 @@ void MDPdelayResp::SetPDelayRequest(IReceivePackage* package)
 {
     m_rcvdPdelayReqPtr->ParsePackage(package->GetBuffer());
     m_rcvdPdelayReqPtr->SetReceiveTime(package->GetTimestamp());
+    m_portGlobal->pdelayCount++;
     m_rcvdPdelayReq = true;
 }

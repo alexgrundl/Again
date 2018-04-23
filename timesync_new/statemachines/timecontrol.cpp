@@ -34,8 +34,8 @@ void TimeControl::Syntonize(ScaledNs masterLocalOffset, double remoteLocalRate)
             if(ppm > 250.0)
                 ppm = 250.0;
 
-            printf("PPM: %f\n", ppm);
-            printf("remoteLocalRate: %f\n", remoteLocalRate);
+//            printf("PPM: %f\n", ppm);
+//            printf("remoteLocalRate: %f\n", remoteLocalRate);
             m_ptpClock->AdjustFrequency(ppm);
         }
     }

@@ -22,6 +22,9 @@ public:
 
     void ProcessState();
 
+
+    void SignalSyncReceiptTimeReceive();
+
 private:
 
     /**
@@ -29,6 +32,12 @@ private:
      * the ClockSlave entity. This variable is reset by this state machine.
      */
     bool m_rcvdSyncReceiptTime;
+
+
+    ExtendedTimestamp m_lastMasterTime;
+
+
+    ExtendedTimestamp m_lastSyncReceiptTime;
 };
 
 #endif // CLOCKMASTERSYNCOFFSET_H
