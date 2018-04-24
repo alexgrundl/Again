@@ -47,6 +47,8 @@ void ClockSlaveSync::SetPortSyncSync(PortSyncSync* rcvd)
     m_rcvdPSSyncPtr->sourcePortIdentity = rcvd->sourcePortIdentity;
     m_rcvdPSSyncPtr->syncReceiptTimeoutTime = rcvd->syncReceiptTimeoutTime;
     m_rcvdPSSyncPtr->upstreamTxTime = rcvd->upstreamTxTime;
+    m_rcvdPSSyncPtr->domain = rcvd->domain;
+
     m_rcvdPSSync = true;
 }
 
@@ -72,6 +74,8 @@ void ClockSlaveSync::ProcessState()
                     neighborPropDelay = m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->neighborPropDelay;
                     neighborRateRatio = m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->neighborRateRatio;
                     delayAsymmetry = m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->delayAsymmetry;
+                    if(neighborRateRatio == 0)
+                        neighborRateRatio = 1.0;
                 }
 
                 /* Why do we have to use neighborPropDelay and neighborRateRatio?? Thought this is an instance "per time-aware system"?? */
@@ -90,10 +94,11 @@ void ClockSlaveSync::ProcessState()
                     m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->remoteLocalDelta = m_timeAwareSystem->GetSyncReceiptTime() - m_timeAwareSystem->GetSyncReceiptLocalTime();
                     m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->remoteLocalRate = m_lastSyncReceiptLocalTime.ns > 0 && (m_timeAwareSystem->GetSyncReceiptLocalTime() - m_lastSyncReceiptLocalTime).ns > 0 ?
                                 (m_timeAwareSystem->GetSyncReceiptTime() - m_lastSyncReceiptTime) / (m_timeAwareSystem->GetSyncReceiptLocalTime() - m_lastSyncReceiptLocalTime) : 1.0;
-                    m_timeControl.Syntonize(m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->remoteLocalDelta, m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->remoteLocalRate);
+                    if(m_timeAwareSystem->GetDomain() == TimeAwareSystem::GetDomainToSyntonize())
+                        m_timeControl.Syntonize(m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->remoteLocalDelta, m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->remoteLocalRate);
                     m_lastSyncReceiptTime = m_timeAwareSystem->GetSyncReceiptTime();
                     m_lastSyncReceiptLocalTime = m_timeAwareSystem->GetSyncReceiptLocalTime();
-                    //printf("Diff Port %u: %li\n", m_rcvdPSSyncPtr->localPortNumber, remoteLocalDelta.ns);
+                    //printf("Diff Port %u: %li\n", m_rcvdPSSyncPtr->localPortNumber, m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->remoteLocalDelta.ns);
                 }
 
                 m_clockMasterSyncOffset->SignalSyncReceiptTimeReceive();

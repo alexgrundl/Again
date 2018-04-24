@@ -309,6 +309,24 @@ public:
 
     PtpClock* GetLocalClock();
 
+
+    uint8_t GetDomain();
+
+
+    void SetDomain(uint8_t domain);
+
+
+    static uint8_t GetDomainToSyntonize();
+
+
+    static void SetDomainToSyntonize(uint8_t domain);
+
+
+    static uint8_t GetDomainToMeasurePDelay();
+
+
+    static void SetDomainToMeasurePDelay(uint8_t domain);
+
 private:
 
     /**
@@ -430,6 +448,15 @@ private:
 
 
     PtpClock* clockLocal;
+
+
+    uint8_t m_domain;
+
+
+    static uint8_t s_domainToSyntonize;
+
+
+    static uint8_t s_domainToMeasurePDelay;
 };
 
 #endif // TIMEAWARESYSTEM_H

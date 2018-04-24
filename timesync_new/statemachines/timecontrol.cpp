@@ -10,6 +10,7 @@ TimeControl::TimeControl()
 void TimeControl::SetPtpClock(PtpClock* ptpClock)
 {
     m_ptpClock = ptpClock;
+    m_ptpClock->AdjustFrequency(0);
 }
 
 void TimeControl::Syntonize(ScaledNs masterLocalOffset, double remoteLocalRate)
@@ -29,13 +30,13 @@ void TimeControl::Syntonize(ScaledNs masterLocalOffset, double remoteLocalRate)
             float syncPerSec = 1.0 / pow(2, -3);
             ppm += (m_integral * syncPerSec * masterLocalOffset.ns) + m_proportional * (remoteLocalRate - 1.0)*1000000;
 
-            if(ppm < -250.0)
-                ppm = -250.0;
-            if(ppm > 250.0)
-                ppm = 250.0;
+            if(ppm < -2500.0)
+                ppm = -2500.0;
+            if(ppm > 2500.0)
+                ppm = 2500.0;
 
-//            printf("PPM: %f\n", ppm);
-//            printf("remoteLocalRate: %f\n", remoteLocalRate);
+            //printf("PPM: %f\n", ppm);
+            //printf("remoteLocalRate: %f\n", remoteLocalRate);
             m_ptpClock->AdjustFrequency(ppm);
         }
     }

@@ -32,6 +32,8 @@ void MDPdelayResp::SetPdelayResp()
     m_txPdelayRespPtr->SetRequestReceiptTimestamp(receiveTime);
     m_txPdelayRespPtr->SetCorrectionField(m_rcvdPdelayReqPtr->GetReceiveTime().ns_frac);
     m_txPdelayRespPtr->SetRequestingPortIdentity(m_rcvdPdelayReqPtr->GetSourcePortIdentity());
+
+    m_txPdelayRespPtr->SetDomainNumber(m_rcvdPdelayReqPtr->GetDomainNumber());
 }
 
 void MDPdelayResp::TxPdelayResp()

@@ -18,6 +18,7 @@ struct MDSyncSend
     uint16_t gmTimeBaseIndicator;
     ScaledNs lastGmPhaseChange;
     double lastGmFreqChange;
+    uint8_t domain;
 };
 
 typedef MDSyncSend MDSyncReceive;
@@ -35,6 +36,7 @@ struct PortSyncSync
     uint16_t gmTimeBaseIndicator;
     ScaledNs lastGmPhaseChange;
     double lastGmFreqChange;
+    uint8_t domain;
 };
 
 

@@ -37,6 +37,7 @@ void SiteSyncSync::SetPSSyncSend (PortSyncSync* rcvdPSSyncIndPtr)
     m_txPSSyncPtr->sourcePortIdentity = rcvdPSSyncIndPtr->sourcePortIdentity;
     m_txPSSyncPtr->syncReceiptTimeoutTime = rcvdPSSyncIndPtr->syncReceiptTimeoutTime;
     m_txPSSyncPtr->upstreamTxTime = rcvdPSSyncIndPtr->upstreamTxTime;
+    m_txPSSyncPtr->domain = rcvdPSSyncIndPtr->domain;
 }
 
 void SiteSyncSync::TxPSSync()
@@ -63,6 +64,8 @@ void SiteSyncSync::SetSync(PortSyncSync* rcvd)
     rcvdPSSyncPtr->sourcePortIdentity = rcvd->sourcePortIdentity;
     rcvdPSSyncPtr->syncReceiptTimeoutTime = rcvd->syncReceiptTimeoutTime;
     rcvdPSSyncPtr->upstreamTxTime = rcvd->upstreamTxTime;
+    rcvdPSSyncPtr->domain = rcvd->domain;
+
     m_rcvdPSSyncPtrs.push_back(rcvdPSSyncPtr);
     m_rcvdPSSync = true;
 }

@@ -71,8 +71,11 @@ bool check_wireless(const char* ifname, char* protocol)
 int main()
 {
     TimeAwareSystem tas;
+    TimeAwareSystem tas1;
+
     std::vector<INetworkInterfacePort*> networkPorts;
     std::vector<PortGlobal*> ports;
+    std::vector<PortGlobal*> ports1;
 
     struct ifaddrs *addrs,*next;
     getifaddrs(&addrs);
@@ -85,70 +88,100 @@ int main()
         {
             if(strcmp(next->ifa_name, "enp15s0") == 0)
             {
-            INetworkInterfacePort* networkPort = new NetworkPort(next->ifa_name);
-            networkPort->Initialize();
-            networkPorts.push_back(networkPort);
+                INetworkInterfacePort* networkPort = new NetworkPort(next->ifa_name);
+                networkPort->Initialize();
+                networkPorts.push_back(networkPort);
 
-            PortGlobal* port = new PortGlobal();
-            port->asCapable = true;
-            port->portEnabled = true;
-            port->pttPortEnabled = true;
-            PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), port->identity.clockIdentity);
-            port->identity.portNumber = networkPorts.size();
-            port->syncReceiptTimeout = 3;
-            port->computeNeighborPropDelay = true;
-            port->computeNeighborRateRatio = true;
+                for (int i = 0; i < 2; ++i)
+                {
+                    PortGlobal* port = new PortGlobal();
+                    port->asCapable = true;
+                    port->portEnabled = true;
+                    port->pttPortEnabled = true;
+                    PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), port->identity.clockIdentity);
+                    port->identity.portNumber = networkPorts.size();
+                    port->syncReceiptTimeout = 3;
+                    port->computeNeighborPropDelay = true;
+                    port->computeNeighborRateRatio = true;
 
-            port->pdelayReqInterval.ns = NS_PER_SEC;
-            port->pdelayReqInterval.ns_frac = 0;
-            port->neighborPropDelayThresh.ns = 900;
-            port->neighborPropDelayThresh.ns_frac = 0;
+                    port->pdelayReqInterval.ns = NS_PER_SEC;
+                    port->pdelayReqInterval.ns_frac = 0;
+                    port->neighborPropDelayThresh.ns = 900;
+                    port->neighborPropDelayThresh.ns_frac = 0;
 
-            port->rcvdMsg = false;
-            port->updtInfo = true;
-            port->announceReceiptTimeout = 3;
-            port->announceInterval.ns = NS_PER_SEC;
+                    port->rcvdMsg = false;
+                    port->updtInfo = true;
+                    port->announceReceiptTimeout = 3;
+                    port->announceInterval.ns = NS_PER_SEC;
 
-            port->portPriority.identity.priority1 = 255;
-            port->portPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
-            port->portPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
-            port->portPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
-            port->portPriority.identity.priority2 = 255;
-            memset(port->portPriority.identity.clockIdentity, 255, sizeof(port->portPriority.identity.clockIdentity));
-            port->portPriority.stepsRemoved = UINT16_MAX;
-            memset(port->portPriority.sourcePortIdentity.clockIdentity, 255, sizeof(port->portPriority.sourcePortIdentity.clockIdentity));
-            port->portPriority.sourcePortIdentity.portNumber = UINT16_MAX;
-            port->portPriority.portNumber = UINT16_MAX;
+                    port->portPriority.identity.priority1 = 255;
+                    port->portPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
+                    port->portPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
+                    port->portPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
+                    port->portPriority.identity.priority2 = 255;
+                    memset(port->portPriority.identity.clockIdentity, 255, sizeof(port->portPriority.identity.clockIdentity));
+                    port->portPriority.stepsRemoved = UINT16_MAX;
+                    memset(port->portPriority.sourcePortIdentity.clockIdentity, 255, sizeof(port->portPriority.sourcePortIdentity.clockIdentity));
+                    port->portPriority.sourcePortIdentity.portNumber = UINT16_MAX;
+                    port->portPriority.portNumber = UINT16_MAX;
 
-            ports.push_back(port);
+                    if(i == 0)
+                    {
+                        ports.push_back(port);
 
-            tas.AddSelectedRole(PORT_ROLE_SLAVE);
-            tas.selected.push_back(false);
-            tas.reselect.push_back(false);
+                        tas.AddSelectedRole(PORT_ROLE_SLAVE);
+                        tas.selected.push_back(false);
+                        tas.reselect.push_back(false);
 
-            printf("Name: %s\n", next->ifa_name);
+                        printf("Name: %s\n", next->ifa_name);
 
-            if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
-            {
-                uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
-                PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
-                tas.SetClockIdentity(clockIdentityFromMAC);
-                tas.InitLocalClock(((NetworkPort*)networkPort)->GetPtpClockIndex());
-            }
+                        if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
+                        {
+                            uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
+                            PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
+                            tas.SetClockIdentity(clockIdentityFromMAC);
+                            tas.InitLocalClock(((NetworkPort*)networkPort)->GetPtpClockIndex());
+                        }
+                    }
+                    else
+                    {
+                        ports1.push_back(port);
+
+                        tas1.AddSelectedRole(PORT_ROLE_SLAVE);
+                        tas1.selected.push_back(false);
+                        tas1.reselect.push_back(false);
+                        tas1.SetDomain(1);
+
+                        printf("Name: %s\n", next->ifa_name);
+
+                        if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
+                        {
+                            uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
+                            PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
+                            tas1.SetClockIdentity(clockIdentityFromMAC);
+                            tas1.InitLocalClock(((NetworkPort*)networkPort)->GetPtpClockIndex());
+                        }
+                    }
+                }
             }
         }
         next = next->ifa_next;
     }
     freeifaddrs(addrs);
 
+    std::vector<StateMachineManager*> smManagers;
 
     StateMachineManager smManager(&tas, ports, networkPorts);
+    smManagers.push_back(&smManager);
+    StateMachineManager smManager1(&tas1, ports1, networkPorts);
+    smManagers.push_back(&smManager1);
     smManager.StartProcessing();
+    smManager1.StartProcessing();
 
     std::vector<PortManager*> portManagers;
     for (std::vector<INetworkInterfacePort*>::size_type i = 0; i < networkPorts.size(); ++i)
     {
-            portManagers.push_back(new PortManager(networkPorts[i], &smManager, i));
+            portManagers.push_back(new PortManager(networkPorts[i], smManagers, i));
             portManagers[i]->StartReceiving();
     }
 

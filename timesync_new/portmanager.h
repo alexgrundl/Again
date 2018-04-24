@@ -12,7 +12,7 @@ class PortManager
 {
 public:
 
-    PortManager(INetworkInterfacePort* networkPort, StateMachineManager* stateMachineManager, int portIndex);
+    PortManager(INetworkInterfacePort* networkPort, std::vector<StateMachineManager*>& stateMachineManagers, int portIndex);
 
 
     void StartReceiving();
@@ -31,7 +31,7 @@ private:
     int m_portIndex;
 
 
-    StateMachineManager* m_stateMachineManager;
+    std::vector<StateMachineManager*> m_stateMachineManagers;
 };
 
 #endif // PORTMANAGER_H

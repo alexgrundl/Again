@@ -36,7 +36,7 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
         m_mdPortAnnounceTransmit.push_back(new MDPortAnnounceTransmit(m_timeAwareSystem, ports[i], networkPorts[i]));
         m_portAnnounceTransmit.push_back(new PortAnnounceTransmit(m_timeAwareSystem, ports[i], m_mdPortAnnounceTransmit[i]));
 
-        m_portIPC.push_back(new PortIPC(m_timeAwareSystem, ports[i], networkPorts[i]));
+        m_portIPC.push_back(new PortIPC(m_timeAwareSystem, ports[i], networkPorts[i], m_timeAwareSystem->GetDomain()));
     }
     m_portRoleSelection = new PortRoleSelection(m_timeAwareSystem, ports);
 
@@ -145,7 +145,7 @@ void StateMachineManager::ProcessPackage(int portIndex, IReceivePackage* package
     /* Remove in good code. */
 //    ((CLinuxReceivePackage*)package)->SetTimestamp(m_timeAwareSystem->GetCurrentTime());
 
-    if(domain == 0)
+    if(domain == m_timeAwareSystem->GetDomain())
     {
         switch(messageType)
         {

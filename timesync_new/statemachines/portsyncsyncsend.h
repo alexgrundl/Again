@@ -85,6 +85,9 @@ private:
      */
     double m_lastGmFreqChange;
 
+
+    uint8_t m_lastDomain;
+
     /**
      * @brief  A pointer to the MDSyncSend structure sent to the MD entity of this port.
      */

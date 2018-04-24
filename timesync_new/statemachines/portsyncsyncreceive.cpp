@@ -27,6 +27,7 @@ void PortSyncSyncReceive::SetPSSyncPSSR (MDSyncReceive* rcvdMDSyncPtr, UScaledNs
     m_txPSSyncPtr->upstreamTxTime = rcvdMDSyncPtr->upstreamTxTime;
     m_txPSSyncPtr->syncReceiptTimeoutTime = m_timeAwareSystem->GetCurrentTime() + syncReceiptTimeoutTimeInterval;
     m_txPSSyncPtr->rateRatio = rateRatio;
+    m_txPSSyncPtr->domain = rcvdMDSyncPtr->domain;
 }
 
 
@@ -46,6 +47,7 @@ void PortSyncSyncReceive::ProcessSync(MDSyncReceive* rcvd)
     m_rcvdMDSyncPtr->rateRatio = rcvd->rateRatio;
     m_rcvdMDSyncPtr->sourcePortIdentity = rcvd->sourcePortIdentity;
     m_rcvdMDSyncPtr->upstreamTxTime = rcvd->upstreamTxTime;
+    m_rcvdMDSyncPtr->domain = rcvd->domain;
     m_rcvdMDSync = true;
 }
 

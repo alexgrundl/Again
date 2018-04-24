@@ -41,6 +41,8 @@ void PortAnnounceTransmit::TxAnnounce()
 
     m_txAnnounceMessage->SetPathSequence(m_timeAwareSystem->GetPathTrace());
 
+    m_txAnnounceMessage->SetDomainNumber(m_timeAwareSystem->GetDomain());
+
     m_mdPortAnnounceTransmit->SetAnnounce(m_txAnnounceMessage);
 }
 
@@ -79,6 +81,7 @@ void PortAnnounceTransmit::ProcessState()
             {
                 m_portGlobal->newInfo = false;
                 TxAnnounce();
+                m_sequenceID++;
                 m_state = STATE_TRANSMIT_ANNOUNCE;
             }
             break;

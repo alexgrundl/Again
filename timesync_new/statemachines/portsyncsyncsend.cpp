@@ -24,6 +24,7 @@ PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal*
     m_txMDSyncSendPtr = new MDSyncSend();
     m_syncReceiptTimeoutTime.ns = 0;
     m_syncReceiptTimeoutTime.ns_frac = 0;
+    m_lastDomain = 0;
 
     m_mdSyncSendSM = mdSyncSendSM;
 
@@ -57,6 +58,7 @@ void PortSyncSyncSend::SetMDSync()
     m_txMDSyncSendPtr->followUpCorrectionField.ns_frac = m_lastFollowUpCorrectionField.ns_frac;
     m_txMDSyncSendPtr->upstreamTxTime.ns = m_lastUpstreamTxTime.ns;
     m_txMDSyncSendPtr->upstreamTxTime.ns_frac = m_lastUpstreamTxTime.ns_frac;
+    m_txMDSyncSendPtr->domain = m_lastDomain;
 }
 
 void PortSyncSyncSend::TxMDSync()
@@ -77,6 +79,7 @@ void PortSyncSyncSend::ProcessSync(PortSyncSync* rcvd)
     m_rcvdPSSyncPtr->sourcePortIdentity = rcvd->sourcePortIdentity;
     m_rcvdPSSyncPtr->syncReceiptTimeoutTime = rcvd->syncReceiptTimeoutTime;
     m_rcvdPSSyncPtr->upstreamTxTime = rcvd->upstreamTxTime;
+    m_rcvdPSSyncPtr->domain = rcvd->domain;
     m_rcvdPSSync = true;
 }
 
@@ -147,6 +150,7 @@ void PortSyncSyncSend::ExecuteSendMDSyncState()
         m_lastGmPhaseChange = m_rcvdPSSyncPtr->lastGmPhaseChange;
         m_lastGmFreqChange = m_rcvdPSSyncPtr->lastGmFreqChange;
         m_lastSourcePortIdentity = m_rcvdPSSyncPtr->sourcePortIdentity;
+        m_lastDomain = m_rcvdPSSyncPtr->domain;
     }
     m_rcvdPSSync = false;
     m_lastSyncSentTime = m_timeAwareSystem->GetCurrentTime();

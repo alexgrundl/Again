@@ -1,5 +1,10 @@
 #include "timeawaresystem.h"
 
+uint8_t TimeAwareSystem::s_domainToSyntonize = 0;
+
+uint8_t TimeAwareSystem::s_domainToMeasurePDelay = 0;
+
+
 TimeAwareSystem::TimeAwareSystem()
 {
 
@@ -91,13 +96,15 @@ TimeAwareSystem::TimeAwareSystem()
     selectedRole.push_back(PORT_ROLE_SLAVE);
 
     clockLocal = NULL;
+    m_domain = 0;
 }
 
 TimeAwareSystem::~TimeAwareSystem()
 {
     ClearPathTrace();
 
-    clockLocal->StopPPS();
+    if(m_domain == 0)
+        clockLocal->StopPPS();
     delete clockLocal;
 }
 
@@ -356,11 +363,44 @@ void TimeAwareSystem::InitLocalClock(int clockIndex)
     delete clockLocal;
     clockLocal = new PtpClock();
     clockLocal->Open(clockIndex);
-    clockLocal->StopPPS();
-    clockLocal->StartPPS();
+    if(m_domain == 0)
+    {
+        clockLocal->StopPPS();
+        clockLocal->StartPPS();
+    }
 }
 
 PtpClock* TimeAwareSystem::GetLocalClock()
 {
     return clockLocal;
+}
+
+uint8_t TimeAwareSystem::GetDomain()
+{
+    return m_domain;
+}
+
+void TimeAwareSystem::SetDomain(uint8_t domain)
+{
+    m_domain = domain;
+}
+
+uint8_t TimeAwareSystem::GetDomainToSyntonize()
+{
+    return s_domainToSyntonize;
+}
+
+void TimeAwareSystem::SetDomainToSyntonize(uint8_t domain)
+{
+    s_domainToSyntonize = domain;
+}
+
+uint8_t TimeAwareSystem::GetDomainToMeasurePDelay()
+{
+    return s_domainToMeasurePDelay;
+}
+
+void TimeAwareSystem::SetDomainToMeasurePDelay(uint8_t domain)
+{
+    s_domainToMeasurePDelay = domain;
 }

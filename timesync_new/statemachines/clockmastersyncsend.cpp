@@ -42,6 +42,7 @@ void ClockMasterSyncSend::SetPSSyncCMSS(double gmRateRatio)
     m_txPSSyncPtr->gmTimeBaseIndicator = m_timeAwareSystem->GetClockSourceTimeBaseIndicator();
     m_txPSSyncPtr->lastGmPhaseChange = m_timeAwareSystem->GetClockSourcePhaseOffset();
     m_txPSSyncPtr->lastGmFreqChange = m_timeAwareSystem->GetClockSourceFreqOffset();
+    m_txPSSyncPtr->domain = m_timeAwareSystem->GetDomain();
 }
 
 void ClockMasterSyncSend::TxPSSyncCMSS()
@@ -54,7 +55,7 @@ void ClockMasterSyncSend::ProcessState()
     if(m_timeAwareSystem->BEGIN)
     {
         m_syncSendTime = m_timeAwareSystem->GetCurrentTime();
-        m_syncSendTime.ns += 1000000000 * pow(2, m_timeAwareSystem->GetClockMasterLogSyncInterval());
+        m_syncSendTime.ns += NS_PER_SEC * pow(2, m_timeAwareSystem->GetClockMasterLogSyncInterval());
         m_state = STATE_INITIALIZING;
     }
     else
@@ -66,7 +67,7 @@ void ClockMasterSyncSend::ProcessState()
             SetPSSyncCMSS(m_timeAwareSystem->GetGmRateRatio());
             TxPSSyncCMSS();
             m_syncSendTime = m_timeAwareSystem->GetCurrentTime();
-            m_syncSendTime.ns += 1000000000 * pow(2, m_timeAwareSystem->GetClockMasterLogSyncInterval());
+            m_syncSendTime.ns += NS_PER_SEC * pow(2, m_timeAwareSystem->GetClockMasterLogSyncInterval());
         }
     }
 }

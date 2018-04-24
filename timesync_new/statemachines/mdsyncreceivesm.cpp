@@ -48,6 +48,8 @@ void MDSyncReceiveSM::SetMDSyncReceive()
     m_txMDSyncReceivePtr->lastGmPhaseChange = tlv.lastGmPhaseChange;
     /* scaledLastGmFreqChange has to be converted to the correct value, probably... */
     m_txMDSyncReceivePtr->lastGmFreqChange = tlv.scaledLastGmFreqChange / pow(2, 41);
+
+    m_txMDSyncReceivePtr->domain = m_rcvdFollowUpPtr->GetDomainNumber();
 }
 
 void MDSyncReceiveSM::TxMDSyncReceive()

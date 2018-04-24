@@ -191,7 +191,7 @@ void PortRoleSelection::UpdtRolesTree()
     for (std::vector<PortRole>::size_type i = 0; i <= m_ports.size(); ++i)
     {
         PortRole portRole = m_timeAwareSystem->GetSelectedRole(i);
-        printf("Port role %lu, %s\n", i, GetStrPortRole(portRole));
+        printf("Domain %u\tPort role %lu, %s\n", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
     }
 }
 

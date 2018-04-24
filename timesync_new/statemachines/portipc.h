@@ -8,7 +8,7 @@ class PortIPC : public StateMachineBaseMD
 {
 public:
 
-    PortIPC(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort* networkPort);
+    PortIPC(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort* networkPort, int domain);
 
 
     virtual ~PortIPC();
@@ -25,16 +25,25 @@ public:
 private:
 
 
-    PtpClock m_ptpClock;
+    PtpClock* m_ptpClock;
 
 
-    LinuxSharedMemoryIPC m_ipc;
+    LinuxSharedMemoryIPC* m_ipc;
 
 
-    uint64_t timeSystemPrevious;
+    uint64_t m_timeSystemPrevious;
 
 
-    uint64_t timeDevicePrevious;
+    uint64_t m_timeDevicePrevious;
+
+
+    uint8_t m_domain;
+
+
+    UScaledNs m_ipcUpdateTime;
+
+
+    static uint8_t m_ipcUpdateDomain;
 };
 
 #endif // PORTIPC_H

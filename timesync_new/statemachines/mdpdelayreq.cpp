@@ -127,7 +127,8 @@ void MDPdelayReq::ProcessState()
         switch(m_state)
         {
         case STATE_NOT_ENABLED:
-            if(m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled)
+            if(m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled &&
+                    m_timeAwareSystem->GetDomain() == TimeAwareSystem::GetDomainToMeasurePDelay())
             {
                 m_initPdelayRespReceived = false;
                 //Hmmmmmmmmmmmmmmmmmmmmm.....
@@ -141,7 +142,14 @@ void MDPdelayReq::ProcessState()
                 m_lostResponses = 0;
                 m_portGlobal->isMeasuringDelay = false;
                 m_portGlobal->asCapable = false;
+                m_networkPort->SetASCapable(false);
                 m_state = STATE_INITIAL_SEND_PDELAY_REQ;
+            }
+            else
+            {
+                m_portGlobal->asCapable = m_networkPort->GetASCapable();
+                m_portGlobal->neighborPropDelay = {m_networkPort->GetPDelay(), 0};
+                m_portGlobal->neighborRateRatio = m_networkPort->GetNeighborRatio();
             }
             break;
 
@@ -183,17 +191,29 @@ void MDPdelayReq::ProcessState()
             {
                 m_rcvdPdelayRespFollowUp = false;
                 if (m_portGlobal->computeNeighborRateRatio)
+                {
                     m_portGlobal->neighborRateRatio = ComputePdelayRateRatio();
+                    m_networkPort->SetNeighborRatio(m_portGlobal->neighborRateRatio);
+                }
                 if (m_portGlobal->computeNeighborPropDelay)
+                {
                     m_portGlobal->neighborPropDelay = ComputePropTime();
+                    m_networkPort->SetPDelay(m_portGlobal->neighborPropDelay.ns);
+                }
                 m_lostResponses = 0;
                 m_portGlobal->isMeasuringDelay = true;
                 if ((m_portGlobal->neighborPropDelay <= m_portGlobal->neighborPropDelayThresh) &&
                         memcmp(m_rcvdPdelayRespPtr->GetSourcePortIdentity().clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH) != 0
                         && m_neighborRateRatioValid)
+                {
                     m_portGlobal->asCapable = true;
+                    m_networkPort->SetASCapable(true);
+                }
                 else
+                {
                     m_portGlobal->asCapable = false;
+                    m_networkPort->SetASCapable(false);
+                }
                 m_state = STATE_WAITING_FOR_PDELAY_INTERVAL_TIMER;
             }
             else if((m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval) ||

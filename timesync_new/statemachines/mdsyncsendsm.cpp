@@ -25,6 +25,8 @@ void MDSyncSendSM::SetSync()
     m_txSyncPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
     m_txSyncPtr->SetSequenceID(m_portGlobal->syncSequenceId);
     m_txSyncPtr->SetLogMessageInterval((m_rcvdMDSyncPtr->logMessageInterval));
+
+    m_txSyncPtr->SetDomainNumber(m_rcvdMDSyncPtr->domain);
 }
 
 void MDSyncSendSM::SetFollowUp()
@@ -44,6 +46,8 @@ void MDSyncSendSM::SetFollowUp()
     m_txFollowUpPtr->SetGmTimeBaseIndicator(m_rcvdMDSyncPtr->gmTimeBaseIndicator);
     m_txFollowUpPtr->SetLastGmPhaseChange(m_rcvdMDSyncPtr->lastGmPhaseChange);
     m_txFollowUpPtr->SetScaledLastGmFreqChange(m_rcvdMDSyncPtr->lastGmFreqChange * pow(2, 41));
+
+    m_txFollowUpPtr->SetDomainNumber(m_rcvdMDSyncPtr->domain);
 }
 
 
@@ -73,6 +77,7 @@ void MDSyncSendSM::SetMDSyncSend(MDSyncSend* rcvdMDSyncPtr)
     m_rcvdMDSyncPtr->rateRatio = rcvdMDSyncPtr->rateRatio;
     m_rcvdMDSyncPtr->sourcePortIdentity = rcvdMDSyncPtr->sourcePortIdentity;
     m_rcvdMDSyncPtr->upstreamTxTime = rcvdMDSyncPtr->upstreamTxTime;
+    m_rcvdMDSyncPtr->domain = rcvdMDSyncPtr->domain;
     m_rcvdMDSync = true;
 }
 
