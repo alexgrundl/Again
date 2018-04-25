@@ -66,17 +66,17 @@ void PortIPC::ProcessState()
         portState = m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER ? PTP_MASTER : PTP_SLAVE;
         timeBase = GPTP_CLOCK_REALTIME;
         masterClockIdentity =  m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER ?
-                    m_timeAwareSystem->GetClockIdentity() : m_timeAwareSystem->gmPriority.sourcePortIdentity.clockIdentity;
+                    m_timeAwareSystem->GetClockIdentity() : m_timeAwareSystem->GetGmPriority().sourcePortIdentity.clockIdentity;
 
         m_ipc->update(masterLocalPhaseOffset, localSystemPhaseOffset, masterLocalFrequencyOffset, localSystemFrequencyOffset, deviceTime, 0,
                      m_portGlobal->pdelayCount, portState, m_portGlobal->asCapable, timeBase, m_portGlobal->neighborPropDelay.ns);
 
         m_ipc->update_grandmaster(const_cast<uint8_t*>(masterClockIdentity), m_domain);
-        m_ipc->update_network_interface(m_timeAwareSystem->GetClockIdentity(), m_timeAwareSystem->systemPriority.identity.priority1,
-                                       m_timeAwareSystem->systemPriority.identity.clockQuality.clockClass,
-                                       m_timeAwareSystem->systemPriority.identity.clockQuality.offsetScaledLogVariance,
-                                       m_timeAwareSystem->systemPriority.identity.clockQuality.clockAccuracy,
-                                       m_timeAwareSystem->systemPriority.identity.priority2, 0,
+        m_ipc->update_network_interface(m_timeAwareSystem->GetClockIdentity(), m_timeAwareSystem->GetSystemPriority().identity.priority1,
+                                       m_timeAwareSystem->GetSystemPriority().identity.clockQuality.clockClass,
+                                       m_timeAwareSystem->GetSystemPriority().identity.clockQuality.offsetScaledLogVariance,
+                                       m_timeAwareSystem->GetSystemPriority().identity.clockQuality.clockAccuracy,
+                                       m_timeAwareSystem->GetSystemPriority().identity.priority2, 0,
                                        0, 0, 0, m_portGlobal->identity.portNumber);
 
         m_ipcUpdateTime.ns += NS_PER_SEC / 10;

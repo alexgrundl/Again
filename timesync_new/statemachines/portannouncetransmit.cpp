@@ -21,21 +21,21 @@ void PortAnnounceTransmit::TxAnnounce()
     m_txAnnounceMessage->SetSourcePortIdentity(&portIdentity);
 
     m_txAnnounceMessage->SetLogMessageInterval(m_portGlobal->currentLogAnnounceInterval);
-    m_txAnnounceMessage->SetCurrentUtcOffset(m_timeAwareSystem->currentUtcOffset);
+    m_txAnnounceMessage->SetCurrentUtcOffset(m_timeAwareSystem->GetCurrentUtcOffset());
     m_txAnnounceMessage->SetGrandmasterPriority1(m_portGlobal->masterPriority.identity.priority1);
     m_txAnnounceMessage->SetGrandmasterClockQuality(m_portGlobal->masterPriority.identity.clockQuality);
     m_txAnnounceMessage->SetGrandmasterPriority2(m_portGlobal->masterPriority.identity.priority2);
     m_txAnnounceMessage->SetGrandmasterIdentity(m_portGlobal->masterPriority.identity.clockIdentity);
 
-    m_txAnnounceMessage->SetStepsRemoved(m_timeAwareSystem->masterStepsRemoved);
+    m_txAnnounceMessage->SetStepsRemoved(m_timeAwareSystem->GetMasterStepsRemoved());
 
-    m_txAnnounceMessage->SetFlagLeap61(m_timeAwareSystem->leap61);
-    m_txAnnounceMessage->SetFlagLeap59(m_timeAwareSystem->leap59);
-    m_txAnnounceMessage->SetCurrentUtcOffsetValid(m_timeAwareSystem->currentUtcOffsetValid);
-    m_txAnnounceMessage->SetTimeTraceable(m_timeAwareSystem->timeTraceable);
-    m_txAnnounceMessage->SetFrequencyTraceable(m_timeAwareSystem->frequencyTraceable);
-    m_txAnnounceMessage->SetCurrentUtcOffset(m_timeAwareSystem->currentUtcOffset);
-    m_txAnnounceMessage->SetTimeSource(m_timeAwareSystem->timeSource);
+    m_txAnnounceMessage->SetFlagLeap61(m_timeAwareSystem->GetLeap61());
+    m_txAnnounceMessage->SetFlagLeap59(m_timeAwareSystem->GetLeap59());
+    m_txAnnounceMessage->SetCurrentUtcOffsetValid(m_timeAwareSystem->GetCurrentUtcOffsetValid());
+    m_txAnnounceMessage->SetTimeTraceable(m_timeAwareSystem->GetTimeTraceable());
+    m_txAnnounceMessage->SetFrequencyTraceable(m_timeAwareSystem->GetFrequencyTraceable());
+    m_txAnnounceMessage->SetCurrentUtcOffset(m_timeAwareSystem->GetCurrentUtcOffset());
+    m_txAnnounceMessage->SetTimeSource(m_timeAwareSystem->GetTimeSource());
 
     m_txAnnounceMessage->SetSequenceID(m_sequenceID);
 

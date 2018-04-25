@@ -1,13 +1,20 @@
 #include <iostream>
 #include <unistd.h>
 #include <sys/types.h>
-#include <ifaddrs.h>
-#include <sys/ioctl.h>
 #include <memory>
-#include <linux/wireless.h>
 #include <signal.h>
 
-#include "ptpclock.h"
+#ifdef __linux__
+    #include <ifaddrs.h>
+    #include <sys/ioctl.h>
+    #include <linux/wireless.h>
+    #include "ptpclocklinux.h"
+
+#else
+    #include "ptpclockwindows.h"
+#endif
+
+
 #include "ptpmessagesync.h"
 #include "ptpmessagefollowup.h"
 #include "ThreadWrapper.h"
@@ -77,6 +84,9 @@ int main()
     std::vector<PortGlobal*> ports;
     std::vector<PortGlobal*> ports1;
 
+    PtpClock* clockDom0 = new PtpClockLinux();
+    PtpClock* clockDom1 = new PtpClockLinux();
+
     struct ifaddrs *addrs,*next;
     getifaddrs(&addrs);
     next = addrs;
@@ -141,7 +151,7 @@ int main()
                             uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
                             PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
                             tas.SetClockIdentity(clockIdentityFromMAC);
-                            tas.InitLocalClock(((NetworkPort*)networkPort)->GetPtpClockIndex());
+                            tas.InitLocalClock(clockDom0, ((NetworkPort*)networkPort)->GetPtpClockIndex());
                         }
                     }
                     else
@@ -158,7 +168,7 @@ int main()
                             uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
                             PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
                             tas1.SetClockIdentity(clockIdentityFromMAC);
-                            tas1.InitLocalClock(((NetworkPort*)networkPort)->GetPtpClockIndex());
+                            tas1.InitLocalClock(clockDom1, ((NetworkPort*)networkPort)->GetPtpClockIndex());
                         }
                     }
                 }
@@ -185,6 +195,9 @@ int main()
     }
 
     wait_for_signals();
+
+    delete clockDom0;
+    delete clockDom1;
 
     return 0;
 }

@@ -52,7 +52,9 @@ SOURCES += main.cpp \
     types/extendedtimestamp.cpp \
     statemachines/timecontrol.cpp \
     ipc/linuxsharedmemoryipc.cpp \
-    statemachines/portipc.cpp
+    statemachines/portipc.cpp \
+    ptpclocklinux.cpp \
+    ptpclockwindows.cpp
 
 HEADERS += \
     types/types.h \
@@ -73,7 +75,6 @@ HEADERS += \
     ptpmessage/ptpmessagepdelayrespfollowup.h \
     ptpmessage/ptpmessagesync.h \
     ptpmessage/ptpmessagetype.h \
-    ptpclock.h \
     statemachines/mdsyncreceivesm.h \
     statemachines/mdsyncsendsm.h \
     c-platform/linux/platform_linux.h \
@@ -109,5 +110,8 @@ HEADERS += \
     ipc/avbts_osipc.hpp \
     ipc/linuxipcarg.h \
     ipc/linuxsharedmemoryipc.h \
-    statemachines/portipc.h
+    statemachines/portipc.h \
+    ptpclock.h \
+    ptpclocklinux.h \
+    ptpclockwindows.h
 

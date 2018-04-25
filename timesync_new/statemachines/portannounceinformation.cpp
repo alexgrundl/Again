@@ -173,7 +173,7 @@ void PortAnnounceInformation::ExecuteAgedState()
 void PortAnnounceInformation::ExecuteUpdateState()
 {
     m_portGlobal->portPriority = m_portGlobal->masterPriority;
-    m_portGlobal->portStepsRemoved = m_timeAwareSystem->masterStepsRemoved;
+    m_portGlobal->portStepsRemoved = m_timeAwareSystem->GetMasterStepsRemoved();
     m_portGlobal->updtInfo = false;
     m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_MINE;
     m_portGlobal->newInfo = true;

@@ -67,9 +67,9 @@ void PortSyncSyncReceive::ProcessState()
         case STATE_RECEIVED_SYNC:
             if(m_rcvdMDSync && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable
                     && (m_state == STATE_DISCARD ||
-                        (memcmp(m_rcvdMDSyncPtr->sourcePortIdentity.clockIdentity, m_timeAwareSystem->gmPriority.sourcePortIdentity.clockIdentity,
+                        (memcmp(m_rcvdMDSyncPtr->sourcePortIdentity.clockIdentity, m_timeAwareSystem->GetGmPriority().sourcePortIdentity.clockIdentity,
                                 CLOCK_ID_LENGTH) == 0 && m_rcvdMDSyncPtr->sourcePortIdentity.portNumber ==
-                         m_timeAwareSystem->gmPriority.sourcePortIdentity.portNumber)))
+                         m_timeAwareSystem->GetGmPriority().sourcePortIdentity.portNumber)))
             {
                 m_rcvdMDSync = false;
                 m_rateRatio = m_rcvdMDSyncPtr->rateRatio;

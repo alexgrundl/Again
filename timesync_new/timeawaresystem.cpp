@@ -11,91 +11,91 @@ TimeAwareSystem::TimeAwareSystem()
     BEGIN = true;
 //    clockMasterSyncInterval.ns = 0;
 //    clockMasterSyncInterval.ns_frac = 0;
-    clockSlaveTime.sec = 0;
-    clockSlaveTime.ns = 0;
-    clockSlaveTime.ns_frac = 0;
-    syncReceiptTime.sec = 0;
-    syncReceiptTime.ns = 0;
-    syncReceiptTime.ns_frac = 0;
-    syncReceiptLocalTime.ns = 0;
-    syncReceiptLocalTime.ns_frac = 0;
-    clockSourceFreqOffset = 1.0;
-    clockSourcePhaseOffset.ns = 0;
-    clockSourcePhaseOffset.ns_frac = 0;
-    clockSourceTimeBaseIndicator = 0;
-    clockSourceTimeBaseIndicatorOld = 0;
-    clockSourceLastGmPhaseChange.ns = 0;
-    clockSourceLastGmPhaseChange.ns_frac = 0;
-    clockSourceLastGmFreqChange = 1.0;
-    gmPresent = false;
-    gmRateRatio = 1.0;
-    gmTimeBaseIndicator = 0;
-    lastGmPhaseChange.ns = 0;
-    lastGmPhaseChange.ns_frac = 0;
-    lastGmFreqChange = 1.0;
-    localClockTickInterval.ns = 0;
-    localClockTickInterval.ns_frac = 0;
-    localTime.ns = 0;
-    localTime.ns_frac = 0;
-    masterTime.sec = 0;
-    masterTime.ns = 0;
-    masterTime.ns_frac = 0;
-    memset(thisClock, 255, sizeof(thisClock));
-    clockMasterLogSyncInterval = -3;
+    m_clockSlaveTime.sec = 0;
+    m_clockSlaveTime.ns = 0;
+    m_clockSlaveTime.ns_frac = 0;
+    m_syncReceiptTime.sec = 0;
+    m_syncReceiptTime.ns = 0;
+    m_syncReceiptTime.ns_frac = 0;
+    m_syncReceiptLocalTime.ns = 0;
+    m_syncReceiptLocalTime.ns_frac = 0;
+    m_clockSourceFreqOffset = 1.0;
+    m_clockSourcePhaseOffset.ns = 0;
+    m_clockSourcePhaseOffset.ns_frac = 0;
+    m_clockSourceTimeBaseIndicator = 0;
+    m_clockSourceTimeBaseIndicatorOld = 0;
+    m_clockSourceLastGmPhaseChange.ns = 0;
+    m_clockSourceLastGmPhaseChange.ns_frac = 0;
+    m_clockSourceLastGmFreqChange = 1.0;
+    m_gmPresent = false;
+    m_gmRateRatio = 1.0;
+    m_gmTimeBaseIndicator = 0;
+    m_lastGmPhaseChange.ns = 0;
+    m_lastGmPhaseChange.ns_frac = 0;
+    m_lastGmFreqChange = 1.0;
+    m_localClockTickInterval.ns = 0;
+    m_localClockTickInterval.ns_frac = 0;
+    m_localTime.ns = 0;
+    m_localTime.ns_frac = 0;
+    m_masterTime.sec = 0;
+    m_masterTime.ns = 0;
+    m_masterTime.ns_frac = 0;
+    memset(m_thisClock, 255, sizeof(m_thisClock));
+    m_clockMasterLogSyncInterval = -3;
 
 
-    masterStepsRemoved = 0;
-    leap61 = false;
-    leap59 = false;
-    currentUtcOffsetValid = false;
-    timeTraceable = false;
-    frequencyTraceable = false;
-    currentUtcOffset = 0;
-    timeSource = CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR;
-    sysLeap61 = false;
-    sysLeap59 = false;
-    sysCurrentUTCOffsetValid = false;
-    sysTimeTraceable = false;
-    sysFrequencyTraceable = false;
-    sysCurrentUtcOffset = 0;
-    sysTimeSource = CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR;
+    m_masterStepsRemoved = 0;
+    m_leap61 = false;
+    m_leap59 = false;
+    m_currentUtcOffsetValid = false;
+    m_timeTraceable = false;
+    m_frequencyTraceable = false;
+    m_currentUtcOffset = 0;
+    m_timeSource = CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR;
+    m_sysLeap61 = false;
+    m_sysLeap59 = false;
+    m_sysCurrentUTCOffsetValid = false;
+    m_sysTimeTraceable = false;
+    m_sysFrequencyTraceable = false;
+    m_sysCurrentUtcOffset = 0;
+    m_sysTimeSource = CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR;
 
-    systemPriority.identity.priority1 = 254;
-    systemPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
-    systemPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
-    systemPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
-    systemPriority.identity.priority2 = 255;
-    memset(systemPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
-    systemPriority.stepsRemoved = 0;
-    memset(systemPriority.sourcePortIdentity.clockIdentity, 255, CLOCK_ID_LENGTH);
-    systemPriority.sourcePortIdentity.portNumber = 0;
-    systemPriority.portNumber = 0;
+    m_systemPriority.identity.priority1 = 254;
+    m_systemPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
+    m_systemPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
+    m_systemPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
+    m_systemPriority.identity.priority2 = 255;
+    memset(m_systemPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
+    m_systemPriority.stepsRemoved = 0;
+    memset(m_systemPriority.sourcePortIdentity.clockIdentity, 255, CLOCK_ID_LENGTH);
+    m_systemPriority.sourcePortIdentity.portNumber = 0;
+    m_systemPriority.portNumber = 0;
 
-    gmPriority.identity.priority1 = 255;
-    gmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
-    gmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
-    gmPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
-    gmPriority.identity.priority2 = 255;
-    memset(gmPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
-    gmPriority.stepsRemoved = UINT16_MAX;
-    memset(gmPriority.sourcePortIdentity.clockIdentity, 255, CLOCK_ID_LENGTH);
-    gmPriority.sourcePortIdentity.portNumber = UINT16_MAX;
-    gmPriority.portNumber = UINT16_MAX;
+    m_gmPriority.identity.priority1 = 255;
+    m_gmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
+    m_gmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
+    m_gmPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
+    m_gmPriority.identity.priority2 = 255;
+    memset(m_gmPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
+    m_gmPriority.stepsRemoved = UINT16_MAX;
+    memset(m_gmPriority.sourcePortIdentity.clockIdentity, 255, CLOCK_ID_LENGTH);
+    m_gmPriority.sourcePortIdentity.portNumber = UINT16_MAX;
+    m_gmPriority.portNumber = UINT16_MAX;
 
-    lastGmPriority.identity.priority1 = 255;
-    lastGmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
-    lastGmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
-    lastGmPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
-    lastGmPriority.identity.priority2 = 255;
-    memset(lastGmPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
-    lastGmPriority.stepsRemoved = UINT16_MAX;
-    memset(lastGmPriority.sourcePortIdentity.clockIdentity, 255, CLOCK_ID_LENGTH);
-    lastGmPriority.sourcePortIdentity.portNumber = UINT16_MAX;
-    lastGmPriority.portNumber = UINT16_MAX;
+    m_lastGmPriority.identity.priority1 = 255;
+    m_lastGmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
+    m_lastGmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
+    m_lastGmPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
+    m_lastGmPriority.identity.priority2 = 255;
+    memset(m_lastGmPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
+    m_lastGmPriority.stepsRemoved = UINT16_MAX;
+    memset(m_lastGmPriority.sourcePortIdentity.clockIdentity, 255, CLOCK_ID_LENGTH);
+    m_lastGmPriority.sourcePortIdentity.portNumber = UINT16_MAX;
+    m_lastGmPriority.portNumber = UINT16_MAX;
 
-    selectedRole.push_back(PORT_ROLE_SLAVE);
+    m_selectedRole.push_back(PORT_ROLE_SLAVE);
 
-    clockLocal = NULL;
+    m_clockLocal = NULL;
     m_domain = 0;
 }
 
@@ -103,99 +103,98 @@ TimeAwareSystem::~TimeAwareSystem()
 {
     ClearPathTrace();
 
-    if(m_domain == 0)
-        clockLocal->StopPPS();
-    delete clockLocal;
+    if(m_domain == 0 && m_clockLocal != NULL)
+        m_clockLocal->StopPPS();
 }
 
 ExtendedTimestamp TimeAwareSystem::GetClockSlaveTime()
 {
-    return clockSlaveTime;
+    return m_clockSlaveTime;
 }
 
 void TimeAwareSystem::SetClockSlaveTime(ExtendedTimestamp time)
 {
-    clockSlaveTime = time;
+    m_clockSlaveTime = time;
 }
 
 ExtendedTimestamp TimeAwareSystem::GetSyncReceiptTime()
 {
-    return syncReceiptTime;
+    return m_syncReceiptTime;
 }
 
 void TimeAwareSystem::SetSyncReceiptTime(ExtendedTimestamp time)
 {
-    syncReceiptTime = time;
+    m_syncReceiptTime = time;
 }
 
 UScaledNs TimeAwareSystem::GetSyncReceiptLocalTime()
 {
-    return syncReceiptLocalTime;
+    return m_syncReceiptLocalTime;
 }
 
 void TimeAwareSystem::SetSyncReceiptLocalTime(UScaledNs time)
 {
-    syncReceiptLocalTime = time;
+    m_syncReceiptLocalTime = time;
 }
 
 double TimeAwareSystem::GetClockSourceFreqOffset()
 {
-    return clockSourceFreqOffset;
+    return m_clockSourceFreqOffset;
 }
 
 void TimeAwareSystem::SetClockSourceFreqOffset(double offset)
 {
-    clockSourceFreqOffset = offset;
+    m_clockSourceFreqOffset = offset;
 }
 
 ScaledNs TimeAwareSystem::GetClockSourcePhaseOffset()
 {
-    return clockSourcePhaseOffset;
+    return m_clockSourcePhaseOffset;
 }
 
 void TimeAwareSystem::SetClockSourcePhaseOffset(ScaledNs offset)
 {
-    clockSourcePhaseOffset = offset;
+    m_clockSourcePhaseOffset = offset;
 }
 
 uint16_t TimeAwareSystem::GetClockSourceTimeBaseIndicator()
 {
-    return clockSourceTimeBaseIndicator;
+    return m_clockSourceTimeBaseIndicator;
 }
 
 void TimeAwareSystem::SetClockSourceTimeBaseIndicator(uint16_t indicator)
 {
-    clockSourceTimeBaseIndicator = indicator;
+    m_clockSourceTimeBaseIndicator = indicator;
 }
 
 uint16_t TimeAwareSystem::GetClockSourceTimeBaseIndicatorOld()
 {
-    return clockSourceTimeBaseIndicatorOld;
+    return m_clockSourceTimeBaseIndicatorOld;
 }
 
 void TimeAwareSystem::SetClockSourceTimeBaseIndicatorOld(uint16_t indicator)
 {
-    clockSourceTimeBaseIndicatorOld = indicator;
+    m_clockSourceTimeBaseIndicatorOld = indicator;
 }
 
 ScaledNs TimeAwareSystem::GetClockSourceLastGmPhaseChange()
 {
-    return clockSourceLastGmPhaseChange;
+    return m_clockSourceLastGmPhaseChange;
 }
 
 void TimeAwareSystem::SetClockSourceLastGmPhaseChange(ScaledNs value)
 {
-    clockSourceLastGmPhaseChange = value;
+    m_clockSourceLastGmPhaseChange = value;
 }
 
 double TimeAwareSystem::GetClockSourceLastGmFreqChange()
 {
-    return clockSourceLastGmFreqChange;
+    return m_clockSourceLastGmFreqChange;
 }
 
 void TimeAwareSystem::SetClockSourceLastGmFreqChange(double value)
 {
-    clockSourceLastGmFreqChange = value;
+    m_clockSourceLastGmFreqChange = value;
 }
 
 UScaledNs TimeAwareSystem::GetCurrentTime()
@@ -203,8 +202,8 @@ UScaledNs TimeAwareSystem::GetCurrentTime()
     struct timespec ts;
     UScaledNs uscaled;
 
-    if(clockLocal != NULL)
-        clockLocal->GetTime(&ts);
+    if(m_clockLocal != NULL)
+        m_clockLocal->GetTime(&ts);
     else
         clock_gettime(CLOCK_MONOTONIC, &ts);
 
@@ -216,114 +215,114 @@ UScaledNs TimeAwareSystem::GetCurrentTime()
 
 bool TimeAwareSystem::IsGmPresent()
 {
-    return gmPresent;
+    return m_gmPresent;
 }
 
 void TimeAwareSystem::SetGmPresent(bool present)
 {
-    gmPresent = present;
+    m_gmPresent = present;
 }
 
 double TimeAwareSystem::GetGmRateRatio()
 {
-    return gmRateRatio;
+    return m_gmRateRatio;
 }
 
 void TimeAwareSystem::SetGmRateRatio(double ratio)
 {
-    gmRateRatio = ratio;
+    m_gmRateRatio = ratio;
 }
 
 uint16_t TimeAwareSystem::GetGmTimeBaseIndicator()
 {
-    return gmTimeBaseIndicator;
+    return m_gmTimeBaseIndicator;
 }
 
 void TimeAwareSystem::SetGmTimeBaseIndicator(uint16_t indicator)
 {
-    gmTimeBaseIndicator = indicator;
+    m_gmTimeBaseIndicator = indicator;
 }
 
 ScaledNs TimeAwareSystem::GetLastGmPhaseChange()
 {
-    return lastGmPhaseChange;
+    return m_lastGmPhaseChange;
 }
 
 void TimeAwareSystem::SetLastGmPhaseChange(ScaledNs value)
 {
-    lastGmPhaseChange = value;
+    m_lastGmPhaseChange = value;
 }
 
 double TimeAwareSystem::GetLastGmFreqChange()
 {
-    return lastGmFreqChange;
+    return m_lastGmFreqChange;
 }
 
 void TimeAwareSystem::SetLastGmFreqChange(double value)
 {
-    lastGmFreqChange = value;
+    m_lastGmFreqChange = value;
 }
 
 TimeInterval TimeAwareSystem::GetLocalClockTickInterval()
 {
-    return localClockTickInterval;
+    return m_localClockTickInterval;
 }
 
 void TimeAwareSystem::SetLocalClockTickInterval(TimeInterval interval)
 {
-    localClockTickInterval = interval;
+    m_localClockTickInterval = interval;
 }
 
 UScaledNs TimeAwareSystem::GetLocalTime()
 {
-    return localTime;
+    return m_localTime;
 }
 
 void TimeAwareSystem::SetLocalTime(UScaledNs time)
 {
-    localTime = time;
+    m_localTime = time;
 }
 
 void TimeAwareSystem::AddSelectedRole(PortRole role)
 {
-    selectedRole.push_back(role);
+    m_selectedRole.push_back(role);
 }
 
 PortRole TimeAwareSystem::GetSelectedRole(int index)
 {
-    return (std::vector<PortRole>::size_type)index < selectedRole.size() ? selectedRole[index] : PORT_ROLE_DISABLED;
+    return (std::vector<PortRole>::size_type)index < m_selectedRole.size() ? m_selectedRole[index] : PORT_ROLE_DISABLED;
 }
 
 void TimeAwareSystem::SetSelectedRole(int index, PortRole role)
 {
-    if((std::vector<PortRole>::size_type)index < selectedRole.size())
-            selectedRole[index] = role;
+    if((std::vector<PortRole>::size_type)index < m_selectedRole.size())
+            m_selectedRole[index] = role;
 }
 
 ExtendedTimestamp TimeAwareSystem::GetMasterTime()
 {
-    return masterTime;
+    return m_masterTime;
 }
 
 void TimeAwareSystem::SetMasterTime(ExtendedTimestamp time)
 {
-    masterTime = time;
+    m_masterTime = time;
 }
 
 void TimeAwareSystem::IncreaseMasterTime(TimeInterval interval)
 {
-    masterTime += interval;
+    m_masterTime += interval;
 }
 
 const uint8_t* TimeAwareSystem::GetClockIdentity()
 {
-    return thisClock;
+    return m_thisClock;
 }
 
 void TimeAwareSystem::SetClockIdentity(uint8_t* identity)
 {
-    memcpy(thisClock, identity, CLOCK_ID_LENGTH);
-    memcpy(systemPriority.identity.clockIdentity, identity, CLOCK_ID_LENGTH);
+    memcpy(m_thisClock, identity, CLOCK_ID_LENGTH);
+    memcpy(m_systemPriority.identity.clockIdentity, identity, CLOCK_ID_LENGTH);
 }
 
 void TimeAwareSystem::AddPath(const uint8_t* path)
@@ -331,48 +330,47 @@ void TimeAwareSystem::AddPath(const uint8_t* path)
     uint8_t* pathToAdd = new uint8_t[CLOCK_ID_LENGTH];
     memcpy(pathToAdd, path, CLOCK_ID_LENGTH);
 
-    this->pathTrace.push_back(pathToAdd);
+    this->m_pathTrace.push_back(pathToAdd);
 }
 
 int8_t TimeAwareSystem::GetClockMasterLogSyncInterval()
 {
-    return clockMasterLogSyncInterval;
+    return m_clockMasterLogSyncInterval;
 }
 
 void TimeAwareSystem::SetClockMasterLogSyncInterval(int8_t interval)
 {
-    clockMasterLogSyncInterval = interval;
+    m_clockMasterLogSyncInterval = interval;
 }
 
 void TimeAwareSystem::ClearPathTrace()
 {
-    for (std::vector<uint8_t*>::size_type i = 0; i < pathTrace.size(); ++i)
+    for (std::vector<uint8_t*>::size_type i = 0; i < m_pathTrace.size(); ++i)
     {
-        delete[] pathTrace[i];
+        delete[] m_pathTrace[i];
     }
-    pathTrace.clear();
+    m_pathTrace.clear();
 }
 
 std::vector<uint8_t*> TimeAwareSystem::GetPathTrace()
 {
-    return pathTrace;
+    return m_pathTrace;
 }
 
-void TimeAwareSystem::InitLocalClock(int clockIndex)
+void TimeAwareSystem::InitLocalClock(PtpClock *clock, int clockIndex)
 {
-    delete clockLocal;
-    clockLocal = new PtpClock();
-    clockLocal->Open(clockIndex);
+    m_clockLocal = clock;
+    m_clockLocal->Open(clockIndex);
     if(m_domain == 0)
     {
-        clockLocal->StopPPS();
-        clockLocal->StartPPS();
+        m_clockLocal->StopPPS();
+        m_clockLocal->StartPPS();
     }
 }
 
 PtpClock* TimeAwareSystem::GetLocalClock()
 {
-    return clockLocal;
+    return m_clockLocal;
 }
 
 uint8_t TimeAwareSystem::GetDomain()
@@ -403,4 +401,184 @@ uint8_t TimeAwareSystem::GetDomainToMeasurePDelay()
 void TimeAwareSystem::SetDomainToMeasurePDelay(uint8_t domain)
 {
     s_domainToMeasurePDelay = domain;
+}
+
+uint8_t TimeAwareSystem::GetMasterStepsRemoved()
+{
+    return m_masterStepsRemoved;
+}
+
+void TimeAwareSystem::SetMasterStepsRemoved(uint8_t stepsRemoved)
+{
+    m_masterStepsRemoved = stepsRemoved;
+}
+
+bool TimeAwareSystem::GetLeap61()
+{
+    return m_leap61;
+}
+
+void TimeAwareSystem::SetLeap61(bool enable)
+{
+    m_leap61 = enable;
+}
+
+bool TimeAwareSystem::GetLeap59()
+{
+    return m_leap59;
+}
+
+void TimeAwareSystem::SetLeap59(bool enable)
+{
+    m_leap59 = enable;
+}
+
+bool TimeAwareSystem::GetCurrentUtcOffsetValid()
+{
+    return m_currentUtcOffsetValid;
+}
+
+void TimeAwareSystem::SetCurrentUtcOffsetValid(bool enable)
+{
+    m_currentUtcOffsetValid = enable;
+}
+
+bool TimeAwareSystem::GetTimeTraceable()
+{
+    return m_timeTraceable;
+}
+
+void TimeAwareSystem::SetTimeTraceable(bool enable)
+{
+    m_timeTraceable = enable;
+}
+
+bool TimeAwareSystem::GetFrequencyTraceable()
+{
+    return m_frequencyTraceable;
+}
+
+void TimeAwareSystem::SetFrequencyTraceable(bool enable)
+{
+    m_frequencyTraceable = enable;
+}
+
+int16_t TimeAwareSystem::GetCurrentUtcOffset()
+{
+    return m_currentUtcOffset;
+}
+
+void TimeAwareSystem::SetCurrentUtcOffset(int16_t offset)
+{
+    m_currentUtcOffset = offset;
+}
+
+ClockTimeSource TimeAwareSystem::GetTimeSource()
+{
+    return m_timeSource;
+}
+
+void TimeAwareSystem::SetTimeSource(ClockTimeSource timeSource)
+{
+    this->m_timeSource = timeSource;
+}
+
+bool TimeAwareSystem::GetSysLeap61()
+{
+    return m_sysLeap61;
+}
+
+void TimeAwareSystem::SetSysLeap61(bool enable)
+{
+    m_sysLeap61 = enable;
+}
+
+bool TimeAwareSystem::GetSysLeap59()
+{
+    return m_sysLeap59;
+}
+
+void TimeAwareSystem::SetSysLeap59(bool enable)
+{
+    m_sysLeap59 = enable;
+}
+
+bool TimeAwareSystem::GetSysCurrentUTCOffsetValid()
+{
+    return m_sysCurrentUTCOffsetValid;
+}
+
+void TimeAwareSystem::SetSysCurrentUTCOffsetValid(bool valid)
+{
+    m_sysCurrentUTCOffsetValid = valid;
+}
+
+bool TimeAwareSystem::GetSysTimeTraceable()
+{
+    return m_sysTimeTraceable;
+}
+
+void TimeAwareSystem::SetSysTimeTraceable(bool traceable)
+{
+    m_sysTimeTraceable = traceable;
+}
+
+bool TimeAwareSystem::GetSysFrequencyTraceable()
+{
+    return m_sysFrequencyTraceable;
+}
+
+void TimeAwareSystem::SetSysFrequencyTraceable(bool traceable)
+{
+    m_sysFrequencyTraceable = traceable;
+}
+
+int16_t TimeAwareSystem::GetSysCurrentUtcOffset()
+{
+    return m_sysCurrentUtcOffset;
+}
+
+void TimeAwareSystem::SetSysCurrentUtcOffset(int16_t offset)
+{
+    m_sysCurrentUtcOffset = offset;
+}
+
+ClockTimeSource TimeAwareSystem::GetSysTimeSource()
+{
+    return m_sysTimeSource;
+}
+
+void TimeAwareSystem::SetSysTimeSource(ClockTimeSource timeSource)
+{
+    m_sysTimeSource = timeSource;
+}
+
+PriorityVector TimeAwareSystem::GetSystemPriority()
+{
+    return m_systemPriority;
+}
+
+void TimeAwareSystem::SetSystemPriority(PriorityVector priority)
+{
+    m_systemPriority = priority;
+}
+
+PriorityVector TimeAwareSystem::GetGmPriority()
+{
+    return m_gmPriority;
+}
+
+void TimeAwareSystem::SetGmPriority(PriorityVector priority)
+{
+    m_gmPriority = priority;
+}
+
+PriorityVector TimeAwareSystem::GetLastGmPriority()
+{
+    return m_lastGmPriority;
+}
+
+void TimeAwareSystem::SetLastGmPriority(PriorityVector priority)
+{
+    m_lastGmPriority = priority;
 }

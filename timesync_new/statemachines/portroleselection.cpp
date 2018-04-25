@@ -13,20 +13,23 @@ PortRoleSelection::~PortRoleSelection()
 
 void PortRoleSelection::UpdtRoleDisabledTree()
 {
+    PriorityVector lastGmPriority;
     for (std::vector<PortRole>::size_type i = 0; i < m_ports.size(); ++i)
     {
         m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_DISABLED);
 
-        m_timeAwareSystem->lastGmPriority.identity.priority1 = 255;
-        m_timeAwareSystem->lastGmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
-        m_timeAwareSystem->lastGmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
-        m_timeAwareSystem->lastGmPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
-        m_timeAwareSystem->lastGmPriority.identity.priority2 = 255;
-        memset(m_timeAwareSystem->lastGmPriority.identity.clockIdentity, 255, sizeof(m_timeAwareSystem->lastGmPriority.identity.clockIdentity));
-        m_timeAwareSystem->lastGmPriority.stepsRemoved = UINT16_MAX;
-        memset(m_timeAwareSystem->lastGmPriority.sourcePortIdentity.clockIdentity, 255, sizeof(m_timeAwareSystem->lastGmPriority.sourcePortIdentity.clockIdentity));
-        m_timeAwareSystem->lastGmPriority.sourcePortIdentity.portNumber = UINT16_MAX;
-        m_timeAwareSystem->lastGmPriority.portNumber = UINT16_MAX;
+        lastGmPriority.identity.priority1 = 255;
+        lastGmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
+        lastGmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
+        lastGmPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
+        lastGmPriority.identity.priority2 = 255;
+        memset(lastGmPriority.identity.clockIdentity, 255, sizeof(lastGmPriority.identity.clockIdentity));
+        lastGmPriority.stepsRemoved = UINT16_MAX;
+        memset(lastGmPriority.sourcePortIdentity.clockIdentity, 255, sizeof(lastGmPriority.sourcePortIdentity.clockIdentity));
+        lastGmPriority.sourcePortIdentity.portNumber = UINT16_MAX;
+        lastGmPriority.portNumber = UINT16_MAX;
+
+        m_timeAwareSystem->SetLastGmPriority(lastGmPriority);
 
         m_timeAwareSystem->ClearPathTrace();
         m_timeAwareSystem->AddPath(m_timeAwareSystem->GetClockIdentity());
@@ -57,7 +60,7 @@ void PortRoleSelection::UpdtRolesTree()
      * which the clockIdentity of the master port is not equal to thisClock (see 10.2.3.22), */
 
     PortGlobal* bestPort = NULL;
-    PriorityVector bestGmPriority = m_timeAwareSystem->systemPriority;
+    PriorityVector bestGmPriority = m_timeAwareSystem->GetSystemPriority();
 
     for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
     {
@@ -72,8 +75,8 @@ void PortRoleSelection::UpdtRolesTree()
             bestPort = port;
         }
     }
-    m_timeAwareSystem->lastGmPriority = m_timeAwareSystem->gmPriority;
-    m_timeAwareSystem->gmPriority = bestGmPriority;
+    m_timeAwareSystem->SetLastGmPriority(m_timeAwareSystem->GetGmPriority());
+    m_timeAwareSystem->SetGmPriority(bestGmPriority);
 
     /* Sets the per-time-aware system global variables leap61, leap59, currentUtcOffsetValid, timeTraceable, frequencyTraceable, currentUtcOffset,
      * and timeSource as follows:
@@ -84,22 +87,22 @@ void PortRoleSelection::UpdtRolesTree()
      * currentUtcOffset, and timeSource are set to sysLeap61, sysLeap59, sysCurrentUtcOffsetValid, sysTimeTraceable, sysFrequencyTraceable,
      * sysCurrentUtcOffset, and sysTimeSource, respectively.
      */
-    m_timeAwareSystem->leap61 = bestPort != NULL ? bestPort->annLeap61 : m_timeAwareSystem->sysLeap61;
-    m_timeAwareSystem->leap59 = bestPort != NULL ? bestPort->annLeap59 : m_timeAwareSystem->sysLeap59;
-    m_timeAwareSystem->currentUtcOffsetValid = bestPort != NULL ? bestPort->annCurrentUtcOffsetValid : m_timeAwareSystem->currentUtcOffsetValid;
-    m_timeAwareSystem->timeTraceable = bestPort != NULL ? bestPort->annTimeTraceable : m_timeAwareSystem->sysTimeTraceable;
-    m_timeAwareSystem->frequencyTraceable = bestPort != NULL ? bestPort->annFrequencyTraceable : m_timeAwareSystem->sysFrequencyTraceable;
-    m_timeAwareSystem->currentUtcOffset = bestPort != NULL ? bestPort->annCurrentUtcOffset : m_timeAwareSystem->sysCurrentUtcOffset;
-    m_timeAwareSystem->timeSource = bestPort != NULL ? bestPort->annTimeSource : m_timeAwareSystem->sysTimeSource;
+    m_timeAwareSystem->SetLeap61(bestPort != NULL ? bestPort->annLeap61 : m_timeAwareSystem->GetSysLeap61());
+    m_timeAwareSystem->SetLeap59(bestPort != NULL ? bestPort->annLeap59 : m_timeAwareSystem->GetSysLeap59());
+    m_timeAwareSystem->SetCurrentUtcOffsetValid(bestPort != NULL ? bestPort->annCurrentUtcOffsetValid : m_timeAwareSystem->GetCurrentUtcOffsetValid());
+    m_timeAwareSystem->SetTimeTraceable(bestPort != NULL ? bestPort->annTimeTraceable : m_timeAwareSystem->GetSysTimeTraceable());
+    m_timeAwareSystem->SetFrequencyTraceable(bestPort != NULL ? bestPort->annFrequencyTraceable : m_timeAwareSystem->GetSysFrequencyTraceable());
+    m_timeAwareSystem->SetCurrentUtcOffset(bestPort != NULL ? bestPort->annCurrentUtcOffset : m_timeAwareSystem->GetSysCurrentUtcOffset());
+    m_timeAwareSystem->SetTimeSource(bestPort != NULL ? bestPort->annTimeSource : m_timeAwareSystem->GetSysTimeSource());
 
     /* Computes the first three components and the clockIdentity of the fourth component of the
      * masterPriorityVector for each port (i.e., everything except the portNumber of the fourth component) */
     for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
     {
         PortGlobal* port = m_ports[i];
-        port->masterPriority.identity = m_timeAwareSystem->gmPriority.identity;
-        port->masterPriority.stepsRemoved = m_timeAwareSystem->gmPriority.stepsRemoved;
-        memcpy(port->masterPriority.sourcePortIdentity.clockIdentity, m_timeAwareSystem->systemPriority.sourcePortIdentity.clockIdentity,
+        port->masterPriority.identity = m_timeAwareSystem->GetGmPriority().identity;
+        port->masterPriority.stepsRemoved = m_timeAwareSystem->GetGmPriority().stepsRemoved;
+        memcpy(port->masterPriority.sourcePortIdentity.clockIdentity, m_timeAwareSystem->GetSystemPriority().sourcePortIdentity.clockIdentity,
                CLOCK_ID_LENGTH);
         port->masterPriority.sourcePortIdentity.portNumber = port->identity.portNumber;
     }
@@ -108,7 +111,7 @@ void PortRoleSelection::UpdtRolesTree()
      * 1) messageStepsRemoved (see 10.3.9.7) for the port associated with the gmPriorityVector, incremented by 1, if the gmPriorityVector is not
      * the systemPriorityVector, or
      * 2) 0 if the gmPriorityVector is the systemPriorityVector */
-     m_timeAwareSystem->masterStepsRemoved = bestPort != NULL ? bestPort->messageStepsRemoved : 0;
+     m_timeAwareSystem->SetMasterStepsRemoved(bestPort != NULL ? bestPort->messageStepsRemoved : 0);
 
      /* assigns the port role for port j and sets selectedRole[j] equal to this port role, as follows, for j = 1, 2, numberPorts:
       * 3) If the port is disabled (infoIs == Disabled), selectedRole[j] is set to DisabledPort.
@@ -144,7 +147,7 @@ void PortRoleSelection::UpdtRolesTree()
          else if(port->infoIs == SPANNING_TREE_PORT_STATE_MINE)
          {
              m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_MASTER);
-             if(port->portStepsRemoved != m_timeAwareSystem->masterStepsRemoved || bestPort == NULL || port != bestPort)
+             if(port->portStepsRemoved != m_timeAwareSystem->GetMasterStepsRemoved() || bestPort == NULL || port != bestPort)
                  port->updtInfo = true;
          }
          //6), 7), 8) and 9)
@@ -174,7 +177,7 @@ void PortRoleSelection::UpdtRolesTree()
      /** Updates gmPresent as follows:
       * 10) gmPresent is set to TRUE if the priority1 field of the rootSystemIdentity of the gmPriorityVector is less than 255.
       * 11) gmPresent is set to FALSE if the priority1 field of the rootSystemIdentity of the gmPriorityVector is equal to 255. */
-     m_timeAwareSystem->SetGmPresent(m_timeAwareSystem->systemPriority.identity.priority1 < 255);
+     m_timeAwareSystem->SetGmPresent(m_timeAwareSystem->GetSystemPriority().identity.priority1 < 255);
 
      /** Assigns the port role for port 0, and sets selectedRole[0], as follows:
       * 12) if selectedRole[j] is set to SlavePort for any port with portNumber j, j = 1, 2, ..., numberPorts, selectedRole[0] is set to PassivePort.

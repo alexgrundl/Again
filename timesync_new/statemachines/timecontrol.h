@@ -1,6 +1,8 @@
 #ifndef TIMECONTROL_H
 #define TIMECONTROL_H
 
+#include <stdlib.h>
+
 #include "ptpclock.h"
 
 class TimeControl

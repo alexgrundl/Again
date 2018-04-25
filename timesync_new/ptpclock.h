@@ -2,75 +2,42 @@
 #define PTPCLOCK_H
 
 #include <time.h>
-#include <string>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <linux/ptp_clock.h>
-#include <sys/ioctl.h>
-#include <string.h>
-#include <limits.h>
 
 #include "interfaces.h"
-
-#define CLOCKFD 3
-#define FD_TO_CLOCKID(fd) ((~(clockid_t) (fd) << 3) | CLOCKFD)
-#define CLOCKID_TO_FD(clk) ((unsigned int) ~((clk) >> 3))
-
-#ifndef ADJ_SETOFFSET
-#define ADJ_SETOFFSET   0x100
-#endif
-#define ADJ_NANO        0x2000
 
 class PtpClock : public ClockSourceTime
 {
 public:
 
-    PtpClock();
+
+    virtual ~PtpClock(){}
 
 
-    virtual ~PtpClock();
+    virtual void AdjustPhase(int64_t nanoseconds) = 0;
 
 
-    void Invoke(ClockSourceTimeParams* params);
+    virtual void AdjustFrequency(double ppm) = 0;
 
 
-    void AdjustPhase(int64_t nanoseconds);
+    virtual bool Open(int clockIndex) = 0;
 
 
-    void AdjustFrequency(double ppm);
+    virtual void GetTime(struct timespec* ts) = 0;
 
 
-    bool Open(int clockIndex);
+    virtual bool GetSystemAndDeviceTime(struct timespec* tsSystem, struct timespec* tsDevice) = 0;
 
 
-    void GetTime(struct timespec* ts);
+    virtual bool StartPPS(int pinIndex, int channel, struct ptp_clock_time* period) = 0;
 
 
-    bool GetSystemAndDeviceTime(struct timespec* tsSystem, struct timespec* tsDevice);
+    virtual bool StartPPS() = 0;
 
 
-    bool StartPPS(int pinIndex, int channel, struct ptp_clock_time* period);
+    virtual bool StopPPS(int pinIndex, int channel) = 0;
 
 
-    bool StartPPS();
-
-
-    bool StopPPS(int pinIndex, int channel);
-
-
-    bool StopPPS();
-
-private:
-
-    std::string ptpClockRootPath;
-
-
-    std::string m_clockPath;
-
-
-    int m_clockFD;
+    virtual bool StopPPS() = 0;
 };
 
 #endif // PTPCLOCK_H
