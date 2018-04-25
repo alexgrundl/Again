@@ -22,7 +22,7 @@ PtpMessageFollowUp::~PtpMessageFollowUp()
 
 }
 
-void PtpMessageFollowUp::GetMessage(uint8_t *bytes)
+void PtpMessageFollowUp::GetPtpMessage(uint8_t *bytes)
 {
     GetHeader(bytes);
 

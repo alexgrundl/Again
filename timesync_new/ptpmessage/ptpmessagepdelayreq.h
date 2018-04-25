@@ -11,7 +11,7 @@ public:
     PtpMessagePDelayReq();
 
 
-    void GetMessage(uint8_t* bytes);
+    void GetPtpMessage(uint8_t* bytes);
 
 
     void ParsePackage(const uint8_t* bytes);

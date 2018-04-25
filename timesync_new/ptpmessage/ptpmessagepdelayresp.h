@@ -12,7 +12,7 @@ public:
     PtpMessagePDelayResp();
 
 
-    void GetMessage(uint8_t* bytes);
+    void GetPtpMessage(uint8_t* bytes);
 
 
     PortIdentity GetRequestingPortIdentity();

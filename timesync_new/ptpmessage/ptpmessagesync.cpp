@@ -13,7 +13,7 @@ PtpMessageSync::~PtpMessageSync()
 
 }
 
-void PtpMessageSync::GetMessage(uint8_t *bytes)
+void PtpMessageSync::GetPtpMessage(uint8_t *bytes)
 {
     GetHeader(bytes);
     for(int i = 0; i < 10; i++)

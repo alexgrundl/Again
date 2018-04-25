@@ -179,7 +179,7 @@ void PtpMessageAnnounce::SetFrequencyTraceable(bool enable)
     m_flags = enable ? m_flags | (1 << FLAG_FREQUENCY_TRACABLE) : m_flags &~(1 << FLAG_FREQUENCY_TRACABLE);
 }
 
-void PtpMessageAnnounce::GetMessage(uint8_t *bytes)
+void PtpMessageAnnounce::GetPtpMessage(uint8_t *bytes)
 {
     GetHeader(bytes);
 

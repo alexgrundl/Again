@@ -7,7 +7,7 @@ PtpMessagePDelayReq::PtpMessagePDelayReq()
     m_control = 5;
 }
 
-void PtpMessagePDelayReq::GetMessage(uint8_t* bytes)
+void PtpMessagePDelayReq::GetPtpMessage(uint8_t* bytes)
 {
     GetHeader(bytes);
     for(int i = 0; i < 20; i++)

@@ -14,7 +14,7 @@ PtpMessagePDelayResp::PtpMessagePDelayResp()
     memset(m_requestingPortIdentity.clockIdentity, 0, sizeof(m_requestingPortIdentity.clockIdentity));
 }
 
-void PtpMessagePDelayResp::GetMessage(uint8_t* bytes)
+void PtpMessagePDelayResp::GetPtpMessage(uint8_t* bytes)
 {
     GetHeader(bytes);
 

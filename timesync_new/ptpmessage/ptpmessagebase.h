@@ -107,7 +107,7 @@ public:
     void SetSendTime(UScaledNs value);
 
 
-    virtual void GetMessage(uint8_t* bytes) = 0;
+    virtual void GetPtpMessage(uint8_t* bytes) = 0;
 
 
     void ParseHeader(const uint8_t* bytes);
