@@ -10,7 +10,8 @@ TimeControl::TimeControl()
 void TimeControl::SetPtpClock(PtpClock* ptpClock)
 {
     m_ptpClock = ptpClock;
-    m_ptpClock->AdjustFrequency(0);
+    if(m_ptpClock != NULL)
+        m_ptpClock->AdjustFrequency(0);
 }
 
 void TimeControl::Syntonize(ScaledNs masterLocalOffset, double remoteLocalRate)

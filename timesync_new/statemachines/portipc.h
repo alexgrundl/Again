@@ -1,6 +1,8 @@
 #ifndef PORTIPC_H
 #define PORTIPC_H
 
+#ifdef __linux__
+
 #include "statemachinebase.h"
 #include "linuxsharedmemoryipc.h"
 
@@ -42,5 +44,7 @@ private:
 
     UScaledNs m_ipcUpdateTime;
 };
+
+#endif
 
 #endif // PORTIPC_H

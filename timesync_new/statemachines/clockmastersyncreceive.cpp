@@ -59,9 +59,12 @@ void ClockMasterSyncReceive::ProcessState()
     else
     {
         /* Should be invoked elsewhere. Just for testing... */
-        ClockSourceTimeParams params;
-        m_timeAwareSystem->GetLocalClock()->Invoke(&params);
-        SetClockSourceRequest(&params);
+        if(m_timeAwareSystem->GetLocalClock() != NULL)
+        {
+            ClockSourceTimeParams params;
+            m_timeAwareSystem->GetLocalClock()->Invoke(&params);
+            SetClockSourceRequest(&params);
+        }
 
         if(m_rcvdClockSourceReq || m_rcvdLocalClockTick)
         {

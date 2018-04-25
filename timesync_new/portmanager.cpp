@@ -28,6 +28,7 @@ uint32_t PortManager::Receive(bool_t* pbIsRunning, pal::EventHandle_t pWaitHandl
         dwWaitResult = pal::EventWait(pWaitHandle, 20);
         if(dwWaitResult == pal::EventWaitTimeout)
         {
+#ifdef __linux__
             CLinuxReceivePackage package(128);
             m_networkPort->ReceiveMessage(&package);
             if(package.IsValid())
@@ -38,9 +39,10 @@ uint32_t PortManager::Receive(bool_t* pbIsRunning, pal::EventHandle_t pWaitHandl
                     m_stateMachineManagers[i]->ProcessPackage(m_portIndex, &package);
                 }
             }
+#endif
         }
         else
-            sleep(1);
+            pal::ms_sleep(1000);
     }
 
     return 0;

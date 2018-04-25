@@ -1,6 +1,8 @@
 #ifndef LINUXSHAREDMEMORYIPC_H
 #define LINUXSHAREDMEMORYIPC_H
 
+#ifdef __linux__
+
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -128,5 +130,8 @@ public:
     void set_ifname(const char* ifname);
     void set_if_phc_index(int phc_idx);
 };
+
+
+#endif
 
 #endif // LINUXSHAREDMEMORYIPC_H

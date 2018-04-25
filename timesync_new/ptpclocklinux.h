@@ -1,6 +1,8 @@
 #ifndef PTPCLOCKLINUX_H
 #define PTPCLOCKLINUX_H
 
+#ifdef __linux__
+
 #include <time.h>
 #include <string>
 #include <sys/types.h>
@@ -75,5 +77,6 @@ private:
     int m_clockFD;
 };
 
+#endif
 
 #endif // PTPCLOCKLINUX_H

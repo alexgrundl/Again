@@ -25,7 +25,9 @@
 #include "portannounceinformation.h"
 #include "portroleselection.h"
 #include "portannouncetransmit.h"
-#include "portipc.h"
+#ifdef __linux__
+    #include "portipc.h"
+#endif
 
 #include "ptpclock.h"
 
@@ -107,9 +109,9 @@ private:
 
     std::vector<MDPortAnnounceTransmit*> m_mdPortAnnounceTransmit;
 
-
+#ifdef __linux
     std::vector<PortIPC*> m_portIPC;
-
+#endif
 
 
     CThreadWrapper<StateMachineManager>* m_stateThread;

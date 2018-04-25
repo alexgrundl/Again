@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #include "ptpclocklinux.h"
 
 PtpClockLinux::PtpClockLinux()
@@ -173,3 +175,5 @@ bool PtpClockLinux::StopPPS()
 {
     return StopPPS(2, 1);
 }
+
+#endif

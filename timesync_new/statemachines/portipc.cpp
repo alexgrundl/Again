@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #include "portipc.h"
 
 PortIPC::PortIPC(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetworkInterfacePort *networkPort, int domain) :
@@ -89,3 +91,5 @@ void PortIPC::ProcessState()
 //{
 //    m_ipc.update(mlPhoffset, lsPhoffset, mlFreqoffset, lsFreqoffset, 5, 6, 7,  PTP_SLAVE, true, GPTP_CLOCK_REALTIME, 5);
 //}
+
+#endif

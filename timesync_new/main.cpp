@@ -28,6 +28,8 @@ const char* ifnameMasterClock = "enp15s0";
 
 void wait_for_signals()
 {
+#ifdef __linux__
+
     sigset_t set;
     int sig;
     sigemptyset(&set);
@@ -48,10 +50,16 @@ void wait_for_signals()
         }
 
     } while (sig != SIGINT);
+
+#else
+    while(true)
+        pal::ms_sleep(1000);
+#endif
 }
 
 bool check_wireless(const char* ifname, char* protocol)
 {
+#ifdef __linux__
   int sock = -1;
   struct iwreq pwrq;
   memset(&pwrq, 0, sizeof(pwrq));
@@ -72,6 +80,7 @@ bool check_wireless(const char* ifname, char* protocol)
   }
 
   close(sock);
+#endif
   return false;
 }
 
@@ -84,8 +93,13 @@ int main()
     std::vector<PortGlobal*> ports;
     std::vector<PortGlobal*> ports1;
 
+#ifndef __linux__
+    PtpClock* clockDom0 = new PtpClockWindows();
+    PtpClock* clockDom1 = new PtpClockWindows();
+#else
     PtpClock* clockDom0 = new PtpClockLinux();
     PtpClock* clockDom1 = new PtpClockLinux();
+
 
     struct ifaddrs *addrs,*next;
     getifaddrs(&addrs);
@@ -177,6 +191,7 @@ int main()
         next = next->ifa_next;
     }
     freeifaddrs(addrs);
+#endif
 
     std::vector<StateMachineManager*> smManagers;
 

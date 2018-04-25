@@ -3,7 +3,8 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-LIBS += -pthread -lrt
+win32: LIBS += -pthread -lhid -lsetupapi
+else: unix: LIBS += -pthread -lrt
 
 INCLUDEPATH += c-extensions
 INCLUDEPATH += c-platform
@@ -54,7 +55,8 @@ SOURCES += main.cpp \
     ipc/linuxsharedmemoryipc.cpp \
     statemachines/portipc.cpp \
     ptpclocklinux.cpp \
-    ptpclockwindows.cpp
+    ptpclockwindows.cpp \
+    c-platform/win/platform_win.cpp
 
 HEADERS += \
     types/types.h \
@@ -113,5 +115,6 @@ HEADERS += \
     statemachines/portipc.h \
     ptpclock.h \
     ptpclocklinux.h \
-    ptpclockwindows.h
+    ptpclockwindows.h \
+    c-platform/win/platform_win.h
 

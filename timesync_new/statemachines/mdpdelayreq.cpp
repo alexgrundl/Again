@@ -1,15 +1,5 @@
 #include "mdpdelayreq.h"
 
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
-#include <netinet/ether.h>
-#include <linux/if_packet.h>
-#include "ptpmessage/ptpmessagesync.h"
-#include "ptpmessage/ptpmessagefollowup.h"
-
 MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort* networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {

@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #include "linuxsharedmemoryipc.h"
 
 LinuxSharedMemoryIPC::LinuxSharedMemoryIPC()
@@ -238,3 +240,5 @@ void LinuxSharedMemoryIPC::stop() {
         shm_unlink( shm_name.c_str() );
     }
 }
+
+#endif

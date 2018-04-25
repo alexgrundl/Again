@@ -12,6 +12,9 @@ public:
     virtual ~PtpClockWindows();
 
 
+    void Invoke(ClockSourceTimeParams* params) {}
+
+
     void AdjustPhase(int64_t nanoseconds) {}
 
 

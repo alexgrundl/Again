@@ -8,7 +8,8 @@
 #include "commstructs.h"
 #include "timeawaresystem.h"
 
-#include "linux_netport.h"
+#include "netport.h"
+#include "platform.h"
 
 class StateMachineBase
 {

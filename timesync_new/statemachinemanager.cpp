@@ -36,7 +36,9 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
         m_mdPortAnnounceTransmit.push_back(new MDPortAnnounceTransmit(m_timeAwareSystem, ports[i], networkPorts[i]));
         m_portAnnounceTransmit.push_back(new PortAnnounceTransmit(m_timeAwareSystem, ports[i], m_mdPortAnnounceTransmit[i]));
 
+#ifdef __linux__
         m_portIPC.push_back(new PortIPC(m_timeAwareSystem, ports[i], networkPorts[i], m_timeAwareSystem->GetDomain()));
+#endif
     }
     m_portRoleSelection = new PortRoleSelection(m_timeAwareSystem, ports);
 
@@ -60,8 +62,9 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
         m_stateMachines.push_back(m_portAnnounceReceive[i]);
         m_stateMachines.push_back(m_mdPortAnnounceTransmit[i]);
         m_stateMachines.push_back(m_portAnnounceTransmit[i]);
-
+#ifdef __linux__
         m_stateMachines.push_back(m_portIPC[i]);
+#endif
     }
     m_stateMachines.push_back(m_portRoleSelection);
 
@@ -86,8 +89,9 @@ StateMachineManager::~StateMachineManager()
         delete m_portAnnounceReceive[i];
         delete m_mdPortAnnounceTransmit[i];
         delete m_portAnnounceTransmit[i];
-
+#ifdef __linux__
         delete m_portIPC[i];
+#endif
     }
 
     delete m_clockSlaveSync;
