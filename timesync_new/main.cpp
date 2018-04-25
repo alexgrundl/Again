@@ -86,8 +86,8 @@ int main()
         if (next->ifa_addr && next->ifa_addr->sa_family == AF_PACKET &&
                 (next->ifa_flags & IFF_LOOPBACK) == 0 && !check_wireless(next->ifa_name, NULL))
         {
-            if(strcmp(next->ifa_name, "enp15s0") == 0)
-            {
+//            if(strcmp(next->ifa_name, "enp15s0") == 0 || strcmp(next->ifa_name, "enp3s0f0") == 0)
+//            {
                 INetworkInterfacePort* networkPort = new NetworkPort(next->ifa_name);
                 networkPort->Initialize();
                 networkPorts.push_back(networkPort);
@@ -106,7 +106,7 @@ int main()
 
                     port->pdelayReqInterval.ns = NS_PER_SEC;
                     port->pdelayReqInterval.ns_frac = 0;
-                    port->neighborPropDelayThresh.ns = 900;
+                    port->neighborPropDelayThresh.ns = 9000;
                     port->neighborPropDelayThresh.ns_frac = 0;
 
                     port->rcvdMsg = false;
@@ -125,13 +125,14 @@ int main()
                     port->portPriority.sourcePortIdentity.portNumber = UINT16_MAX;
                     port->portPriority.portNumber = UINT16_MAX;
 
+                    port->selected = false;
+                    port->reselect = false;
+
                     if(i == 0)
                     {
                         ports.push_back(port);
 
                         tas.AddSelectedRole(PORT_ROLE_SLAVE);
-                        tas.selected.push_back(false);
-                        tas.reselect.push_back(false);
 
                         printf("Name: %s\n", next->ifa_name);
 
@@ -148,8 +149,6 @@ int main()
                         ports1.push_back(port);
 
                         tas1.AddSelectedRole(PORT_ROLE_SLAVE);
-                        tas1.selected.push_back(false);
-                        tas1.reselect.push_back(false);
                         tas1.SetDomain(1);
 
                         printf("Name: %s\n", next->ifa_name);
@@ -163,7 +162,7 @@ int main()
                         }
                     }
                 }
-            }
+//            }
         }
         next = next->ifa_next;
     }

@@ -179,6 +179,18 @@ struct PortGlobal
     /** Announce */
 
     /**
+     * @brief Setting to TRUE causes the ROLE_SELECTION block of the PortRoleSelection state machine (see 10.3.12) to be re-entered,
+     * which in turn causes the port role of the port of the time-aware system to be updated (via the function updateRolesTree(), see 10.3.12.1.4).
+     */
+    bool reselect;
+
+    /**
+     * @brief Set to TRUE immediately after the port role of the port is updated. This indicates to the PortAnnounceInformation
+     * state machine (see 10.3.11) that it can update the portPriorityVector and other variables for the port.
+     */
+    bool selected;
+
+    /**
      * @brief The time interval after which announce receipt timeout occurs if an Announce message has not been received during the interval.
      * The value of announceReceiptTimeoutTimeInterval is equal to announceReceiptTimeout (see 10.6.3.2) multiplied by the announceInterval (see 10.3.9.6)
      * for the port at the other end of the link to which this port is attached. The value of announceInterval for the port at the other end of the link is

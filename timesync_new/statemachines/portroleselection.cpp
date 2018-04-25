@@ -35,14 +35,14 @@ void PortRoleSelection::UpdtRoleDisabledTree()
 
 void PortRoleSelection::ClearReselectTree()
 {
-    for (std::vector<bool>::size_type i = 0; i < m_timeAwareSystem->reselect.size(); ++i)
-        m_timeAwareSystem->reselect[i] = false;
+    for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
+        m_ports[i]->reselect = false;
 }
 
 void PortRoleSelection::SetSelectedTree()
 {
-    for (std::vector<bool>::size_type i = 0; i < m_timeAwareSystem->selected.size(); ++i)
-        m_timeAwareSystem->selected[i] = true;
+    for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
+        m_ports[i]->selected = true;
 }
 
 void PortRoleSelection::UpdtRolesTree()
@@ -159,6 +159,7 @@ void PortRoleSelection::UpdtRolesTree()
              }
              else if(port->masterPriority.Compare(port->portPriority) != SystemIdentity::INFO_SUPERIOR)
              {
+
                  m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_PASSIVE);
                  port->updtInfo = false;
              }
@@ -193,6 +194,7 @@ void PortRoleSelection::UpdtRolesTree()
         PortRole portRole = m_timeAwareSystem->GetSelectedRole(i);
         printf("Domain %u\tPort role %lu, %s\n", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
     }
+    printf("\n");
 }
 
 const char* PortRoleSelection::GetStrPortRole(PortRole role)
@@ -228,9 +230,9 @@ void PortRoleSelection::ProcessState()
             break;
 
         case STATE_ROLE_SELECTION:
-            for (std::vector<bool>::size_type i = 0; i < m_timeAwareSystem->reselect.size(); ++i)
+            for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
             {
-                if(m_timeAwareSystem->reselect[i])
+                if(m_ports[i]->reselect)
                 {
                     reselect = true;
                     break;

@@ -127,29 +127,31 @@ void MDPdelayReq::ProcessState()
         switch(m_state)
         {
         case STATE_NOT_ENABLED:
-            if(m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled &&
-                    m_timeAwareSystem->GetDomain() == TimeAwareSystem::GetDomainToMeasurePDelay())
+            if(m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled)
             {
-                m_initPdelayRespReceived = false;
-                //Hmmmmmmmmmmmmmmmmmmmmm.....
-                /* m_pdelayRateRatio = 1.0; */
-                m_rcvdMDTimestampReceive = false;
-                srand(time(NULL));
-                m_pdelayReqSequenceId = rand() % 65536;
-                SetPdelayReq();
-                TxPdelayReq();
-                m_pdelayIntervalTimer = m_timeAwareSystem->GetCurrentTime();
-                m_lostResponses = 0;
-                m_portGlobal->isMeasuringDelay = false;
-                m_portGlobal->asCapable = false;
-                m_networkPort->SetASCapable(false);
-                m_state = STATE_INITIAL_SEND_PDELAY_REQ;
-            }
-            else
-            {
-                m_portGlobal->asCapable = m_networkPort->GetASCapable();
-                m_portGlobal->neighborPropDelay = {m_networkPort->GetPDelay(), 0};
-                m_portGlobal->neighborRateRatio = m_networkPort->GetNeighborRatio();
+                if(m_timeAwareSystem->GetDomain() == TimeAwareSystem::GetDomainToMeasurePDelay())
+                {
+                    m_initPdelayRespReceived = false;
+                    //Hmmmmmmmmmmmmmmmmmmmmm.....
+                    /* m_pdelayRateRatio = 1.0; */
+                    m_rcvdMDTimestampReceive = false;
+                    srand(time(NULL));
+                    m_pdelayReqSequenceId = rand() % 65536;
+                    SetPdelayReq();
+                    TxPdelayReq();
+                    m_pdelayIntervalTimer = m_timeAwareSystem->GetCurrentTime();
+                    m_lostResponses = 0;
+                    m_portGlobal->isMeasuringDelay = false;
+                    m_portGlobal->asCapable = false;
+                    m_networkPort->SetASCapable(false);
+                    m_state = STATE_INITIAL_SEND_PDELAY_REQ;
+                }
+                else
+                {
+                    m_portGlobal->asCapable = m_networkPort->GetASCapable();
+                    m_portGlobal->neighborPropDelay = {m_networkPort->GetPDelay(), 0};
+                    m_portGlobal->neighborRateRatio = m_networkPort->GetNeighborRatio();
+                }
             }
             break;
 
@@ -253,6 +255,7 @@ void MDPdelayReq::ExecuteResetState()
     {
         m_portGlobal->isMeasuringDelay = false;
         m_portGlobal->asCapable = false;
+        m_networkPort->SetASCapable(false);
     }
 }
 

@@ -25,7 +25,7 @@ uint32_t PortManager::Receive(bool_t* pbIsRunning, pal::EventHandle_t pWaitHandl
 
     while(*pbIsRunning)
     {
-        dwWaitResult = pal::EventWait(pWaitHandle, 10);
+        dwWaitResult = pal::EventWait(pWaitHandle, 20);
         if(dwWaitResult == pal::EventWaitTimeout)
         {
             CLinuxReceivePackage package(128);

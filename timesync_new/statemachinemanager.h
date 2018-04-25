@@ -47,10 +47,7 @@ public:
 
 private:
 
-    static const uint32_t m_granularity_ms = 10;
-
-
-    static const uint32_t m_clockSourceTimeUpdate = 10;
+    static const uint32_t m_granularity_ms = 20;
 
 
     int m_currentIndexClockUpdate;

@@ -41,9 +41,6 @@ private:
 
 
     UScaledNs m_ipcUpdateTime;
-
-
-    static uint8_t m_ipcUpdateDomain;
 };
 
 #endif // PORTIPC_H

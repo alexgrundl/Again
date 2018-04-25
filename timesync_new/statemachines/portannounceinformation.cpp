@@ -81,7 +81,7 @@ void PortAnnounceInformation::ProcessState()
             }
             break;
         case STATE_AGED:
-            if(m_timeAwareSystem->selected[m_portGlobal->identity.portNumber - 1] && m_portGlobal->updtInfo)
+            if(m_portGlobal->selected && m_portGlobal->updtInfo)
             {
                 ExecuteUpdateState();
                 m_state = STATE_UPDATE;
@@ -99,7 +99,7 @@ void PortAnnounceInformation::ProcessState()
                 m_rcvdInfo = RcvInfo(m_portGlobal->rcvdAnnouncePtr);
                 m_state = STATE_RECEIVE;
             }
-            else if(m_timeAwareSystem->selected[m_portGlobal->identity.portNumber - 1] && m_portGlobal->updtInfo)
+            else if(m_portGlobal->selected && m_portGlobal->updtInfo)
             {
                 ExecuteUpdateState();
                 m_state = STATE_UPDATE;
@@ -126,8 +126,8 @@ void PortAnnounceInformation::ProcessState()
                 m_portGlobal->announceReceiptTimeoutTimeInterval.ns_frac = 0;
                 m_announceReceiptTimeoutTime = m_timeAwareSystem->GetCurrentTime() + m_portGlobal->announceReceiptTimeoutTimeInterval;
                 m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_RECEIVED;
-                m_timeAwareSystem->reselect[m_portGlobal->identity.portNumber - 1] = true;
-                m_timeAwareSystem->selected[m_portGlobal->identity.portNumber - 1] = false;
+                m_portGlobal->reselect = true;
+                m_portGlobal->selected = false;
                 m_portGlobal->rcvdMsg = false;
                 /*m_rcvdAnnouncePtr = FALSE*/;
                 m_state = STATE_SUPERIOR_MASTER_PORT;
@@ -159,15 +159,15 @@ void PortAnnounceInformation::ExecuteDisabledState()
     m_portGlobal->rcvdMsg = false;
     m_announceReceiptTimeoutTime = m_timeAwareSystem->GetCurrentTime();
     m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_DISABLED;
-    m_timeAwareSystem->reselect[m_portGlobal->identity.portNumber - 1] = true;
-    m_timeAwareSystem->selected[m_portGlobal->identity.portNumber - 1] = false;
+    m_portGlobal->reselect = true;
+    m_portGlobal->selected = false;
 }
 
 void PortAnnounceInformation::ExecuteAgedState()
 {
     m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_AGED;
-    m_timeAwareSystem->reselect[m_portGlobal->identity.portNumber - 1] = true;
-    m_timeAwareSystem->selected[m_portGlobal->identity.portNumber - 1] = false;
+    m_portGlobal->reselect = true;
+    m_portGlobal->selected = false;
 }
 
 void PortAnnounceInformation::ExecuteUpdateState()

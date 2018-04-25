@@ -177,19 +177,6 @@ public:
 
     /** Announce */
 
-    /**
-     * @brief A Boolean array of length numberPorts (see 8.6.1). Setting reselect[j], where 0 ≤ j ≤ numberPorts, to TRUE causes the ROLE_SELECTION
-     * block of the PortRoleSelection state machine (see 10.3.12) to be re-entered, which in turn causes the port role of each port of the
-     * time-aware system to be updated (via the function updateRolesTree(), see 10.3.12.1.4).
-     */
-    std::vector<bool> reselect;
-
-    /**
-     * @brief A Boolean array of length numberPorts (see 8.6.1). selected[j], where 0 ≤ j ≤ numberPorts, is set to TRUE immediately after the port
-     * roles of all the ports are updated. This indicates to the PortAnnounceInformation state machine (see 10.3.11) that it can update the
-     * portPriorityVector and other variables for each port.
-     */
-    std::vector<bool> selected;
 
     /**
      * @brief The value of stepsRemoved for the time-aware system, after the port roles of all the ports have been updated

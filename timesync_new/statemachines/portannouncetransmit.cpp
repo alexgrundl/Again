@@ -69,15 +69,13 @@ void PortAnnounceTransmit::ProcessState()
             break;
 
         case STATE_IDLE:
-            if(m_timeAwareSystem->GetCurrentTime() >= m_announceSendTime && m_timeAwareSystem->selected[m_portGlobal->identity.portNumber - 1] &&
-                    !m_portGlobal->updtInfo)
+            if(m_timeAwareSystem->GetCurrentTime() >= m_announceSendTime && m_portGlobal->selected && !m_portGlobal->updtInfo)
             {
                 m_portGlobal->newInfo = m_portGlobal->newInfo || m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER;
                 m_state = STATE_TRANSMIT_PERIODIC;
             }
             else if(m_portGlobal->newInfo && (m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER) &&
-                    (m_timeAwareSystem->GetCurrentTime() < m_announceSendTime) && m_timeAwareSystem->selected[m_portGlobal->identity.portNumber - 1]
-                    && !m_portGlobal->updtInfo)
+                    (m_timeAwareSystem->GetCurrentTime() < m_announceSendTime) && m_portGlobal->selected && !m_portGlobal->updtInfo)
             {
                 m_portGlobal->newInfo = false;
                 TxAnnounce();
