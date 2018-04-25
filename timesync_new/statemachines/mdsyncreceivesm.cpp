@@ -76,7 +76,7 @@ void MDSyncReceiveSM::ProcessState()
                 m_rcvdSync = false;
                 m_upstreamSyncInterval.ns = NS_PER_SEC * pow(2, m_rcvdSyncPtr->GetLogMessageInterval());
                 m_upstreamSyncInterval.ns_frac = 0;
-                m_followUpReceiptTimeoutTime = m_timeAwareSystem->GetCurrentTime() + m_upstreamSyncInterval;
+                m_followUpReceiptTimeoutTime = m_timeAwareSystem->ReadCurrentTime() + m_upstreamSyncInterval;
 
                 m_state = STATE_WAITING_FOR_FOLLOW_UP;
             }
@@ -90,7 +90,7 @@ void MDSyncReceiveSM::ProcessState()
                 TxMDSyncReceive();
                 m_state = STATE_WAITING_FOR_SYNC;
             }
-            else if(m_timeAwareSystem->GetCurrentTime() >= m_followUpReceiptTimeoutTime)
+            else if(m_timeAwareSystem->ReadCurrentTime() >= m_followUpReceiptTimeoutTime)
             {
                 //UScaledNs time = m_timeAwareSystem->GetCurrentTime();
                 m_rcvdSync = false;

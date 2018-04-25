@@ -15,7 +15,7 @@ PortIPC::PortIPC(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetworkInt
 
     m_ptpClock = ((NetworkPort*)networkPort)->GetPtpClock();
 
-    m_ipcUpdateTime = m_timeAwareSystem->GetCurrentTime() + UScaledNs({NS_PER_SEC / 10, 0});
+    m_ipcUpdateTime = m_timeAwareSystem->ReadCurrentTime() + UScaledNs({NS_PER_SEC / 10, 0});
 }
 
 PortIPC::~PortIPC()
@@ -25,7 +25,7 @@ PortIPC::~PortIPC()
 
 void PortIPC::ProcessState()
 {
-    if(m_timeAwareSystem->GetCurrentTime() >= m_ipcUpdateTime)
+    if(m_timeAwareSystem->ReadCurrentTime() >= m_ipcUpdateTime)
     {
         int64_t masterLocalPhaseOffset, localSystemPhaseOffset;
         FrequencyRatio masterLocalFrequencyOffset, localSystemFrequencyOffset;

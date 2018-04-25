@@ -54,19 +54,19 @@ void ClockMasterSyncSend::ProcessState()
 {
     if(m_timeAwareSystem->BEGIN)
     {
-        m_syncSendTime = m_timeAwareSystem->GetCurrentTime();
+        m_syncSendTime = m_timeAwareSystem->ReadCurrentTime();
         m_syncSendTime.ns += NS_PER_SEC * pow(2, m_timeAwareSystem->GetClockMasterLogSyncInterval());
         m_state = STATE_INITIALIZING;
     }
     else
     {
-        if(m_timeAwareSystem->GetCurrentTime() >= m_syncSendTime)
+        if(m_timeAwareSystem->ReadCurrentTime() >= m_syncSendTime)
         {
             m_state = STATE_SEND_SYNC_INDICATION;
 
             SetPSSyncCMSS(m_timeAwareSystem->GetGmRateRatio());
             TxPSSyncCMSS();
-            m_syncSendTime = m_timeAwareSystem->GetCurrentTime();
+            m_syncSendTime = m_timeAwareSystem->ReadCurrentTime();
             m_syncSendTime.ns += NS_PER_SEC * pow(2, m_timeAwareSystem->GetClockMasterLogSyncInterval());
         }
     }

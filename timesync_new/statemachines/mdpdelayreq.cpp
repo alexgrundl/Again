@@ -139,7 +139,7 @@ void MDPdelayReq::ProcessState()
                     m_pdelayReqSequenceId = rand() % 65536;
                     SetPdelayReq();
                     TxPdelayReq();
-                    m_pdelayIntervalTimer = m_timeAwareSystem->GetCurrentTime();
+                    m_pdelayIntervalTimer = m_timeAwareSystem->ReadCurrentTime();
                     m_lostResponses = 0;
                     m_portGlobal->isMeasuringDelay = false;
                     m_portGlobal->asCapable = false;
@@ -174,7 +174,7 @@ void MDPdelayReq::ProcessState()
                 m_rcvdPdelayResp = false;
                 m_state = STATE_WAITING_FOR_PDELAY_RESP_FOLLOW_UP;
             }
-            else if((m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval) ||
+            else if((m_timeAwareSystem->ReadCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval) ||
                     (m_rcvdPdelayResp &&
                     (memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, CLOCK_ID_LENGTH) != 0 ||
                     (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber != m_portGlobal->identity.portNumber) ||
@@ -218,7 +218,7 @@ void MDPdelayReq::ProcessState()
                 }
                 m_state = STATE_WAITING_FOR_PDELAY_INTERVAL_TIMER;
             }
-            else if((m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval) ||
+            else if((m_timeAwareSystem->ReadCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval) ||
                     (m_rcvdPdelayResp && (m_rcvdPdelayRespPtr->GetSequenceID() == m_txPdelayReqPtr->GetSequenceID())))
             {
                 ExecuteResetState();
@@ -227,7 +227,7 @@ void MDPdelayReq::ProcessState()
             break;
 
         case STATE_WAITING_FOR_PDELAY_INTERVAL_TIMER:
-            if(m_timeAwareSystem->GetCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval)
+            if(m_timeAwareSystem->ReadCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval)
             {
                 ExecuteSendPDelayReqState();
                 m_state = STATE_SEND_PDELAY_REQ;
@@ -264,7 +264,7 @@ void MDPdelayReq::ExecuteSendPDelayReqState()
     m_pdelayReqSequenceId += 1;
     SetPdelayReq();
     TxPdelayReq();
-    m_pdelayIntervalTimer = m_timeAwareSystem->GetCurrentTime();
+    m_pdelayIntervalTimer = m_timeAwareSystem->ReadCurrentTime();
 }
 
 

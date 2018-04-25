@@ -197,7 +197,7 @@ void TimeAwareSystem::SetClockSourceLastGmFreqChange(double value)
     m_clockSourceLastGmFreqChange = value;
 }
 
-UScaledNs TimeAwareSystem::GetCurrentTime()
+UScaledNs TimeAwareSystem::ReadCurrentTime()
 {
     struct timespec ts;
     UScaledNs uscaled;

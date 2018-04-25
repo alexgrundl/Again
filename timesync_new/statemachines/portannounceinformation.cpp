@@ -105,7 +105,7 @@ void PortAnnounceInformation::ProcessState()
                 m_state = STATE_UPDATE;
             }
             else if((m_portGlobal->infoIs == SPANNING_TREE_PORT_STATE_RECEIVED) &&
-                    (m_timeAwareSystem->GetCurrentTime() >= m_announceReceiptTimeoutTime //||
+                    (m_timeAwareSystem->ReadCurrentTime() >= m_announceReceiptTimeoutTime //||
                      /* Where to get syncReceiptTimeoutTime ????????????????????? */
                      /*(m_timeAwareSystem->GetCurrentTime() >= m_portGlobal->syncReceiptTimeoutTime &&
                     m_timeAwareSystem->gmPresent)*/) && !m_portGlobal->updtInfo && !m_portGlobal->rcvdMsg)
@@ -124,7 +124,7 @@ void PortAnnounceInformation::ProcessState()
                 m_portGlobal->announceReceiptTimeoutTimeInterval.ns = (uint64_t)m_portGlobal->announceReceiptTimeout * NS_PER_SEC *
                         pow(2, /*16 +*/ m_portGlobal->rcvdAnnouncePtr->GetLogMessageInterval());
                 m_portGlobal->announceReceiptTimeoutTimeInterval.ns_frac = 0;
-                m_announceReceiptTimeoutTime = m_timeAwareSystem->GetCurrentTime() + m_portGlobal->announceReceiptTimeoutTimeInterval;
+                m_announceReceiptTimeoutTime = m_timeAwareSystem->ReadCurrentTime() + m_portGlobal->announceReceiptTimeoutTimeInterval;
                 m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_RECEIVED;
                 m_portGlobal->reselect = true;
                 m_portGlobal->selected = false;
@@ -135,7 +135,7 @@ void PortAnnounceInformation::ProcessState()
             else if(m_rcvdInfo == MASTER_INFO_REPEATED)
             {
                 /* Sending port is same master port */
-                m_announceReceiptTimeoutTime = m_timeAwareSystem->GetCurrentTime() + m_portGlobal->announceReceiptTimeoutTimeInterval;
+                m_announceReceiptTimeoutTime = m_timeAwareSystem->ReadCurrentTime() + m_portGlobal->announceReceiptTimeoutTimeInterval;
                 m_portGlobal->rcvdMsg = false;
                 /*rcvdAnnouncePtr = FALSE;*/
                 m_state = STATE_REPEATED_MASTER_PORT;
@@ -157,7 +157,7 @@ void PortAnnounceInformation::ProcessState()
 void PortAnnounceInformation::ExecuteDisabledState()
 {
     m_portGlobal->rcvdMsg = false;
-    m_announceReceiptTimeoutTime = m_timeAwareSystem->GetCurrentTime();
+    m_announceReceiptTimeoutTime = m_timeAwareSystem->ReadCurrentTime();
     m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_DISABLED;
     m_portGlobal->reselect = true;
     m_portGlobal->selected = false;

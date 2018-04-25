@@ -99,7 +99,7 @@ public:
     /**leap61
      * @brief  The current value of time relative to the LocalClock entity clock.
      */
-    UScaledNs GetCurrentTime();
+    UScaledNs ReadCurrentTime();
 
 
     bool IsGmPresent();

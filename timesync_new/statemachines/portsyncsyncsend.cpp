@@ -109,9 +109,9 @@ void PortSyncSyncSend::ProcessState()
             m_state = STATE_SET_SYNC_RECEIPT_TIMEOUT_TIME;
             break;
         case STATE_SET_SYNC_RECEIPT_TIMEOUT_TIME:
-            if((((m_rcvdPSSync && (m_timeAwareSystem->GetCurrentTime() - m_lastSyncSentTime >= m_portGlobal->syncInterval * 0.5) &&
+            if((((m_rcvdPSSync && (m_timeAwareSystem->ReadCurrentTime() - m_lastSyncSentTime >= m_portGlobal->syncInterval * 0.5) &&
                  m_rcvdPSSyncPtr->localPortNumber != m_portGlobal->identity.portNumber)) ||
-                ((m_timeAwareSystem->GetCurrentTime() - m_lastSyncSentTime >= m_portGlobal->syncInterval) &&
+                ((m_timeAwareSystem->ReadCurrentTime() - m_lastSyncSentTime >= m_portGlobal->syncInterval) &&
                    (m_lastRcvdPortNum != m_portGlobal->identity.portNumber))) && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled &&
                     m_portGlobal->asCapable && m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER)
             {
@@ -119,14 +119,14 @@ void PortSyncSyncSend::ProcessState()
                 m_state = STATE_SEND_MD_SYNC;
             }
             else if(m_rcvdPSSync &&
-                    (m_timeAwareSystem->GetCurrentTime() - m_lastSyncSentTime < m_portGlobal->syncInterval * 0.5) &&
+                    (m_timeAwareSystem->ReadCurrentTime() - m_lastSyncSentTime < m_portGlobal->syncInterval * 0.5) &&
                     (m_rcvdPSSyncPtr->localPortNumber != m_portGlobal->identity.portNumber)
                     && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable &&
                     m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER)
             {
                 m_syncReceiptTimeoutTime = m_rcvdPSSyncPtr->syncReceiptTimeoutTime;
             }
-            else if(m_timeAwareSystem->GetCurrentTime() >= m_syncReceiptTimeoutTime)
+            else if(m_timeAwareSystem->ReadCurrentTime() >= m_syncReceiptTimeoutTime)
                 m_rcvdPSSync = false;
                 m_state = STATE_SYNC_RECEIPT_TIMEOUT;
             break;
@@ -153,7 +153,7 @@ void PortSyncSyncSend::ExecuteSendMDSyncState()
         m_lastDomain = m_rcvdPSSyncPtr->domain;
     }
     m_rcvdPSSync = false;
-    m_lastSyncSentTime = m_timeAwareSystem->GetCurrentTime();
+    m_lastSyncSentTime = m_timeAwareSystem->ReadCurrentTime();
     SetMDSync();
     TxMDSync();
 }
