@@ -11,6 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "types.h"
 #include "avbts_osipc.hpp"
 #include "linuxipcarg.h"
 

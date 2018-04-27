@@ -128,7 +128,7 @@ int main()
 
                         tas.AddSelectedRole(PORT_ROLE_SLAVE);
 
-                        lognotice("Sending on interface: %s\n", next->ifa_name);
+                        lognotice("Sending on interface: %s", next->ifa_name);
 
                         if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
                         {

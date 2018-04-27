@@ -3,6 +3,7 @@
 
 #include <time.h>
 
+#include "types.h"
 #include "interfaces.h"
 
 class PtpClock : public ClockSourceTime

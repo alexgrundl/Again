@@ -192,12 +192,12 @@ void PortRoleSelection::UpdtRolesTree()
         m_timeAwareSystem->AddPath(m_timeAwareSystem->GetClockIdentity());
     }
 
+    lognotice("New port roles.");
     for (std::vector<PortRole>::size_type i = 0; i <= m_ports.size(); ++i)
     {
         PortRole portRole = m_timeAwareSystem->GetSelectedRole(i);
-        printf("Domain %u\tPort role %lu, %s\n", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
+        lognotice("Domain %u\tPort role %lu, %s", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
     }
-    printf("\n");
 }
 
 const char* PortRoleSelection::GetStrPortRole(PortRole role)

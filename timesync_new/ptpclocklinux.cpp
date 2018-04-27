@@ -124,7 +124,9 @@ bool PtpClockLinux::StartPPS(int pinIndex, int channel, struct ptp_clock_time* p
     desc.chan = channel;
 
     if(ioctl(m_clockFD, PTP_PIN_SETFUNC, &desc))
-        printf("PTP_PIN_SETFUNC SDP%i failed.\n", pinIndex);
+    {
+        logwarning("PTP_PIN_SETFUNC SDP%i failed.\n", pinIndex);
+    }
     else
     {
         clock_gettime(FD_TO_CLOCKID(m_clockFD), &ts);
@@ -136,10 +138,12 @@ bool PtpClockLinux::StartPPS(int pinIndex, int channel, struct ptp_clock_time* p
         peroutRequest.period.nsec = period->nsec;
 
         if(ioctl(m_clockFD, PTP_PEROUT_REQUEST, &peroutRequest))
-            printf("PTP_PEROUT_REQUEST SDP%i failed.\n", pinIndex);
+        {
+            logwarning("PTP_PEROUT_REQUEST SDP%i failed.", pinIndex);
+        }
         else
         {
-            printf("Periodic output SDP%i enabled\n", pinIndex);
+            lognotice("Periodic output SDP%i enabled.", pinIndex);
             success = true;
         }
     }
@@ -156,7 +160,7 @@ bool PtpClockLinux::StopPPS(int pinIndex, int channel)
     desc.index = pinIndex;
     desc.chan = channel;
 
-    printf("Periodic output SDP%i disabled\n", pinIndex);
+    lognotice("Periodic output SDP%i disabled.", pinIndex);
     return ioctl(m_clockFD, PTP_PIN_SETFUNC, &desc) != -1;
 }
 

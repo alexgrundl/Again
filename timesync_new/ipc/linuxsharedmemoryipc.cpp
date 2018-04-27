@@ -14,7 +14,7 @@ LinuxSharedMemoryIPC::~LinuxSharedMemoryIPC()
 {
     munmap(master_offset_buffer, SHM_SIZE);
     if(shm_unlink(shm_name.c_str()) != 0)
-        printf("error shm_unlink: %s\n", strerror(errno));
+        logerror("error shm_unlink: %s\n", strerror(errno));
 }
 
 bool LinuxSharedMemoryIPC::init( OS_IPC_ARG *barg )
@@ -34,7 +34,7 @@ bool LinuxSharedMemoryIPC::init( OS_IPC_ARG *barg )
         arg = dynamic_cast<LinuxIPCArg *> (barg);
         if( arg == NULL )
         {
-            fprintf(stderr, "Wrong IPC init arg type, File: %s\n", __FILE__);
+            logerror("Wrong IPC init arg type, File: %s\n", __FILE__);
             goto exit_error;
         }
         else
@@ -54,17 +54,17 @@ bool LinuxSharedMemoryIPC::init( OS_IPC_ARG *barg )
     shm_fd = shm_open( shm_name.c_str(), O_RDWR | O_CREAT, 0660 );
     if( shm_fd == -1 )
     {
-        fprintf(stderr, "shm_open(): %s, File: %s\n", strerror(errno), __FILE__);
+        logerror("shm_open(): %s, File: %s\n", strerror(errno), __FILE__);
         goto exit_error;
     }
     (void) umask(oldumask);
     if (fchown(shm_fd, -1, grp != NULL ? grp->gr_gid : 0) < 0)
     {
-        fprintf(stderr, "shm_open(): Failed to set ownership, File: %s\n", __FILE__);
+        logerror("shm_open(): Failed to set ownership, File: %s\n", __FILE__);
     }
     if( ftruncate( shm_fd, SHM_SIZE ) == -1 )
     {
-        fprintf(stderr, "ftruncate(), File: %s\n", __FILE__);
+        logerror("ftruncate(), File: %s\n", __FILE__);
         goto exit_unlink;
     }
     master_offset_buffer = (char *) mmap
@@ -72,14 +72,14 @@ bool LinuxSharedMemoryIPC::init( OS_IPC_ARG *barg )
           shm_fd, 0 );
     if( master_offset_buffer == (char *) -1 )
     {
-        fprintf(stderr, "mmap(), File: %s\n", __FILE__);
+        logerror("mmap(), File: %s\n", __FILE__);
         goto exit_unlink;
     }
     /*create mutex attr */
     err = pthread_mutexattr_init(&shared);
     if(err != 0)
     {
-        fprintf(stderr, "mutex attr initialization failed - %s, File: %s\n", strerror(errno), __FILE__);
+        logerror("mutex attr initialization failed - %s, File: %s\n", strerror(errno), __FILE__);
         goto exit_unlink;
     }
     pthread_mutexattr_setpshared(&shared,1);
@@ -87,7 +87,7 @@ bool LinuxSharedMemoryIPC::init( OS_IPC_ARG *barg )
     err = pthread_mutex_init((pthread_mutex_t *) master_offset_buffer, &shared);
     if(err != 0)
     {
-        fprintf(stderr, "sharedmem - Mutex initialization failed - %s, File: %s\n", strerror(errno), __FILE__);
+        logerror("sharedmem - Mutex initialization failed - %s, File: %s\n", strerror(errno), __FILE__);
         goto exit_unlink;
     }
     setpid();
