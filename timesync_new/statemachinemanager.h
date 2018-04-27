@@ -26,6 +26,7 @@
 #include "portannounceinformation.h"
 #include "portroleselection.h"
 #include "portannouncetransmit.h"
+#include "linkdelaysyncintervalsetting.h"
 #ifdef __linux__
     #include "portipc.h"
 #endif
@@ -109,6 +110,9 @@ private:
 
 
     std::vector<MDPortAnnounceTransmit*> m_mdPortAnnounceTransmit;
+
+
+    std::vector<LinkDelaySyncIntervalSetting*> m_linkDelaySyncIntervalSetting;
 
 #ifdef __linux
     std::vector<PortIPC*> m_portIPC;

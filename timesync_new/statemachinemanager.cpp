@@ -36,6 +36,8 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
         m_mdPortAnnounceTransmit.push_back(new MDPortAnnounceTransmit(m_timeAwareSystem, ports[i], networkPorts[i]));
         m_portAnnounceTransmit.push_back(new PortAnnounceTransmit(m_timeAwareSystem, ports[i], m_mdPortAnnounceTransmit[i]));
 
+        m_linkDelaySyncIntervalSetting.push_back(new LinkDelaySyncIntervalSetting(timeAwareSystem, ports[i], networkPorts[i]));
+
 #ifdef __linux__
         m_portIPC.push_back(new PortIPC(m_timeAwareSystem, ports[i], networkPorts[i], m_timeAwareSystem->GetDomain()));
 #endif
@@ -62,6 +64,8 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
         m_stateMachines.push_back(m_portAnnounceReceive[i]);
         m_stateMachines.push_back(m_mdPortAnnounceTransmit[i]);
         m_stateMachines.push_back(m_portAnnounceTransmit[i]);
+
+        m_stateMachines.push_back(m_linkDelaySyncIntervalSetting[i]);
 #ifdef __linux__
         m_stateMachines.push_back(m_portIPC[i]);
 #endif
@@ -170,6 +174,10 @@ void StateMachineManager::ProcessPackage(int portIndex, IReceivePackage* package
             break;
         case PTP_MESSSAGE_TYPE_ANNOUNCE:
             m_portAnnounceReceive[portIndex]->SetAnnounce(package);
+            break;
+        case PTP_MESSSAGE_TYPE_SIGNALING:
+            m_linkDelaySyncIntervalSetting[portIndex]->SetSignalingMessage(package);
+            break;
         }
     }
 }

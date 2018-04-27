@@ -59,7 +59,9 @@ SOURCES += main.cpp \
     ptpclockwindows.cpp \
     c-platform/win/platform_win.cpp \
     portglobal.cpp \
-    linux_netport.cpp
+    linux_netport.cpp \
+    statemachines/linkdelaysyncintervalsetting.cpp \
+    ptpmessage/ptpmessagesignaling.cpp
 
 HEADERS += \
     types/types.h \
@@ -120,5 +122,7 @@ HEADERS += \
     c-platform/win/platform_win.h \
     portglobal.h \
     linux_netport.h \
-    netport.h
+    netport.h \
+    statemachines/linkdelaysyncintervalsetting.h \
+    ptpmessage/ptpmessagesignaling.h
 

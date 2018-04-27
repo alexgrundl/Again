@@ -131,7 +131,7 @@ void PtpMessageAnnounce::SetPathSequence(std::vector<uint8_t*> pathSequence)
 
 bool PtpMessageAnnounce::GetFlagLeap61()
 {
-    return (m_flags & (1 << FLAG_LI61)) == FLAG_LI61;
+    return (m_flags & (1 << FLAG_LI61)) == 1 << FLAG_LI61;
 }
 
 void PtpMessageAnnounce::SetFlagLeap61(bool enable)
@@ -141,7 +141,7 @@ void PtpMessageAnnounce::SetFlagLeap61(bool enable)
 
 bool PtpMessageAnnounce::GetFlagLeap59()
 {
-    return (m_flags & (1 << FLAG_LI59)) == FLAG_LI59;
+    return (m_flags & (1 << FLAG_LI59)) == 1 << FLAG_LI59;
 }
 
 void PtpMessageAnnounce::SetFlagLeap59(bool enable)
@@ -151,7 +151,7 @@ void PtpMessageAnnounce::SetFlagLeap59(bool enable)
 
 bool PtpMessageAnnounce::GetCurrentUtcOffsetValid()
 {
-    return (m_flags & (1 << FLAG_UTC_REASONABLE)) == FLAG_UTC_REASONABLE;
+    return (m_flags & (1 << FLAG_UTC_REASONABLE)) == 1 << FLAG_UTC_REASONABLE;
 }
 
 void PtpMessageAnnounce::SetCurrentUtcOffsetValid(bool enable)
@@ -161,7 +161,7 @@ void PtpMessageAnnounce::SetCurrentUtcOffsetValid(bool enable)
 
 bool PtpMessageAnnounce::GetTimeTraceable()
 {
-    return (m_flags & (1 << FLAG_TIME_TRACABLE)) == FLAG_TIME_TRACABLE;
+    return (m_flags & (1 << FLAG_TIME_TRACABLE)) == 1 << FLAG_TIME_TRACABLE;
 }
 
 void PtpMessageAnnounce::SetTimeTraceable(bool enable)
@@ -171,7 +171,7 @@ void PtpMessageAnnounce::SetTimeTraceable(bool enable)
 
 bool PtpMessageAnnounce::GetFrequencyTraceable()
 {
-    return (m_flags & (1 << FLAG_FREQUENCY_TRACABLE)) == FLAG_FREQUENCY_TRACABLE;
+    return (m_flags & (1 << FLAG_FREQUENCY_TRACABLE)) == 1 << FLAG_FREQUENCY_TRACABLE;
 }
 
 void PtpMessageAnnounce::SetFrequencyTraceable(bool enable)

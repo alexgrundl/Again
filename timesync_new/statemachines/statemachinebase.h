@@ -60,7 +60,9 @@ public:
 
         STATE_TRANSMIT_ANNOUNCE,
         STATE_TRANSMIT_PERIODIC,
-        STATE_IDLE
+        STATE_IDLE,
+
+        STATE_SET_INTERVALS
     };
 
 
