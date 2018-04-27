@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 
+#include "types.h"
 #include "ThreadWrapper.h"
 #include "statemachinebase.h"
 #include "ptpmessagepdelayreq.h"

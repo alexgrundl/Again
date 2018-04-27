@@ -6,12 +6,14 @@ CONFIG -= qt
 win32: LIBS += -pthread -lhid -lsetupapi
 else: unix: LIBS += -pthread -lrt
 
+DEFINES += _LOG_TO_CONSOLE
+DEFINES += _LOG_TO_SYSLOG
+
 INCLUDEPATH += c-extensions
 INCLUDEPATH += c-platform
 INCLUDEPATH += types
 INCLUDEPATH += statemachines
 INCLUDEPATH += ptpmessage
-INCLUDEPATH += comm
 INCLUDEPATH += ipc
 
 SOURCES += main.cpp \
@@ -39,7 +41,6 @@ SOURCES += main.cpp \
     statemachines/mdpdelayresp.cpp \
     timeawaresystem.cpp \
     c-extensions/TimeMeas.cpp \
-    comm/linux_netport.cpp \
     portmanager.cpp \
     statemachines/portannounceinformation.cpp \
     statemachines/portannouncereceive.cpp \
@@ -57,7 +58,8 @@ SOURCES += main.cpp \
     ptpclocklinux.cpp \
     ptpclockwindows.cpp \
     c-platform/win/platform_win.cpp \
-    portglobal.cpp
+    portglobal.cpp \
+    linux_netport.cpp
 
 HEADERS += \
     types/types.h \
@@ -90,8 +92,6 @@ HEADERS += \
     statemachines/mdpdelayresp.h \
     timeawaresystem.h \
     c-extensions/TimeMeas.h \
-    comm/netport.h \
-    comm/linux_netport.h \
     portmanager.h \
     statemachines/portannounceinformation.h \
     statemachines/portannouncereceive.h \
@@ -118,5 +118,7 @@ HEADERS += \
     ptpclocklinux.h \
     ptpclockwindows.h \
     c-platform/win/platform_win.h \
-    portglobal.h
+    portglobal.h \
+    linux_netport.h \
+    netport.h
 

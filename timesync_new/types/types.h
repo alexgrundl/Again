@@ -1,6 +1,9 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#define __COMMONDEFS_LOGTAGS "<xtss-daemon v2>"
+#include "commondefs.h"
+
 #include <stdint.h>
 #include <cstddef>
 #include <math.h>

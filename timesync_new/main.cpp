@@ -4,14 +4,14 @@
 #include <memory>
 #include <signal.h>
 
+#include "types.h"
 #ifdef __linux__
-    #include <ifaddrs.h>
-    #include <sys/ioctl.h>
-    #include <linux/wireless.h>
-    #include "ptpclocklinux.h"
-
+#include <ifaddrs.h>
+#include <sys/ioctl.h>
+#include <linux/wireless.h>
+#include "ptpclocklinux.h"
 #else
-    #include "ptpclockwindows.h"
+#include "ptpclockwindows.h"
 #endif
 
 
@@ -128,7 +128,7 @@ int main()
 
                         tas.AddSelectedRole(PORT_ROLE_SLAVE);
 
-                        printf("Name: %s\n", next->ifa_name);
+                        lognotice("Sending on interface: %s\n", next->ifa_name);
 
                         if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
                         {
@@ -144,8 +144,6 @@ int main()
 
                         tas1.AddSelectedRole(PORT_ROLE_SLAVE);
                         tas1.SetDomain(1);
-
-                        printf("Name: %s\n", next->ifa_name);
 
                         if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
                         {
