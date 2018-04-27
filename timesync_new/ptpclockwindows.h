@@ -1,6 +1,8 @@
 #ifndef PTPCLOCKWINDOWS_H
 #define PTPCLOCKWINDOWS_H
 
+#ifndef __linux__
+
 #include "ptpclock.h"
 
 class PtpClockWindows : public PtpClock
@@ -41,5 +43,7 @@ public:
 
     bool StopPPS() {}
 };
+
+#endif //__linux__
 
 #endif // PTPCLOCKWINDOWS_H

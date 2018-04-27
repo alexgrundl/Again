@@ -78,11 +78,9 @@ void ClockSlaveSync::ProcessState()
                         neighborRateRatio = 1.0;
                 }
 
-                /* Why do we have to use neighborPropDelay and neighborRateRatio?? Thought this is an instance "per time-aware system"?? */
                 m_timeAwareSystem->SetSyncReceiptTime(m_rcvdPSSyncPtr->preciseOriginTimestamp + m_rcvdPSSyncPtr->followUpCorrectionField +
                         neighborPropDelay * (m_rcvdPSSyncPtr->rateRatio / neighborRateRatio) + delayAsymmetry);
                 m_timeAwareSystem->SetSyncReceiptLocalTime(m_rcvdPSSyncPtr->upstreamTxTime + neighborPropDelay / neighborRateRatio + delayAsymmetry / m_rcvdPSSyncPtr->rateRatio);
-                /* End why do ... */
 
                 m_timeAwareSystem->SetGmTimeBaseIndicator(m_rcvdPSSyncPtr->gmTimeBaseIndicator);
                 m_timeAwareSystem->SetLastGmPhaseChange(m_rcvdPSSyncPtr->lastGmPhaseChange);

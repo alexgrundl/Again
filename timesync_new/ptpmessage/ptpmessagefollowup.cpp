@@ -79,7 +79,7 @@ void PtpMessageFollowUp::ParsePackage(const uint8_t* bytes)
 
     m_followUpTLV.organizationId[0] = bytes[kMessageHeaderLength + 14];
     m_followUpTLV.organizationId[1] = bytes[kMessageHeaderLength + 15];
-    m_followUpTLV.organizationId[3] = bytes[kMessageHeaderLength + 16];
+    m_followUpTLV.organizationId[2] = bytes[kMessageHeaderLength + 16];
 
     m_followUpTLV.organizationSubType = (bytes[kMessageHeaderLength + 17] << 16) + (bytes[kMessageHeaderLength + 18] << 8) + bytes[kMessageHeaderLength + 19];
 

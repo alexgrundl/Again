@@ -28,18 +28,20 @@ uint32_t PortManager::Receive(bool_t* pbIsRunning, pal::EventHandle_t pWaitHandl
         dwWaitResult = pal::EventWait(pWaitHandle, 20);
         if(dwWaitResult == pal::EventWaitTimeout)
         {
+            IReceivePackage* package;
 #ifdef __linux__
-            CLinuxReceivePackage package(128);
-            m_networkPort->ReceiveMessage(&package);
-            if(package.IsValid())
+            CLinuxReceivePackage linuxPackage(128);
+            package = &linuxPackage;
+#endif
+            m_networkPort->ReceiveMessage(package);
+            if(package->IsValid())
             {
 
                 for (std::vector<StateMachineManager*>::size_type i = 0; i < m_stateMachineManagers.size(); ++i)
                 {
-                    m_stateMachineManagers[i]->ProcessPackage(m_portIndex, &package);
+                    m_stateMachineManagers[i]->ProcessPackage(m_portIndex, package);
                 }
             }
-#endif
         }
         else
             pal::ms_sleep(1000);

@@ -56,7 +56,8 @@ SOURCES += main.cpp \
     statemachines/portipc.cpp \
     ptpclocklinux.cpp \
     ptpclockwindows.cpp \
-    c-platform/win/platform_win.cpp
+    c-platform/win/platform_win.cpp \
+    portglobal.cpp
 
 HEADERS += \
     types/types.h \
@@ -116,5 +117,6 @@ HEADERS += \
     ptpclock.h \
     ptpclocklinux.h \
     ptpclockwindows.h \
-    c-platform/win/platform_win.h
+    c-platform/win/platform_win.h \
+    portglobal.h
 

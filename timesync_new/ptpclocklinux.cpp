@@ -176,4 +176,4 @@ bool PtpClockLinux::StopPPS()
     return StopPPS(2, 1);
 }
 
-#endif
+#endif //__linux__

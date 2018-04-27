@@ -92,4 +92,4 @@ void PortIPC::ProcessState()
 //    m_ipc.update(mlPhoffset, lsPhoffset, mlFreqoffset, lsFreqoffset, 5, 6, 7,  PTP_SLAVE, true, GPTP_CLOCK_REALTIME, 5);
 //}
 
-#endif
+#endif //__linux__

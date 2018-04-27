@@ -77,6 +77,6 @@ private:
     int m_clockFD;
 };
 
-#endif
+#endif //__linux__
 
 #endif // PTPCLOCKLINUX_H

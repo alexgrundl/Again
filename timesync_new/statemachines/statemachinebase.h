@@ -7,6 +7,7 @@
 
 #include "commstructs.h"
 #include "timeawaresystem.h"
+#include "portglobal.h"
 
 #include "netport.h"
 #include "platform.h"

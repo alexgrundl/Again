@@ -119,38 +119,8 @@ int main()
                 for (int i = 0; i < 2; ++i)
                 {
                     PortGlobal* port = new PortGlobal();
-                    port->asCapable = true;
-                    port->portEnabled = true;
-                    port->pttPortEnabled = true;
                     PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), port->identity.clockIdentity);
                     port->identity.portNumber = networkPorts.size();
-                    port->syncReceiptTimeout = 3;
-                    port->computeNeighborPropDelay = true;
-                    port->computeNeighborRateRatio = true;
-
-                    port->pdelayReqInterval.ns = NS_PER_SEC;
-                    port->pdelayReqInterval.ns_frac = 0;
-                    port->neighborPropDelayThresh.ns = 9000;
-                    port->neighborPropDelayThresh.ns_frac = 0;
-
-                    port->rcvdMsg = false;
-                    port->updtInfo = true;
-                    port->announceReceiptTimeout = 3;
-                    port->announceInterval.ns = NS_PER_SEC;
-
-                    port->portPriority.identity.priority1 = 255;
-                    port->portPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
-                    port->portPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
-                    port->portPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
-                    port->portPriority.identity.priority2 = 255;
-                    memset(port->portPriority.identity.clockIdentity, 255, sizeof(port->portPriority.identity.clockIdentity));
-                    port->portPriority.stepsRemoved = UINT16_MAX;
-                    memset(port->portPriority.sourcePortIdentity.clockIdentity, 255, sizeof(port->portPriority.sourcePortIdentity.clockIdentity));
-                    port->portPriority.sourcePortIdentity.portNumber = UINT16_MAX;
-                    port->portPriority.portNumber = UINT16_MAX;
-
-                    port->selected = false;
-                    port->reselect = false;
 
                     if(i == 0)
                     {

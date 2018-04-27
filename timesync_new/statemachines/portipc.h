@@ -5,6 +5,7 @@
 
 #include "statemachinebase.h"
 #include "linuxsharedmemoryipc.h"
+#include "linux_netport.h"
 
 class PortIPC : public StateMachineBaseMD
 {
@@ -45,6 +46,6 @@ private:
     UScaledNs m_ipcUpdateTime;
 };
 
-#endif
+#endif //__linux__
 
 #endif // PORTIPC_H

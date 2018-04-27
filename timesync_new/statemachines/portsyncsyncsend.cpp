@@ -27,9 +27,6 @@ PortSyncSyncSend::PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal*
     m_lastDomain = 0;
 
     m_mdSyncSendSM = mdSyncSendSM;
-
-    //Remove when "LinkDelaySyncIntervalSetting" and "initiallogsyncinterval" are implemented..
-    m_portGlobal->syncInterval = {125 * 1000 * 1000, 0};
 }
 
 PortSyncSyncSend::~PortSyncSyncSend()
