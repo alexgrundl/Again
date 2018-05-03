@@ -5,13 +5,16 @@
 #include <signal.h>
 
 #include "types.h"
+
 #ifdef __linux__
+#include "licensechecklinux.h"
 #include <ifaddrs.h>
 #include <sys/ioctl.h>
 #include <linux/wireless.h>
 #include "ptpclocklinux.h"
 #else
 #include "ptpclockwindows.h"
+#include "licensecheckwindows.h"
 #endif
 
 
@@ -24,7 +27,11 @@
 
 using namespace std;
 
-const char* ifnameMasterClock = "enp15s0";
+#ifdef __arm__
+    #ifndef NO_LICENSE_CHECK
+    #define NO_LICENSE_CHECK
+    #endif
+#endif
 
 void wait_for_signals()
 {
@@ -86,102 +93,121 @@ bool check_wireless(const char* ifname, char* protocol)
 
 int main()
 {
-    TimeAwareSystem tas;
-    TimeAwareSystem tas1;
-
-    std::vector<INetworkInterfacePort*> networkPorts;
-    std::vector<PortGlobal*> ports;
-    std::vector<PortGlobal*> ports1;
+    LicenseCheck* licenseCheck;
+    bool checkLicense = true;
 
 #ifndef __linux__
-    PtpClock* clockDom0 = new PtpClockWindows();
-    PtpClock* clockDom1 = new PtpClockWindows();
+    licenseCheck = new LicenseCheckWindows();
 #else
-    PtpClock* clockDom0 = new PtpClockLinux();
-    PtpClock* clockDom1 = new PtpClockLinux();
-
-
-    struct ifaddrs *addrs,*next;
-    getifaddrs(&addrs);
-    next = addrs;
-
-    while (next)
-    {
-        if (next->ifa_addr && next->ifa_addr->sa_family == AF_PACKET &&
-                (next->ifa_flags & IFF_LOOPBACK) == 0 && !check_wireless(next->ifa_name, NULL))
-        {
-//            if(strcmp(next->ifa_name, "enp15s0") == 0 || strcmp(next->ifa_name, "enp3s0f0") == 0)
-//            {
-                INetworkInterfacePort* networkPort = new NetworkPort(next->ifa_name);
-                networkPort->Initialize();
-                networkPorts.push_back(networkPort);
-
-                for (int i = 0; i < 2; ++i)
-                {
-                    PortGlobal* port = new PortGlobal();
-                    PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), port->identity.clockIdentity);
-                    port->identity.portNumber = networkPorts.size();
-
-                    if(i == 0)
-                    {
-                        ports.push_back(port);
-
-                        tas.AddSelectedRole(PORT_ROLE_SLAVE);
-
-                        lognotice("Sending on interface: %s", next->ifa_name);
-
-                        if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
-                        {
-                            uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
-                            PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
-                            tas.SetClockIdentity(clockIdentityFromMAC);
-                            tas.InitLocalClock(clockDom0, ((NetworkPort*)networkPort)->GetPtpClockIndex());
-                        }
-                    }
-                    else
-                    {
-                        ports1.push_back(port);
-
-                        tas1.AddSelectedRole(PORT_ROLE_SLAVE);
-                        tas1.SetDomain(1);
-
-                        if(strcmp(ifnameMasterClock, next->ifa_name) == 0)
-                        {
-                            uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
-                            PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
-                            tas1.SetClockIdentity(clockIdentityFromMAC);
-                            tas1.InitLocalClock(clockDom1, ((NetworkPort*)networkPort)->GetPtpClockIndex());
-                        }
-                    }
-                }
-//            }
-        }
-        next = next->ifa_next;
-    }
-    freeifaddrs(addrs);
+    licenseCheck = new LicenseCheckLinux();
 #endif
 
-    std::vector<StateMachineManager*> smManagers;
+#ifdef NO_LICENSE_CHECK
+    checkLicense = false;
+#endif
 
-    StateMachineManager smManager(&tas, ports, networkPorts);
-    smManagers.push_back(&smManager);
-    StateMachineManager smManager1(&tas1, ports1, networkPorts);
-    smManagers.push_back(&smManager1);
-    smManager.StartProcessing();
-    smManager1.StartProcessing();
-
-    std::vector<PortManager*> portManagers;
-    for (std::vector<INetworkInterfacePort*>::size_type i = 0; i < networkPorts.size(); ++i)
+    if(!checkLicense || licenseCheck->LicenseValid())
     {
-            portManagers.push_back(new PortManager(networkPorts[i], smManagers, i));
-            portManagers[i]->StartReceiving();
+        TimeAwareSystem tas;
+        TimeAwareSystem tas1;
+
+        std::vector<INetworkInterfacePort*> networkPorts;
+        std::vector<PortGlobal*> ports;
+        std::vector<PortGlobal*> ports1;
+
+    #ifndef __linux__
+        PtpClock* clockDom0 = new PtpClockWindows();
+        PtpClock* clockDom1 = new PtpClockWindows();
+    #else
+        PtpClock* clockDom0 = new PtpClockLinux();
+        PtpClock* clockDom1 = new PtpClockLinux();
+
+        char macLicense[ETH_ALEN], ifnameLicense[IFNAMSIZ];
+        struct ifaddrs *addrs,*next;
+        getifaddrs(&addrs);
+        next = addrs;
+
+        ((LicenseCheckLinux*)licenseCheck)->GetMacOfInterfaceWithLicense(macLicense, ifnameLicense);
+        while (next)
+        {
+            if (next->ifa_addr && next->ifa_addr->sa_family == AF_PACKET &&
+                    (next->ifa_flags & IFF_LOOPBACK) == 0 && !check_wireless(next->ifa_name, NULL))
+            {
+    //            if(strcmp(next->ifa_name, "enp15s0") == 0 || strcmp(next->ifa_name, "enp3s0f0") == 0)
+    //            {
+                    INetworkInterfacePort* networkPort = new NetworkPort(next->ifa_name);
+                    networkPort->Initialize();
+                    networkPorts.push_back(networkPort);
+
+                    for (int i = 0; i < 2; ++i)
+                    {
+                        PortGlobal* port = new PortGlobal();
+                        PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), port->identity.clockIdentity);
+                        port->identity.portNumber = networkPorts.size();
+
+                        if(i == 0)
+                        {
+                            ports.push_back(port);
+
+                            tas.AddSelectedRole(PORT_ROLE_SLAVE);
+
+                            lognotice("Sending on interface: %s", next->ifa_name);
+
+                            if(strcmp(ifnameLicense, next->ifa_name) == 0)
+                            {
+                                uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
+                                PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
+                                tas.SetClockIdentity(clockIdentityFromMAC);
+                                tas.InitLocalClock(clockDom0, ((NetworkPort*)networkPort)->GetPtpClockIndex());
+                            }
+                        }
+                        else
+                        {
+                            ports1.push_back(port);
+
+                            tas1.AddSelectedRole(PORT_ROLE_SLAVE);
+                            tas1.SetDomain(1);
+
+                            if(strcmp(ifnameLicense, next->ifa_name) == 0)
+                            {
+                                uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
+                                PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
+                                tas1.SetClockIdentity(clockIdentityFromMAC);
+                                tas1.InitLocalClock(clockDom1, ((NetworkPort*)networkPort)->GetPtpClockIndex());
+                            }
+                        }
+                    }
+    //            }
+            }
+            next = next->ifa_next;
+        }
+        freeifaddrs(addrs);
+    #endif
+
+        std::vector<StateMachineManager*> smManagers;
+
+        StateMachineManager smManager(&tas, ports, networkPorts);
+        smManagers.push_back(&smManager);
+        StateMachineManager smManager1(&tas1, ports1, networkPorts);
+        smManagers.push_back(&smManager1);
+        smManager.StartProcessing();
+        smManager1.StartProcessing();
+
+        std::vector<PortManager*> portManagers;
+        for (std::vector<INetworkInterfacePort*>::size_type i = 0; i < networkPorts.size(); ++i)
+        {
+                portManagers.push_back(new PortManager(networkPorts[i], smManagers, i));
+                portManagers[i]->StartReceiving();
+        }
+
+        wait_for_signals();
+
+        clockDom0->StopPPS();
+        delete clockDom0;
+        delete clockDom1;
     }
 
-    wait_for_signals();
-
-    delete clockDom0;
-    delete clockDom1;
-
+    delete licenseCheck;
     return 0;
 }
 

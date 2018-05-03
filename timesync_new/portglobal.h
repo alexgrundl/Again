@@ -12,6 +12,9 @@ public:
 
     virtual ~PortGlobal();
 
+
+    void ResetPortPriority();
+
     /**
      * @brief A Boolean that is TRUE if and only if it is determined that this time-aware system and the time-aware system at the other end
      * of the link attached to this port can interoperate with each other via the IEEE 802.1AS protocol. This means that

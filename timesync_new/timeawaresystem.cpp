@@ -103,8 +103,8 @@ TimeAwareSystem::~TimeAwareSystem()
 {
     ClearPathTrace();
 
-    if(m_domain == 0 && m_clockLocal != NULL)
-        m_clockLocal->StopPPS();
+//    if(m_domain == 0 && m_clockLocal != NULL)
+//        m_clockLocal->StopPPS();
 }
 
 ExtendedTimestamp TimeAwareSystem::GetClockSlaveTime()
@@ -363,7 +363,7 @@ void TimeAwareSystem::InitLocalClock(PtpClock *clock, int clockIndex)
     m_clockLocal->Open(clockIndex);
     if(m_domain == 0)
     {
-        m_clockLocal->StopPPS();
+        //m_clockLocal->StopPPS();
         m_clockLocal->StartPPS();
     }
 }

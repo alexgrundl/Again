@@ -174,17 +174,17 @@ void PortRoleSelection::UpdtRolesTree()
          }
      }
 
-     /** Updates gmPresent as follows:
+     /* Updates gmPresent as follows:
       * 10) gmPresent is set to TRUE if the priority1 field of the rootSystemIdentity of the gmPriorityVector is less than 255.
       * 11) gmPresent is set to FALSE if the priority1 field of the rootSystemIdentity of the gmPriorityVector is equal to 255. */
      m_timeAwareSystem->SetGmPresent(m_timeAwareSystem->GetSystemPriority().identity.priority1 < 255);
 
-     /** Assigns the port role for port 0, and sets selectedRole[0], as follows:
+     /* Assigns the port role for port 0, and sets selectedRole[0], as follows:
       * 12) if selectedRole[j] is set to SlavePort for any port with portNumber j, j = 1, 2, ..., numberPorts, selectedRole[0] is set to PassivePort.
-      * 13) if selectedRole[j] is not set to SlavePort for any port with portNumber j, j = 1, 2, ..., numberPorts, selectedRole[0] is set to SlavePort. */
+      * 13) if selectedRole[j] is not set to SlavePort for any port with portNumber j, j = 1, 2, ..., numberPorts, selectereselectdRole[0] is set to SlavePort. */
     m_timeAwareSystem->SetSelectedRole(0, portIsSlave ? PORT_ROLE_PASSIVE : PORT_ROLE_SLAVE);
 
-    /** If the clockIentity member of the systemIdentity (see 10.3.2) member of gmPriority (see 10.3.8.19) is equal to thisClock (see 10.2.3.22), i.e.,
+    /* If the clockIentity member of the systemIdentity (see 10.3.2) member of gmPriority (see 10.3.8.19) is equal to thisClock (see 10.2.3.22), i.e.,
      * if the current time-aware system is the grandmaster, the pathTrace array is set to contain the single element thisClock (see 10.2.3.22). */
     if(bestPort == NULL)
     {
@@ -196,7 +196,8 @@ void PortRoleSelection::UpdtRolesTree()
     for (std::vector<PortRole>::size_type i = 0; i <= m_ports.size(); ++i)
     {
         PortRole portRole = m_timeAwareSystem->GetSelectedRole(i);
-        lognotice("Domain %u\tPort role %lu, %s", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
+        if(portRole != PORT_ROLE_DISABLED)
+            lognotice("Domain %u\tPort role %lu, %s", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
     }
 }
 
@@ -215,6 +216,7 @@ const char* PortRoleSelection::GetStrPortRole(PortRole role)
 void PortRoleSelection::ProcessState()
 {
     bool reselect = false;
+    bool resetPortPriority = false;
 
     if(m_timeAwareSystem->BEGIN)
     {
@@ -238,7 +240,20 @@ void PortRoleSelection::ProcessState()
                 if(m_ports[i]->reselect)
                 {
                     reselect = true;
-                    break;
+                }
+                if(m_ports[i]->infoIs == SPANNING_TREE_PORT_STATE_AGED)
+                {
+                    resetPortPriority = true;
+                }
+            }
+
+            /* We have to reset the port priority if the spanning tree port state turns to "aged", meaning that the announce timeout expired.
+             * Otherwise we'd announce with this priority from now on which is the priority of the old master and not of ourselves. */
+            if(reselect && resetPortPriority)
+            {
+                for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
+                {
+                    m_ports[i]->ResetPortPriority();
                 }
             }
 

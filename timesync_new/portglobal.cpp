@@ -45,16 +45,7 @@ PortGlobal::PortGlobal()
     messageStepsRemoved = 0;
     newInfo = false;
 
-    portPriority.identity.priority1 = 255;
-    portPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
-    portPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
-    portPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
-    portPriority.identity.priority2 = 255;
-    memset(portPriority.identity.clockIdentity, 255, sizeof(portPriority.identity.clockIdentity));
-    portPriority.stepsRemoved = UINT16_MAX;
-    memset(portPriority.sourcePortIdentity.clockIdentity, 255, sizeof(portPriority.sourcePortIdentity.clockIdentity));
-    portPriority.sourcePortIdentity.portNumber = UINT16_MAX;
-    portPriority.portNumber = UINT16_MAX;
+    ResetPortPriority();
 
     portStepsRemoved = 0;
     rcvdAnnouncePtr = NULL;
@@ -80,4 +71,18 @@ PortGlobal::PortGlobal()
 PortGlobal::~PortGlobal()
 {
 
+}
+
+void PortGlobal::ResetPortPriority()
+{
+    portPriority.identity.priority1 = 255;
+    portPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
+    portPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
+    portPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
+    portPriority.identity.priority2 = 255;
+    memset(portPriority.identity.clockIdentity, 255, sizeof(portPriority.identity.clockIdentity));
+    portPriority.stepsRemoved = UINT16_MAX;
+    memset(portPriority.sourcePortIdentity.clockIdentity, 255, sizeof(portPriority.sourcePortIdentity.clockIdentity));
+    portPriority.sourcePortIdentity.portNumber = UINT16_MAX;
+    portPriority.portNumber = UINT16_MAX;
 }

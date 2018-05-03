@@ -166,18 +166,30 @@ bool PtpClockLinux::StopPPS(int pinIndex, int channel)
 
 bool PtpClockLinux::StartPPS()
 {
+    bool success;
     struct ptp_clock_time periodSDP;
+
+    periodSDP.sec = 0;
+    periodSDP.nsec = 250000000;
+    StopPPS(0, 0);
+    success = StartPPS(0, 0, &periodSDP);
 
     periodSDP.sec = 1;
     periodSDP.nsec = 0;
     StopPPS(2, 1);
+    success &= StartPPS(2, 1, &periodSDP);
 
-    return StartPPS(2, 1, &periodSDP);
+    return success;
 }
 
 bool PtpClockLinux::StopPPS()
 {
-    return StopPPS(2, 1);
+    bool success = false;
+
+    success = StopPPS(0, 0);
+    success &= StopPPS(2, 1);
+
+    return success;
 }
 
 #endif //__linux__

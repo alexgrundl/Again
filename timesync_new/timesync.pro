@@ -15,6 +15,7 @@ INCLUDEPATH += types
 INCLUDEPATH += statemachines
 INCLUDEPATH += ptpmessage
 INCLUDEPATH += ipc
+INCLUDEPATH += licensecheck
 
 SOURCES += main.cpp \
     statemachines/sitesyncsync.cpp \
@@ -61,7 +62,12 @@ SOURCES += main.cpp \
     portglobal.cpp \
     linux_netport.cpp \
     statemachines/linkdelaysyncintervalsetting.cpp \
-    ptpmessage/ptpmessagesignaling.cpp
+    ptpmessage/ptpmessagesignaling.cpp \
+    licensecheck/licensecheck.cpp \
+    licensecheck/sha3.c \
+    licensecheck/byte_order.c \
+    licensecheck/licensechecklinux.cpp \
+    licensecheck/licensecheckwindows.cpp
 
 HEADERS += \
     types/types.h \
@@ -124,5 +130,11 @@ HEADERS += \
     linux_netport.h \
     netport.h \
     statemachines/linkdelaysyncintervalsetting.h \
-    ptpmessage/ptpmessagesignaling.h
+    ptpmessage/ptpmessagesignaling.h \
+    licensecheck/licensecheck.h \
+    licensecheck/sha3.h \
+    licensecheck/ustd.h \
+    licensecheck/byte_order.h \
+    licensecheck/licensechecklinux.h \
+    licensecheck/licensecheckwindows.h
 
