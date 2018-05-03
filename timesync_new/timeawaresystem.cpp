@@ -196,7 +196,7 @@ void TimeAwareSystem::SetClockSourceLastGmFreqChange(double value)
 {
     m_clockSourceLastGmFreqChange = value;
 }
-
+#include <intrin.h>
 UScaledNs TimeAwareSystem::ReadCurrentTime()
 {
     struct timespec ts;
@@ -205,7 +205,13 @@ UScaledNs TimeAwareSystem::ReadCurrentTime()
     if(m_clockLocal != NULL)
         m_clockLocal->GetTime(&ts);
     else
+    {
+#ifdef __linux__
         clock_gettime(CLOCK_MONOTONIC, &ts);
+#else
+    //Windows get time function
+#endif
+    }
 
     uscaled.ns = (uint64_t)ts.tv_sec * 1000000000 + ts.tv_nsec;
     uscaled.ns_frac = 0;

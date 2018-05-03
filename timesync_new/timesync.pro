@@ -3,7 +3,7 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-win32: LIBS += -pthread -lhid -lsetupapi
+win32: LIBS += -lhid -lsetupapi
 else: unix: LIBS += -pthread -lrt
 
 DEFINES += _LOG_TO_CONSOLE
