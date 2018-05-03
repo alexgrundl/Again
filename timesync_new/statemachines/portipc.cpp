@@ -2,7 +2,7 @@
 
 #include "portipc.h"
 
-PortIPC::PortIPC(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetworkInterfacePort *networkPort, int domain) :
+PortIPC::PortIPC(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetPort *networkPort, int domain) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_domain = domain;
@@ -10,12 +10,12 @@ PortIPC::PortIPC(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetworkInt
     m_timeDevicePrevious = 0;
 
     LinuxIPCArg arg;
-    arg.setIfnameAndDomain(((NetworkPort*)networkPort)->GetInterfaceName().c_str(), m_domain);
+    arg.setIfnameAndDomain(((LinuxNetPort*)networkPort)->GetInterfaceName().c_str(), m_domain);
     m_ipc = new LinuxSharedMemoryIPC();
     m_ipc->init(&arg);
-    m_ipc->set_if_phc_index(((NetworkPort*)networkPort)->GetPtpClockIndex());
+    m_ipc->set_if_phc_index(((LinuxNetPort*)networkPort)->GetPtpClockIndex());
 
-    m_ptpClock = ((NetworkPort*)networkPort)->GetPtpClock();
+    m_ptpClock = ((LinuxNetPort*)networkPort)->GetPtpClock();
 
     m_ipcUpdateTime = m_timeAwareSystem->ReadCurrentTime() + UScaledNs({NS_PER_SEC / 10, 0});
 }

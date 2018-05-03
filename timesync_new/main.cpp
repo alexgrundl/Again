@@ -135,7 +135,7 @@ int main()
             {
     //            if(strcmp(next->ifa_name, "enp15s0") == 0 || strcmp(next->ifa_name, "enp3s0f0") == 0)
     //            {
-                    INetworkInterfacePort* networkPort = new NetworkPort(next->ifa_name);
+                    INetPort* networkPort = new LinuxNetPort(next->ifa_name);
                     networkPort->Initialize();
                     networkPorts.push_back(networkPort);
 
@@ -158,7 +158,7 @@ int main()
                                 uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
                                 PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
                                 tas.SetClockIdentity(clockIdentityFromMAC);
-                                tas.InitLocalClock(clockDom0, ((NetworkPort*)networkPort)->GetPtpClockIndex());
+                                tas.InitLocalClock(clockDom0, ((LinuxNetPort*)networkPort)->GetPtpClockIndex());
                             }
                         }
                         else
@@ -173,7 +173,7 @@ int main()
                                 uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
                                 PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
                                 tas1.SetClockIdentity(clockIdentityFromMAC);
-                                tas1.InitLocalClock(clockDom1, ((NetworkPort*)networkPort)->GetPtpClockIndex());
+                                tas1.InitLocalClock(clockDom1, ((LinuxNetPort*)networkPort)->GetPtpClockIndex());
                             }
                         }
                     }

@@ -1,15 +1,16 @@
-#ifndef LINUX_NETPORT_H
-#define LINUX_NETPORT_H
+#ifndef LINUXNETPORT_H
+#define LINUXNETPORT_H
 
 #ifdef __linux__
 
 #include <deque>
 #include <ifaddrs.h>
 
-#include "inetport.h"
 #include "types.h"
 #include "platform.h"
-#include "ptpclock.h"
+#include "receivepackage.h"
+#include "inetport.h"
+#include "ptpclocklinux.h"
 
 class LinuxNetPort : public INetPort
 {
@@ -41,7 +42,7 @@ class LinuxNetPort : public INetPort
 
         UScaledNs SendEventMessage(PtpMessageBase* Msg);
 
-        void ReceiveMessage(IReceivePackage* pRet);
+        void ReceiveMessage(ReceivePackage* pRet);
 
         virtual void PushRxTime(UScaledNs& ts);
 
@@ -103,5 +104,5 @@ private:
 
 #endif
 
-#endif // LINUX_NETPORT_H
+#endif // LINUXNETPORT_H
 

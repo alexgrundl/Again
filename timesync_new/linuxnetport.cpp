@@ -20,9 +20,9 @@
 #include "types.h"
 #include "commondefs.h"
 #include "ptpmessagebase.h"
-#include "linux_netport.h"
+#include "linuxnetport.h"
 
-NetworkPort::NetworkPort(char const* const devname)
+LinuxNetPort::LinuxNetPort(char const* const devname)
 {
     m_PtpClockIndex = -1;
     m_PDelay = 0;
@@ -33,40 +33,51 @@ NetworkPort::NetworkPort(char const* const devname)
     m_IfcIndex = -1;
     m_EventSock = pal::SocketCreate(PF_PACKET, SOCK_DGRAM, 0);
     m_GeneralSock = pal::SocketCreate(PF_PACKET, SOCK_DGRAM, 0);
-    m_ptpClock = new PtpClock();
+    m_ptpClock = new PtpClockLinux();
 }
 
-uint64_t NetworkPort::GetPDelay()
+LinuxNetPort::~LinuxNetPort()
+{
+    if(m_EventSock)
+    {
+        pal::SocketDelete(m_EventSock);
+    }
+    pal::LockedRegionDelete(m_EventLock);
+
+    delete m_ptpClock;
+}
+
+uint64_t LinuxNetPort::GetPDelay()
 {
     return m_PDelay;
 }
 
-void NetworkPort::SetPDelay(uint64_t pDelay)
+void LinuxNetPort::SetPDelay(uint64_t pDelay)
 {
     m_PDelay = pDelay;
 }
 
-bool NetworkPort::GetASCapable()
+bool LinuxNetPort::GetASCapable()
 {
     return m_asCapable;
 }
 
-void NetworkPort::SetASCapable(bool asCapable)
+void LinuxNetPort::SetASCapable(bool asCapable)
 {
     m_asCapable = asCapable;
 }
 
-double NetworkPort::GetNeighborRatio()
+double LinuxNetPort::GetNeighborRatio()
 {
     return m_neighborRatio;
 }
 
-void NetworkPort::SetNeighborRatio(double ratio)
+void LinuxNetPort::SetNeighborRatio(double ratio)
 {
     m_neighborRatio = ratio;
 }
 
-bool NetworkPort::Initialize()
+bool LinuxNetPort::Initialize()
 {
     struct ifreq ifr;
     pal::SocketGetHwAddr(m_EventSock, m_IfcName.c_str(), m_MAC, &m_IfcIndex);
@@ -169,7 +180,7 @@ bool NetworkPort::Initialize()
     return true;
 }
 
-bool NetworkPort::SetRxQueueEnabled(bool settoenabled)
+bool LinuxNetPort::SetRxQueueEnabled(bool settoenabled)
 {
     struct packet_mreq mr_8021as;
     memset(&mr_8021as, 0, sizeof(mr_8021as));
@@ -209,12 +220,12 @@ bool NetworkPort::SetRxQueueEnabled(bool settoenabled)
     }
 }
 
-uint16_t NetworkPort::GetPortNumber()
+uint16_t LinuxNetPort::GetPortNumber()
 {
     return m_IfcIndex;
 }
 
-bool NetworkPort::SendGenericMessage(PtpMessageBase* Msg)
+bool LinuxNetPort::SendGenericMessage(PtpMessageBase* Msg)
 {
     if(IsCarrierSet())
     {
@@ -226,7 +237,7 @@ bool NetworkPort::SendGenericMessage(PtpMessageBase* Msg)
         memcpy(remote.sll_addr, PtpMessageBase::kMacMulticast, ETH_ALEN);
         uint8_t pBuffer[100];
 
-        Msg->GetMessage(pBuffer);
+        Msg->GetPtpMessage(pBuffer);
         if(pal::SocketSendToRaw(m_GeneralSock, pBuffer, Msg->GetMessageLength(), &remote, sizeof(remote)) < 0)
         {
 
@@ -239,7 +250,7 @@ bool NetworkPort::SendGenericMessage(PtpMessageBase* Msg)
     return true;
 }
 
-UScaledNs NetworkPort::SendEventMessage(PtpMessageBase* Msg)
+UScaledNs LinuxNetPort::SendEventMessage(PtpMessageBase* Msg)
 {
     UScaledNs timestamp = {0, 0};
     if(IsCarrierSet())
@@ -254,7 +265,7 @@ UScaledNs NetworkPort::SendEventMessage(PtpMessageBase* Msg)
             memcpy(remote.sll_addr, PtpMessageBase::kMacMulticast, ETH_ALEN);
 
             uint8_t pBuffer[100];
-            Msg->GetMessage(pBuffer);
+            Msg->GetPtpMessage(pBuffer);
 
             if(pal::SocketSendToRaw(m_EventSock, pBuffer, Msg->GetMessageLength(), &remote, sizeof(remote)) < 0)
             {
@@ -270,13 +281,13 @@ UScaledNs NetworkPort::SendEventMessage(PtpMessageBase* Msg)
     return timestamp;
 }
 
-void NetworkPort::ReceiveMessage(IReceivePackage* pRet)
+void LinuxNetPort::ReceiveMessage(ReceivePackage* pRet)
 {
     if(IsCarrierSet())
     {
         if(pal::SocketCheck(m_EventSock, 16000) == pal::SocketReaction_e::SockReady)
         {
-            CLinuxReceivePackage* pPackage = (CLinuxReceivePackage*)pRet;
+            ReceivePackage* pPackage = (ReceivePackage*)pRet;
             struct msghdr msg;
             struct cmsghdr *cmsg;
             struct {
@@ -338,54 +349,41 @@ void NetworkPort::ReceiveMessage(IReceivePackage* pRet)
     }
 }
 
-
-
-NetworkPort::~NetworkPort()
-{
-    if(m_EventSock)
-    {
-        pal::SocketDelete(m_EventSock);
-    }
-    pal::LockedRegionDelete(m_EventLock);
-
-    delete m_ptpClock;
-}
-
-void NetworkPort::PushRxTime(UScaledNs& ts)
+void LinuxNetPort::PushRxTime(UScaledNs& ts)
 {
     m_Timestamps.push_front(ts);
 }
 
-int32_t NetworkPort::GetPtpClockIndex()
+int32_t LinuxNetPort::GetPtpClockIndex()
 {
     return m_PtpClockIndex;
 }
 
-std::string NetworkPort::GetInterfaceName()
+std::string LinuxNetPort::GetInterfaceName()
 {
     return m_IfcName;
 }
 
-uint8_t const* NetworkPort::GetMAC()
+uint8_t const* LinuxNetPort::GetMAC()
 {
     return (uint8_t*)m_MAC;
 }
 
-uint32_t NetworkPort::GetRxLinkDelay_ns()
+uint32_t LinuxNetPort::GetRxLinkDelay_ns()
 {
     return 0;//1500;//00; // just value from eMI
 }
-uint32_t NetworkPort::GetTxLinkDelay_ns()
+uint32_t LinuxNetPort::GetTxLinkDelay_ns()
 {
     return 0;//1500;//00; // just value from eMI
 }
 
-PtpClock* NetworkPort::GetPtpClock()
+PtpClock* LinuxNetPort::GetPtpClock()
 {
     return m_ptpClock;
 }
 
-UScaledNs NetworkPort::GetLastTxMessage(int timeout_ms)
+UScaledNs LinuxNetPort::GetLastTxMessage(int timeout_ms)
 {
     UScaledNs timestamp = {0, 0};
     CTimeMeas ct;
@@ -450,7 +448,7 @@ UScaledNs NetworkPort::GetLastTxMessage(int timeout_ms)
     return timestamp;
 }
 
-bool NetworkPort::IsCarrierSet()
+bool LinuxNetPort::IsCarrierSet()
 {
     int nRead = 0;
     int fdCarrier = open((std::string("/sys/class/net/") + std::string(m_IfcName) + std::string("/carrier")).c_str(), O_RDONLY);

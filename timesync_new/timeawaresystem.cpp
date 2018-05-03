@@ -196,7 +196,7 @@ void TimeAwareSystem::SetClockSourceLastGmFreqChange(double value)
 {
     m_clockSourceLastGmFreqChange = value;
 }
-#include <intrin.h>
+
 UScaledNs TimeAwareSystem::ReadCurrentTime()
 {
     struct timespec ts;

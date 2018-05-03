@@ -1,5 +1,5 @@
-#ifndef __INTERFACE_NETPORT_H__
-#define __INTERFACE_NETPORT_H__
+#ifndef INETPORT_H
+#define INETPORT_H
 
 #include <stdint.h>
 
@@ -29,4 +29,4 @@ class INetPort
     INetPort(){}
 };
 
-#endif
+#endif //INETPORT_H

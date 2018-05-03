@@ -5,13 +5,14 @@
 
 #include "statemachinebase.h"
 #include "linuxsharedmemoryipc.h"
-#include "linux_netport.h"
+#include "inetport.h"
+#include "linuxnetport.h"
 
 class PortIPC : public StateMachineBaseMD
 {
 public:
 
-    PortIPC(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort* networkPort, int domain);
+    PortIPC(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort* networkPort, int domain);
 
 
     virtual ~PortIPC();

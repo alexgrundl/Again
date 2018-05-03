@@ -64,7 +64,7 @@ SOURCES += main.cpp \
     ptpmessage/ptpmessagesignaling.cpp \
     linuxnetport.cpp \
     windowsnetport.cpp \
-    receivepackage.cpp
+    receivepackage.cpp \
     licensecheck/licensecheck.cpp \
     licensecheck/sha3.c \
     licensecheck/byte_order.c \
@@ -133,7 +133,7 @@ HEADERS += \
     linuxnetport.h \
     inetport.h \
     windowsnetport.h \
-    receivepackage.h
+    receivepackage.h \
     licensecheck/licensecheck.h \
     licensecheck/sha3.h \
     licensecheck/ustd.h \
