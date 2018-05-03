@@ -38,7 +38,7 @@ StateMachineBasePort::~StateMachineBasePort()
 
 
 
-StateMachineBaseMD::StateMachineBaseMD(TimeAwareSystem* timeAwareSystem, PortGlobal* portGlobal, INetworkInterfacePort *networkPort) :
+StateMachineBaseMD::StateMachineBaseMD(TimeAwareSystem* timeAwareSystem, PortGlobal* portGlobal, INetPort *networkPort) :
     StateMachineBasePort(timeAwareSystem, portGlobal)
 {
     m_networkPort = networkPort;

@@ -1,6 +1,6 @@
 #include "mdsyncsendsm.h"
 
-MDSyncSendSM::MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort* networkPort) :
+MDSyncSendSM::MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort* networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_rcvdMDSync = false;

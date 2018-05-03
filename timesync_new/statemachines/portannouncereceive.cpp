@@ -89,7 +89,7 @@ void PortAnnounceReceive::ProcessState()
     }
 }
 
-void PortAnnounceReceive::SetAnnounce(IReceivePackage *package)
+void PortAnnounceReceive::SetAnnounce(ReceivePackage *package)
 {
     delete m_portGlobal->rcvdAnnouncePtr;
     m_portGlobal->rcvdAnnouncePtr = new PtpMessageAnnounce();

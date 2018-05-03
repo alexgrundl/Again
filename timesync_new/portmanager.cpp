@@ -1,6 +1,6 @@
 #include "portmanager.h"
 
-PortManager::PortManager(INetworkInterfacePort* networkPort, std::vector<StateMachineManager *> &stateMachineManagers, int portIndex)
+PortManager::PortManager(INetPort* networkPort, std::vector<StateMachineManager *> &stateMachineManagers, int portIndex)
 {
     m_networkPort = networkPort;
     m_portIndex = portIndex;
@@ -28,18 +28,13 @@ uint32_t PortManager::Receive(bool_t* pbIsRunning, pal::EventHandle_t pWaitHandl
         dwWaitResult = pal::EventWait(pWaitHandle, 20);
         if(dwWaitResult == pal::EventWaitTimeout)
         {
-            IReceivePackage* package;
-#ifdef __linux__
-            CLinuxReceivePackage linuxPackage(128);
-            package = &linuxPackage;
-#endif
-            m_networkPort->ReceiveMessage(package);
-            if(package->IsValid())
+            ReceivePackage package(128);
+            m_networkPort->ReceiveMessage(&package);
+            if(package.IsValid())
             {
-
                 for (std::vector<StateMachineManager*>::size_type i = 0; i < m_stateMachineManagers.size(); ++i)
                 {
-                    m_stateMachineManagers[i]->ProcessPackage(m_portIndex, package);
+                    m_stateMachineManagers[i]->ProcessPackage(m_portIndex, &package);
                 }
             }
         }

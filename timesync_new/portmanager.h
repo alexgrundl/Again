@@ -6,21 +6,25 @@
 
 #include "types.h"
 #include "ThreadWrapper.h"
-#include "linux_netport.h"
 #include "statemachinemanager.h"
+#ifdef __linux
+#include "linuxnetport.h"
+#else
+#include "windowsnetport.h"
+#endif
 
 class PortManager
 {
 public:
 
-    PortManager(INetworkInterfacePort* networkPort, std::vector<StateMachineManager*>& stateMachineManagers, int portIndex);
+    PortManager(INetPort* networkPort, std::vector<StateMachineManager*>& stateMachineManagers, int portIndex);
 
 
     void StartReceiving();
 
 private:
 
-    INetworkInterfacePort* m_networkPort;
+    INetPort* m_networkPort;
 
 
     uint32_t Receive(bool_t *pbIsRunning, pal::EventHandle_t pWaitHandle);

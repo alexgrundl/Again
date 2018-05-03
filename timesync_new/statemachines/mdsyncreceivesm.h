@@ -12,7 +12,7 @@ public:
 
 
     MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, PortSyncSyncReceive* portSyncSyncReceive,
-                    INetworkInterfacePort *network);
+                    INetPort *network);
 
 
     virtual ~MDSyncReceiveSM();
@@ -21,10 +21,10 @@ public:
     void ProcessState();
 
 
-    void SetSyncMessage(IReceivePackage* package);
+    void SetSyncMessage(ReceivePackage* package);
 
 
-    void SetFollowUpMessage(IReceivePackage *package);
+    void SetFollowUpMessage(ReceivePackage *package);
 
 private:
 

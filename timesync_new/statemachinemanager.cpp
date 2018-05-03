@@ -1,7 +1,7 @@
 #include "statemachinemanager.h"
 
 StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<PortGlobal*> ports,
-                                         std::vector<INetworkInterfacePort*> networkPorts)
+                                         std::vector<INetPort*> networkPorts)
 {
     m_timeAwareSystem = timeAwareSystem;
     m_currentIndexClockUpdate = 0;
@@ -145,7 +145,7 @@ void StateMachineManager::InitialProcess()
 }
 
 
-void StateMachineManager::ProcessPackage(int portIndex, IReceivePackage* package)
+void StateMachineManager::ProcessPackage(int portIndex, ReceivePackage *package)
 {
     PtpMessageType messageType = PtpMessageBase::ParseMessageType(package->GetBuffer());
     int domain = PtpMessageBase::ParseDomain(package->GetBuffer());

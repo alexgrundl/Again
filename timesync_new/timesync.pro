@@ -3,11 +3,11 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-win32: LIBS += -pthread -lhid -lsetupapi
+win32: LIBS += -lhid -lsetupapi
 else: unix: LIBS += -pthread -lrt
 
 DEFINES += _LOG_TO_CONSOLE
-DEFINES += _LOG_TO_SYSLOG
+unix: DEFINES += _LOG_TO_SYSLOG
 
 INCLUDEPATH += c-extensions
 INCLUDEPATH += c-platform
@@ -60,9 +60,11 @@ SOURCES += main.cpp \
     ptpclockwindows.cpp \
     c-platform/win/platform_win.cpp \
     portglobal.cpp \
-    linux_netport.cpp \
     statemachines/linkdelaysyncintervalsetting.cpp \
     ptpmessage/ptpmessagesignaling.cpp \
+    linuxnetport.cpp \
+    windowsnetport.cpp \
+    receivepackage.cpp
     licensecheck/licensecheck.cpp \
     licensecheck/sha3.c \
     licensecheck/byte_order.c \
@@ -105,7 +107,6 @@ HEADERS += \
     statemachines/portannouncereceive.h \
     statemachines/portroleselection.h \
     ptpmessage/ptpmessageannounce.h \
-    comm/netport.h \
     statemachines/portannouncetransmit.h \
     statemachines/mdportannouncetransmit.h \
     c-extensions/autolock.h \
@@ -127,10 +128,12 @@ HEADERS += \
     ptpclockwindows.h \
     c-platform/win/platform_win.h \
     portglobal.h \
-    linux_netport.h \
-    netport.h \
     statemachines/linkdelaysyncintervalsetting.h \
     ptpmessage/ptpmessagesignaling.h \
+    linuxnetport.h \
+    inetport.h \
+    windowsnetport.h \
+    receivepackage.h
     licensecheck/licensecheck.h \
     licensecheck/sha3.h \
     licensecheck/ustd.h \
