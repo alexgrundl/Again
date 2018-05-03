@@ -1,6 +1,6 @@
 #include "mdpdelayreq.h"
 
-MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort* networkPort) :
+MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort* networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_pdelayIntervalTimer.ns = 0;
@@ -258,14 +258,14 @@ void MDPdelayReq::ExecuteSendPDelayReqState()
 }
 
 
-void MDPdelayReq::SetPDelayResponse(IReceivePackage* package)
+void MDPdelayReq::SetPDelayResponse(ReceivePackage *package)
 {
     m_rcvdPdelayRespPtr->ParsePackage(package->GetBuffer());
     m_rcvdPdelayRespPtr->SetReceiveTime(package->GetTimestamp());
     m_rcvdPdelayResp = true;
 }
 
-void MDPdelayReq::SetPDelayResponseFollowUp(IReceivePackage* package)
+void MDPdelayReq::SetPDelayResponseFollowUp(ReceivePackage* package)
 {
     m_rcvdPdelayRespFollowUpPtr->ParsePackage(package->GetBuffer());
     m_rcvdPdelayRespFollowUpPtr->SetReceiveTime(package->GetTimestamp());

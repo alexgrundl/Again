@@ -23,25 +23,25 @@ public:
     void AdjustFrequency(double ppm) {}
 
 
-    bool Open(int clockIndex) {}
+    bool Open(int clockIndex) {return true;}
 
 
     void GetTime(struct timespec* ts) {}
 
 
-    bool GetSystemAndDeviceTime(struct timespec* tsSystem, struct timespec* tsDevice) {}
+    bool GetSystemAndDeviceTime(struct timespec* tsSystem, struct timespec* tsDevice) {return true;}
 
 
-    bool StartPPS(int pinIndex, int channel, struct ptp_clock_time* period) {}
+    bool StartPPS(int pinIndex, int channel, struct ptp_clock_time* period) {return true;}
 
 
-    bool StartPPS() {}
+    bool StartPPS() {return true;}
 
 
-    bool StopPPS(int pinIndex, int channel) {}
+    bool StopPPS(int pinIndex, int channel) {return true;}
 
 
-    bool StopPPS() {}
+    bool StopPPS() {return true;}
 };
 
 #endif //__linux__

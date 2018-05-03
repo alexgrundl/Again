@@ -1,7 +1,7 @@
 #include "mdsyncreceivesm.h"
 
 MDSyncReceiveSM::MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, PortSyncSyncReceive* portSyncSyncReceive,
-                                 INetworkInterfacePort* networkPort) :
+                                 INetPort* networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_followUpReceiptTimeoutTime.ns = 0;
@@ -106,14 +106,14 @@ void MDSyncReceiveSM::ProcessState()
     }
 }
 
-void MDSyncReceiveSM::SetSyncMessage(IReceivePackage *package)
+void MDSyncReceiveSM::SetSyncMessage(ReceivePackage *package)
 {
     m_rcvdSyncPtr->ParsePackage(package->GetBuffer());
     m_rcvdSyncPtr->SetReceiveTime(package->GetTimestamp());
     m_rcvdSync = true;
 }
 
-void MDSyncReceiveSM::SetFollowUpMessage(IReceivePackage *package)
+void MDSyncReceiveSM::SetFollowUpMessage(ReceivePackage *package)
 {
     m_rcvdFollowUpPtr->ParsePackage(package->GetBuffer());
     m_rcvdFollowUpPtr->SetReceiveTime(package->GetTimestamp());

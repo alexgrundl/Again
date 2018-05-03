@@ -13,7 +13,7 @@ class MDPdelayResp : public StateMachineBaseMD
 public:
 
 
-    MDPdelayResp(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetworkInterfacePort *networkPort);
+    MDPdelayResp(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort *networkPort);
 
 
     virtual ~MDPdelayResp();
@@ -22,7 +22,7 @@ public:
     void ProcessState();
 
 
-    void SetPDelayRequest(IReceivePackage* package);
+    void SetPDelayRequest(ReceivePackage* package);
 
 private:
 

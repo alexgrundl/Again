@@ -1,6 +1,6 @@
 #include "linkdelaysyncintervalsetting.h"
 
-LinkDelaySyncIntervalSetting::LinkDelaySyncIntervalSetting(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetworkInterfacePort *networkPort) :
+LinkDelaySyncIntervalSetting::LinkDelaySyncIntervalSetting(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetPort *networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_rcvdSignalingMsg1 = false;
@@ -14,7 +14,7 @@ LinkDelaySyncIntervalSetting::~LinkDelaySyncIntervalSetting()
     delete m_rcvdSignalingPtr;
 }
 
-void LinkDelaySyncIntervalSetting::SetSignalingMessage(IReceivePackage *package)
+void LinkDelaySyncIntervalSetting::SetSignalingMessage(ReceivePackage *package)
 {
     m_rcvdSignalingPtr->ParsePackage(package->GetBuffer());
     m_rcvdSignalingPtr->SetReceiveTime(package->GetTimestamp());

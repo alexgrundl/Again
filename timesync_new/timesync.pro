@@ -7,7 +7,7 @@ win32: LIBS += -pthread -lhid -lsetupapi
 else: unix: LIBS += -pthread -lrt
 
 DEFINES += _LOG_TO_CONSOLE
-DEFINES += _LOG_TO_SYSLOG
+unix: DEFINES += _LOG_TO_SYSLOG
 
 INCLUDEPATH += c-extensions
 INCLUDEPATH += c-platform
@@ -59,9 +59,11 @@ SOURCES += main.cpp \
     ptpclockwindows.cpp \
     c-platform/win/platform_win.cpp \
     portglobal.cpp \
-    linux_netport.cpp \
     statemachines/linkdelaysyncintervalsetting.cpp \
-    ptpmessage/ptpmessagesignaling.cpp
+    ptpmessage/ptpmessagesignaling.cpp \
+    linuxnetport.cpp \
+    windowsnetport.cpp \
+    receivepackage.cpp
 
 HEADERS += \
     types/types.h \
@@ -99,7 +101,6 @@ HEADERS += \
     statemachines/portannouncereceive.h \
     statemachines/portroleselection.h \
     ptpmessage/ptpmessageannounce.h \
-    comm/netport.h \
     statemachines/portannouncetransmit.h \
     statemachines/mdportannouncetransmit.h \
     c-extensions/autolock.h \
@@ -121,8 +122,10 @@ HEADERS += \
     ptpclockwindows.h \
     c-platform/win/platform_win.h \
     portglobal.h \
-    linux_netport.h \
-    netport.h \
     statemachines/linkdelaysyncintervalsetting.h \
-    ptpmessage/ptpmessagesignaling.h
+    ptpmessage/ptpmessagesignaling.h \
+    linuxnetport.h \
+    inetport.h \
+    windowsnetport.h \
+    receivepackage.h
 

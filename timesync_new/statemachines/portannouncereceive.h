@@ -20,7 +20,7 @@ public:
     void ProcessState();
 
 
-    void SetAnnounce(IReceivePackage *package);
+    void SetAnnounce(ReceivePackage *package);
 
 private:
 

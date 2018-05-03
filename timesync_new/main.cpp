@@ -1,16 +1,17 @@
 #include <iostream>
-#include <unistd.h>
 #include <sys/types.h>
 #include <memory>
 #include <signal.h>
 
 #include "types.h"
 #ifdef __linux__
+#include <unistd.h>
 #include <ifaddrs.h>
 #include <sys/ioctl.h>
 #include <linux/wireless.h>
 #include "ptpclocklinux.h"
 #else
+#include <io.h>
 #include "ptpclockwindows.h"
 #endif
 
@@ -19,7 +20,7 @@
 #include "ptpmessagefollowup.h"
 #include "ThreadWrapper.h"
 #include "statemachinemanager.h"
-#include "linux_netport.h"
+#include "linuxnetport.h"
 #include "portmanager.h"
 
 using namespace std;
@@ -89,7 +90,7 @@ int main()
     TimeAwareSystem tas;
     TimeAwareSystem tas1;
 
-    std::vector<INetworkInterfacePort*> networkPorts;
+    std::vector<INetPort*> networkPorts;
     std::vector<PortGlobal*> ports;
     std::vector<PortGlobal*> ports1;
 
@@ -171,7 +172,7 @@ int main()
     smManager1.StartProcessing();
 
     std::vector<PortManager*> portManagers;
-    for (std::vector<INetworkInterfacePort*>::size_type i = 0; i < networkPorts.size(); ++i)
+    for (std::vector<INetPort*>::size_type i = 0; i < networkPorts.size(); ++i)
     {
             portManagers.push_back(new PortManager(networkPorts[i], smManagers, i));
             portManagers[i]->StartReceiving();
