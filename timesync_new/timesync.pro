@@ -65,9 +65,9 @@ SOURCES += main.cpp \
     linuxnetport.cpp \
     windowsnetport.cpp \
     receivepackage.cpp \
-    licensecheck/licensecheck.cpp \
     licensecheck/sha3.c \
     licensecheck/byte_order.c \
+    licensecheck/licensecheck.cpp \
     licensecheck/licensechecklinux.cpp \
     licensecheck/licensecheckwindows.cpp
 
@@ -134,10 +134,10 @@ HEADERS += \
     inetport.h \
     windowsnetport.h \
     receivepackage.h \
-    licensecheck/licensecheck.h \
     licensecheck/sha3.h \
     licensecheck/ustd.h \
     licensecheck/byte_order.h \
+    licensecheck/licensecheck.h \
     licensecheck/licensechecklinux.h \
     licensecheck/licensecheckwindows.h
 

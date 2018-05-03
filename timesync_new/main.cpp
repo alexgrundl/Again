@@ -111,7 +111,7 @@ int main()
         TimeAwareSystem tas;
         TimeAwareSystem tas1;
 
-    std::vector<INetPort*> networkPorts;
+        std::vector<INetPort*> networkPorts;
         std::vector<PortGlobal*> ports;
         std::vector<PortGlobal*> ports1;
 
