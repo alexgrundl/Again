@@ -2,7 +2,7 @@
 
 #include "portipc.h"
 
-PortIPC::PortIPC(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetPort *networkPort, int domain) :
+PortIPC::PortIPC(TimeAwareSystem *timeAwareSystem, SystemPort *port, INetPort *networkPort, int domain) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_domain = domain;
@@ -35,6 +35,7 @@ void PortIPC::ProcessState()
         PortState portState;
         SystemTimeBase timeBase;
         const uint8_t* masterClockIdentity;
+        uint16_t systemPortNumber = m_systemPort->GetIdentity().portNumber;
 
         struct timespec tsSystem, tsDevice;
 
@@ -43,10 +44,10 @@ void PortIPC::ProcessState()
         deviceTime = (uint64_t)tsDevice.tv_sec * NS_PER_SEC + (uint64_t)tsDevice.tv_nsec;
         systemTime = (uint64_t)tsSystem.tv_sec * NS_PER_SEC + tsSystem.tv_nsec;
 
-        if(m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) != PORT_ROLE_MASTER)
+        if(m_timeAwareSystem->GetSelectedRole(systemPortNumber) != PORT_ROLE_MASTER)
         {
-            masterLocalPhaseOffset = m_portGlobal->remoteLocalDelta.ns;
-            masterLocalFrequencyOffset = m_portGlobal->remoteLocalRate;
+            masterLocalPhaseOffset = m_systemPort->GetRemoteLocalDelta().ns;
+            masterLocalFrequencyOffset = m_systemPort->GetRemoteLocalRate();
         }
         else
         {
@@ -65,13 +66,13 @@ void PortIPC::ProcessState()
         m_timeDevicePrevious = deviceTime;
 
 
-        portState = m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER ? PTP_MASTER : PTP_SLAVE;
+        portState = m_timeAwareSystem->GetSelectedRole(systemPortNumber) == PORT_ROLE_MASTER ? PTP_MASTER : PTP_SLAVE;
         timeBase = GPTP_CLOCK_REALTIME;
-        masterClockIdentity =  m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER ?
+        masterClockIdentity =  m_timeAwareSystem->GetSelectedRole(systemPortNumber) == PORT_ROLE_MASTER ?
                     m_timeAwareSystem->GetClockIdentity() : m_timeAwareSystem->GetGmPriority().sourcePortIdentity.clockIdentity;
 
         m_ipc->update(masterLocalPhaseOffset, localSystemPhaseOffset, masterLocalFrequencyOffset, localSystemFrequencyOffset, deviceTime, 0,
-                     m_portGlobal->pdelayCount, portState, m_portGlobal->asCapable, timeBase, m_portGlobal->neighborPropDelay.ns);
+                     m_systemPort->GetPdelayCount(), portState, m_systemPort->GetAsCapable(), timeBase, m_systemPort->GetNeighborPropDelay().ns);
 
         m_ipc->update_grandmaster(const_cast<uint8_t*>(masterClockIdentity), m_domain);
         m_ipc->update_network_interface(m_timeAwareSystem->GetClockIdentity(), m_timeAwareSystem->GetSystemPriority().identity.priority1,
@@ -79,7 +80,7 @@ void PortIPC::ProcessState()
                                        m_timeAwareSystem->GetSystemPriority().identity.clockQuality.offsetScaledLogVariance,
                                        m_timeAwareSystem->GetSystemPriority().identity.clockQuality.clockAccuracy,
                                        m_timeAwareSystem->GetSystemPriority().identity.priority2, 0,
-                                       0, 0, 0, m_portGlobal->identity.portNumber);
+                                       0, 0, 0, systemPortNumber);
 
         m_ipcUpdateTime.ns += NS_PER_SEC / 10;
     }

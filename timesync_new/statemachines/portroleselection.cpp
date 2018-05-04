@@ -1,6 +1,6 @@
 #include "portroleselection.h"
 
-PortRoleSelection::PortRoleSelection(TimeAwareSystem *timeAwareSystem, std::vector<PortGlobal*> ports) : StateMachineBase(timeAwareSystem)
+PortRoleSelection::PortRoleSelection(TimeAwareSystem *timeAwareSystem, std::vector<SystemPort*> ports) : StateMachineBase(timeAwareSystem)
 {
     m_ports = ports;
 }
@@ -38,14 +38,14 @@ void PortRoleSelection::UpdtRoleDisabledTree()
 
 void PortRoleSelection::ClearReselectTree()
 {
-    for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
-        m_ports[i]->reselect = false;
+    for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
+        m_ports[i]->SetReselect(false);
 }
 
 void PortRoleSelection::SetSelectedTree()
 {
-    for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
-        m_ports[i]->selected = true;
+    for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
+        m_ports[i]->SetSelected(true);
 }
 
 void PortRoleSelection::UpdtRolesTree()
@@ -59,13 +59,13 @@ void PortRoleSelection::UpdtRolesTree()
      * systemPriorityVector (for this time-aware system) and the gmPathPriorityVector for each port for
      * which the clockIdentity of the master port is not equal to thisClock (see 10.2.3.22), */
 
-    PortGlobal* bestPort = NULL;
+    SystemPort* bestPort = NULL;
     PriorityVector bestGmPriority = m_timeAwareSystem->GetSystemPriority();
 
-    for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
+    for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
     {
-        PortGlobal* port = m_ports[i];
-        PriorityVector gmPathPriortiy = port->portPriority;
+        SystemPort* port = m_ports[i];
+        PriorityVector gmPathPriortiy = port->GetPortPriority();
         gmPathPriortiy.stepsRemoved++;
 
         if(memcmp(gmPathPriortiy.sourcePortIdentity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH) != 0 &&
@@ -87,31 +87,34 @@ void PortRoleSelection::UpdtRolesTree()
      * currentUtcOffset, and timeSource are set to sysLeap61, sysLeap59, sysCurrentUtcOffsetValid, sysTimeTraceable, sysFrequencyTraceable,
      * sysCurrentUtcOffset, and sysTimeSource, respectively.
      */
-    m_timeAwareSystem->SetLeap61(bestPort != NULL ? bestPort->annLeap61 : m_timeAwareSystem->GetSysLeap61());
-    m_timeAwareSystem->SetLeap59(bestPort != NULL ? bestPort->annLeap59 : m_timeAwareSystem->GetSysLeap59());
-    m_timeAwareSystem->SetCurrentUtcOffsetValid(bestPort != NULL ? bestPort->annCurrentUtcOffsetValid : m_timeAwareSystem->GetCurrentUtcOffsetValid());
-    m_timeAwareSystem->SetTimeTraceable(bestPort != NULL ? bestPort->annTimeTraceable : m_timeAwareSystem->GetSysTimeTraceable());
-    m_timeAwareSystem->SetFrequencyTraceable(bestPort != NULL ? bestPort->annFrequencyTraceable : m_timeAwareSystem->GetSysFrequencyTraceable());
-    m_timeAwareSystem->SetCurrentUtcOffset(bestPort != NULL ? bestPort->annCurrentUtcOffset : m_timeAwareSystem->GetSysCurrentUtcOffset());
-    m_timeAwareSystem->SetTimeSource(bestPort != NULL ? bestPort->annTimeSource : m_timeAwareSystem->GetSysTimeSource());
+    m_timeAwareSystem->SetLeap61(bestPort != NULL ? bestPort->GetAnnLeap61() : m_timeAwareSystem->GetSysLeap61());
+    m_timeAwareSystem->SetLeap59(bestPort != NULL ? bestPort->GetAnnLeap59() : m_timeAwareSystem->GetSysLeap59());
+    m_timeAwareSystem->SetCurrentUtcOffsetValid(bestPort != NULL ? bestPort->GetAnnCurrentUtcOffsetValid() : m_timeAwareSystem->GetCurrentUtcOffsetValid());
+    m_timeAwareSystem->SetTimeTraceable(bestPort != NULL ? bestPort->GetAnnTimeTraceable() : m_timeAwareSystem->GetSysTimeTraceable());
+    m_timeAwareSystem->SetFrequencyTraceable(bestPort != NULL ? bestPort->GetAnnFrequencyTraceable() : m_timeAwareSystem->GetSysFrequencyTraceable());
+    m_timeAwareSystem->SetCurrentUtcOffset(bestPort != NULL ? bestPort->GetAnnCurrentUtcOffset() : m_timeAwareSystem->GetSysCurrentUtcOffset());
+    m_timeAwareSystem->SetTimeSource(bestPort != NULL ? bestPort->GetAnnTimeSource() : m_timeAwareSystem->GetSysTimeSource());
 
     /* Computes the first three components and the clockIdentity of the fourth component of the
      * masterPriorityVector for each port (i.e., everything except the portNumber of the fourth component) */
-    for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
+    for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
     {
-        PortGlobal* port = m_ports[i];
-        port->masterPriority.identity = m_timeAwareSystem->GetGmPriority().identity;
-        port->masterPriority.stepsRemoved = m_timeAwareSystem->GetGmPriority().stepsRemoved;
-        memcpy(port->masterPriority.sourcePortIdentity.clockIdentity, m_timeAwareSystem->GetSystemPriority().sourcePortIdentity.clockIdentity,
+        SystemPort* port = m_ports[i];
+        PriorityVector portMasterPriority;
+        portMasterPriority.identity = m_timeAwareSystem->GetGmPriority().identity;
+        portMasterPriority.stepsRemoved = m_timeAwareSystem->GetGmPriority().stepsRemoved;
+        memcpy(portMasterPriority.sourcePortIdentity.clockIdentity, m_timeAwareSystem->GetSystemPriority().sourcePortIdentity.clockIdentity,
                CLOCK_ID_LENGTH);
-        port->masterPriority.sourcePortIdentity.portNumber = port->identity.portNumber;
+        portMasterPriority.sourcePortIdentity.portNumber = port->GetIdentity().portNumber;
+        portMasterPriority.portNumber = port->GetMasterPriority().portNumber;
+        port->SetMasterPriority(portMasterPriority);
     }
 
     /* Computes masterStepsRemoved, which is equal to:
      * 1) messageStepsRemoved (see 10.3.9.7) for the port associated with the gmPriorityVector, incremented by 1, if the gmPriorityVector is not
      * the systemPriorityVector, or
      * 2) 0 if the gmPriorityVector is the systemPriorityVector */
-     m_timeAwareSystem->SetMasterStepsRemoved(bestPort != NULL ? bestPort->messageStepsRemoved : 0);
+     m_timeAwareSystem->SetMasterStepsRemoved(bestPort != NULL ? bestPort->GetMessageStepsRemoved() : 0);
 
      /* assigns the port role for port j and sets selectedRole[j] equal to this port role, as follows, for j = 1, 2, numberPorts:
       * 3) If the port is disabled (infoIs == Disabled), selectedRole[j] is set to DisabledPort.
@@ -134,42 +137,42 @@ void PortRoleSelection::UpdtRolesTree()
       * 9) If the portPriorityVector was received in an Announce message and announce receipt timeout, or sync receipt timeout with gmPresent TRUE, have not
       * occurred (infoIs == Received), the gmPriorityVector is not now derived from the portPriorityVector, and the masterPriorityVector is better than the
       * portPriorityVector, selectedRole[j] set to MasterPort and updtInfo is set to TRUE. */
-     for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
+     for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
      {
-         PortGlobal* port = m_ports[i];
-         if(port->infoIs == SPANNING_TREE_PORT_STATE_DISABLED)
+         SystemPort* port = m_ports[i];
+         if(port->GetInfoIs() == SPANNING_TREE_PORT_STATE_DISABLED)
              m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_DISABLED);
-         else if(port->infoIs == SPANNING_TREE_PORT_STATE_AGED)
+         else if(port->GetInfoIs() == SPANNING_TREE_PORT_STATE_AGED)
          {
              m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_MASTER);
-             port->updtInfo = true;
+             port->SetUpdtInfo(true);
          }
-         else if(port->infoIs == SPANNING_TREE_PORT_STATE_MINE)
+         else if(port->GetInfoIs() == SPANNING_TREE_PORT_STATE_MINE)
          {
              m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_MASTER);
-             if(port->portStepsRemoved != m_timeAwareSystem->GetMasterStepsRemoved() || bestPort == NULL || port != bestPort)
-                 port->updtInfo = true;
+             if(port->GetPortStepsRemoved() != m_timeAwareSystem->GetMasterStepsRemoved() || bestPort == NULL || port != bestPort)
+                 port->SetUpdtInfo(true);
          }
          //6), 7), 8) and 9)
-         else if(port->infoIs == SPANNING_TREE_PORT_STATE_RECEIVED)
+         else if(port->GetInfoIs() == SPANNING_TREE_PORT_STATE_RECEIVED)
          {
              if(port == bestPort)
              {
                  m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_SLAVE);
-                 port->updtInfo = false;
+                 port->SetUpdtInfo(false);
 
                  portIsSlave = true;
              }
-             else if(port->masterPriority.Compare(port->portPriority) != SystemIdentity::INFO_SUPERIOR)
+             else if(port->GetMasterPriority().Compare(port->GetPortPriority()) != SystemIdentity::INFO_SUPERIOR)
              {
 
                  m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_PASSIVE);
-                 port->updtInfo = false;
+                 port->SetUpdtInfo(false);
              }
              else
              {
                  m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_MASTER);
-                 port->updtInfo = true;
+                 port->SetUpdtInfo(true);
              }
          }
      }
@@ -235,13 +238,13 @@ void PortRoleSelection::ProcessState()
             break;
 
         case STATE_ROLE_SELECTION:
-            for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
+            for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
             {
-                if(m_ports[i]->reselect)
+                if(m_ports[i]->GetReselect())
                 {
                     reselect = true;
                 }
-                if(m_ports[i]->infoIs == SPANNING_TREE_PORT_STATE_AGED)
+                if(m_ports[i]->GetInfoIs() == SPANNING_TREE_PORT_STATE_AGED)
                 {
                     resetPortPriority = true;
                 }
@@ -251,7 +254,7 @@ void PortRoleSelection::ProcessState()
              * Otherwise we'd announce with this priority from now on which is the priority of the old master and not of ourselves. */
             if(reselect && resetPortPriority)
             {
-                for (std::vector<PortGlobal*>::size_type i = 0; i < m_ports.size(); ++i)
+                for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
                 {
                     m_ports[i]->ResetPortPriority();
                 }

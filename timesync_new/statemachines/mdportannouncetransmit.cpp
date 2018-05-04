@@ -1,6 +1,6 @@
 #include "mdportannouncetransmit.h"
 
-MDPortAnnounceTransmit::MDPortAnnounceTransmit(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetPort *networkPort) :
+MDPortAnnounceTransmit::MDPortAnnounceTransmit(TimeAwareSystem *timeAwareSystem, SystemPort *port, INetPort *networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_announceReceived = false;

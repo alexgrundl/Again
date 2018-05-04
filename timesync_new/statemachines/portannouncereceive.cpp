@@ -1,6 +1,6 @@
 #include "portannouncereceive.h"
 
-PortAnnounceReceive::PortAnnounceReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port,
+PortAnnounceReceive::PortAnnounceReceive(TimeAwareSystem* timeAwareSystem, SystemPort* port,
                                          PortAnnounceInformation* portAnnounceInformation) : StateMachineBasePort(timeAwareSystem, port)
 {
     m_rcvdAnnounce = false;
@@ -33,7 +33,7 @@ bool PortAnnounceReceive::QualifyAnnounce(PtpMessageAnnounce* rcvdAnnouncePtr)
     m_timeAwareSystem->ClearPathTrace();
     for (std::vector<uint8_t*>::size_type i = 0; i < tlv.pathSequence.size(); ++i)
     {
-        if(m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_SLAVE)
+        if(m_timeAwareSystem->GetSelectedRole(m_systemPort->GetIdentity().portNumber) == PORT_ROLE_SLAVE)
         {
             m_timeAwareSystem->AddPath(tlv.pathSequence[i]);
             pathSequenceCopied = true;
@@ -48,10 +48,10 @@ bool PortAnnounceReceive::QualifyAnnounce(PtpMessageAnnounce* rcvdAnnouncePtr)
 
 void PortAnnounceReceive::ProcessState()
 {
-    if(m_timeAwareSystem->BEGIN || (m_rcvdAnnounce && (!m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled || !m_portGlobal->asCapable)))
+    if(m_timeAwareSystem->BEGIN || (m_rcvdAnnounce && (!m_systemPort->IsPortEnabled() || !m_systemPort->IsPttPortEnabled() || !m_systemPort->GetAsCapable())))
     {
         m_rcvdAnnounce = false;
-        m_portGlobal->rcvdMsg = false;
+        m_systemPort->SetRcvdMsg(false);
         m_state = STATE_DISCARD;
     }
     else
@@ -59,25 +59,25 @@ void PortAnnounceReceive::ProcessState()
         switch (m_state)
         {
         case STATE_DISCARD:
-            if(m_rcvdAnnounce && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable)
+            if(m_rcvdAnnounce && m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled() && m_systemPort->GetAsCapable())
             {
                 m_rcvdAnnounce = false;
-                if(QualifyAnnounce(m_portGlobal->rcvdAnnouncePtr))
+                if(QualifyAnnounce(m_systemPort->GetRcvdAnnouncePtr()))
                 {
 //                    printf("Qualifiying announce...\n");
-                    m_portGlobal->rcvdMsg = true;
+                    m_systemPort->SetRcvdMsg(true);
                 }
                 m_state = STATE_RECEIVE;
             }
             break;
         case STATE_RECEIVE:
-            if(m_rcvdAnnounce && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable && !m_portGlobal->rcvdMsg)
+            if(m_rcvdAnnounce && m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled() && m_systemPort->GetAsCapable() && !m_systemPort->GetRcvdMsg())
             {
                 m_rcvdAnnounce = false;
-                if(QualifyAnnounce(m_portGlobal->rcvdAnnouncePtr))
+                if(QualifyAnnounce(m_systemPort->GetRcvdAnnouncePtr()))
                 {
 //                    printf("Qualifiying announce...\n");
-                    m_portGlobal->rcvdMsg = true;
+                    m_systemPort->SetRcvdMsg(true);
                 }
             }
             break;
@@ -91,9 +91,14 @@ void PortAnnounceReceive::ProcessState()
 
 void PortAnnounceReceive::SetAnnounce(ReceivePackage *package)
 {
-    delete m_portGlobal->rcvdAnnouncePtr;
-    m_portGlobal->rcvdAnnouncePtr = new PtpMessageAnnounce();
-    m_portGlobal->rcvdAnnouncePtr->ParsePackage(package->GetBuffer());
-    m_portGlobal->rcvdAnnouncePtr->SetReceiveTime(package->GetTimestamp());
+    PtpMessageAnnounce* newAnnouncePtr;
+
+    delete m_systemPort->GetRcvdAnnouncePtr();
+
+    newAnnouncePtr = new PtpMessageAnnounce();
+    newAnnouncePtr->ParsePackage(package->GetBuffer());
+    newAnnouncePtr->SetReceiveTime(package->GetTimestamp());
+    m_systemPort->SetRcvdAnnouncePtr(newAnnouncePtr);
+
     m_rcvdAnnounce = true;
 }

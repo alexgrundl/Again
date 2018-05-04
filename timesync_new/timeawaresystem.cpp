@@ -366,6 +366,7 @@ std::vector<uint8_t*> TimeAwareSystem::GetPathTrace()
 void TimeAwareSystem::InitLocalClock(PtpClock *clock, int clockIndex)
 {
     m_clockLocal = clock;
+    m_clockLocal->SetPtssType(PtpClock::PTSS_TYPE_ROOT);
     m_clockLocal->Open(clockIndex);
     if(m_domain == 0)
     {

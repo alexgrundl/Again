@@ -6,6 +6,7 @@ PtpClockLinux::PtpClockLinux()
 {
     ptpClockRootPath = "/dev/ptp";
     m_clockFD = -1;
+    m_ptssType = PTSS_TYPE_SLAVE;
 }
 
 PtpClockLinux::~PtpClockLinux()
@@ -111,6 +112,16 @@ bool PtpClockLinux::GetSystemAndDeviceTime(struct timespec* tsSystem, struct tim
     return true;
 }
 
+PtpClock::PtssType PtpClockLinux::GetPtssType()
+{
+    return m_ptssType;
+}
+
+void PtpClockLinux::SetPtssType(PtssType type)
+{
+    m_ptssType = type;
+}
+
 bool PtpClockLinux::StartPPS(int pinIndex, int channel, struct ptp_clock_time* period)
 {
     bool success = false;
@@ -191,5 +202,49 @@ bool PtpClockLinux::StopPPS()
 
     return success;
 }
+
+bool PtpClockLinux::EnableExternalTimestamp(int pinIndex)
+{
+    return SetExternalTimestamp(pinIndex, true);
+}
+
+bool PtpClockLinux::DisableExternalTimestamp(int pinIndex)
+{
+    return SetExternalTimestamp(pinIndex, false);
+}
+
+bool PtpClockLinux::SetExternalTimestamp(int pinIndex, bool enable)
+{
+    bool success = false;
+    struct ptp_extts_request exttsRequest;
+
+    exttsRequest.index = pinIndex;
+    exttsRequest.flags = enable ? PTP_ENABLE_FEATURE : 0;
+    if (ioctl(m_clockFD, PTP_EXTTS_REQUEST, &exttsRequest))
+    {
+        logwarning("PTP_EXTTS_REQUEST failed");
+    }
+    else
+    {
+        success = true;
+        lognotice("%s: External timestamping of SDP%i %s.", m_clockPath.c_str(), pinIndex, enable ? "enabled" : "disabled");
+    }
+
+    return success;
+}
+
+//    struct ptp_extts_event event;
+//    for (; extts; extts--)
+//    {
+//        cnt = read(fd, &event, sizeof(event));
+//        if (cnt != sizeof(event))
+//        {
+//            perror("read");
+//            break;
+//        }
+//        printf("event index %u at %lld.%09u\n", event.index,
+//               event.t.sec, event.t.nsec);
+//        fflush(stdout);
+//    }
 
 #endif //__linux__

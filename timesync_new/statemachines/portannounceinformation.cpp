@@ -1,6 +1,6 @@
 #include "portannounceinformation.h"
 
-PortAnnounceInformation::PortAnnounceInformation(TimeAwareSystem* timeAwareSystem, PortGlobal* port) :
+PortAnnounceInformation::PortAnnounceInformation(TimeAwareSystem* timeAwareSystem, SystemPort* port) :
     StateMachineBasePort(timeAwareSystem, port)
 {
     m_announceReceiptTimeoutTime.ns = 0;
@@ -35,7 +35,7 @@ PortAnnounceInformation::MasterInfo PortAnnounceInformation::RcvInfo(PtpMessageA
     /* if the received message conveys the port role MasterPort.....?????????????????????? */
 //    if(m_timeAwareSystem->selectedRole[m_portGlobal->thisPort] == PORT_ROLE_MASTER)
 //    {
-        SystemIdentity::Info info = m_messagePriority.Compare(m_portGlobal->portPriority);
+        SystemIdentity::Info info = m_messagePriority.Compare(m_systemPort->GetPortPriority());
         if(info == SystemIdentity::INFO_SUPERIOR)
             return MASTER_INFO_SUPERIOR;
         else if(info == SystemIdentity::INFO_EQUAL)
@@ -49,19 +49,19 @@ PortAnnounceInformation::MasterInfo PortAnnounceInformation::RcvInfo(PtpMessageA
 
 void PortAnnounceInformation::RecordOtherAnnounceInfo(PtpMessageAnnounce* rcvdAnnouncePtr)
 {
-    m_portGlobal->annLeap61 = rcvdAnnouncePtr->GetFlagLeap61();
-    m_portGlobal->annLeap59 = rcvdAnnouncePtr->GetFlagLeap59();
-    m_portGlobal->annCurrentUtcOffsetValid = rcvdAnnouncePtr->GetCurrentUtcOffsetValid();
-    m_portGlobal->annTimeTraceable = rcvdAnnouncePtr->GetTimeTraceable();
-    m_portGlobal->annFrequencyTraceable = rcvdAnnouncePtr->GetFrequencyTraceable();
-    m_portGlobal->annCurrentUtcOffset = rcvdAnnouncePtr->GetCurrentUtcOffset();
-    m_portGlobal->annTimeSource = rcvdAnnouncePtr->GetTimeSource();
+    m_systemPort->SetAnnLeap61(rcvdAnnouncePtr->GetFlagLeap61());
+    m_systemPort->SetAnnLeap59(rcvdAnnouncePtr->GetFlagLeap59());
+    m_systemPort->SetAnnCurrentUtcOffsetValid(rcvdAnnouncePtr->GetCurrentUtcOffsetValid());
+    m_systemPort->SetAnnTimeTraceable(rcvdAnnouncePtr->GetTimeTraceable());
+    m_systemPort->SetAnnFrequencyTraceable(rcvdAnnouncePtr->GetFrequencyTraceable());
+    m_systemPort->SetAnnCurrentUtcOffset(rcvdAnnouncePtr->GetCurrentUtcOffset());
+    m_systemPort->SetAnnTimeSource(rcvdAnnouncePtr->GetTimeSource());
 }
 
 void PortAnnounceInformation::ProcessState()
 {
-    if(((!m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled || !m_portGlobal->asCapable) &&
-        (m_portGlobal->infoIs != SPANNING_TREE_PORT_STATE_DISABLED) ) ||
+    if(((!m_systemPort->IsPortEnabled() || !m_systemPort->IsPttPortEnabled() || !m_systemPort->GetAsCapable()) &&
+        (m_systemPort->GetInfoIs() != SPANNING_TREE_PORT_STATE_DISABLED) ) ||
             m_timeAwareSystem->BEGIN)
     {
         ExecuteDisabledState();
@@ -72,16 +72,16 @@ void PortAnnounceInformation::ProcessState()
         switch(m_state)
         {
         case STATE_DISABLED:
-            if(m_portGlobal->rcvdMsg)
+            if(m_systemPort->GetRcvdMsg())
                 ExecuteDisabledState();
-            else if(m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable)
+            else if(m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled() && m_systemPort->GetAsCapable())
             {
                 ExecuteAgedState();
                 m_state = STATE_AGED;
             }
             break;
         case STATE_AGED:
-            if(m_portGlobal->selected && m_portGlobal->updtInfo)
+            if(m_systemPort->IsSelected() && m_systemPort->GetUpdtInfo())
             {
                 ExecuteUpdateState();
                 m_state = STATE_UPDATE;
@@ -94,21 +94,21 @@ void PortAnnounceInformation::ProcessState()
             m_state = STATE_CURRENT;
             break;
         case STATE_CURRENT:
-            if(m_portGlobal->rcvdMsg && !m_portGlobal->updtInfo)
+            if(m_systemPort->GetRcvdMsg() && !m_systemPort->GetUpdtInfo())
             {
-                m_rcvdInfo = RcvInfo(m_portGlobal->rcvdAnnouncePtr);
+                m_rcvdInfo = RcvInfo(m_systemPort->GetRcvdAnnouncePtr());
                 m_state = STATE_RECEIVE;
             }
-            else if(m_portGlobal->selected && m_portGlobal->updtInfo)
+            else if(m_systemPort->IsSelected() && m_systemPort->GetUpdtInfo())
             {
                 ExecuteUpdateState();
                 m_state = STATE_UPDATE;
             }
-            else if((m_portGlobal->infoIs == SPANNING_TREE_PORT_STATE_RECEIVED) &&
+            else if((m_systemPort->GetInfoIs() == SPANNING_TREE_PORT_STATE_RECEIVED) &&
                     (m_timeAwareSystem->ReadCurrentTime() >= m_announceReceiptTimeoutTime //||
                      /* Where to get syncReceiptTimeoutTime ????????????????????? */
                      /*(m_timeAwareSystem->GetCurrentTime() >= m_portGlobal->syncReceiptTimeoutTime &&
-                    m_timeAwareSystem->gmPresent)*/) && !m_portGlobal->updtInfo && !m_portGlobal->rcvdMsg)
+                    m_timeAwareSystem->gmPresent)*/) && !m_systemPort->GetUpdtInfo() && !m_systemPort->GetRcvdMsg())
             {
                 ExecuteAgedState();
                 m_state = STATE_AGED;
@@ -118,31 +118,30 @@ void PortAnnounceInformation::ProcessState()
             if(m_rcvdInfo == MASTER_INFO_SUPERIOR)
             {
                 /* Sending port is new master port */
-                m_portGlobal->portPriority = m_messagePriority;
-                m_portGlobal->portStepsRemoved = m_portGlobal->rcvdAnnouncePtr->GetStepsRemoved();
-                RecordOtherAnnounceInfo(m_portGlobal->rcvdAnnouncePtr);
-                m_portGlobal->announceReceiptTimeoutTimeInterval.ns = (uint64_t)m_portGlobal->announceReceiptTimeout * NS_PER_SEC *
-                        pow(2, /*16 +*/ m_portGlobal->rcvdAnnouncePtr->GetLogMessageInterval());
-                m_portGlobal->announceReceiptTimeoutTimeInterval.ns_frac = 0;
-                m_announceReceiptTimeoutTime = m_timeAwareSystem->ReadCurrentTime() + m_portGlobal->announceReceiptTimeoutTimeInterval;
-                m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_RECEIVED;
-                m_portGlobal->reselect = true;
-                m_portGlobal->selected = false;
-                m_portGlobal->rcvdMsg = false;
+                m_systemPort->SetPortPriority(m_messagePriority);
+                m_systemPort->SetPortStepsRemoved(m_systemPort->GetRcvdAnnouncePtr()->GetStepsRemoved());
+                RecordOtherAnnounceInfo(m_systemPort->GetRcvdAnnouncePtr());
+                uint64_t intervalNs = m_systemPort->GetAnnounceReceiptTimeout() * NS_PER_SEC * pow(2, /*16 +*/ m_systemPort->GetRcvdAnnouncePtr()->GetLogMessageInterval());
+                m_systemPort->SetAnnounceReceiptTimeoutTimeInterval({intervalNs, 0});
+                m_announceReceiptTimeoutTime = m_timeAwareSystem->ReadCurrentTime() + m_systemPort->GetAnnounceReceiptTimeoutTimeInterval();
+                m_systemPort->SetInfoIs(SPANNING_TREE_PORT_STATE_RECEIVED);
+                m_systemPort->SetReselect(true);
+                m_systemPort->SetSelected(false);
+                m_systemPort->SetRcvdMsg(false);
                 /*m_rcvdAnnouncePtr = FALSE*/;
                 m_state = STATE_SUPERIOR_MASTER_PORT;
             }
             else if(m_rcvdInfo == MASTER_INFO_REPEATED)
             {
                 /* Sending port is same master port */
-                m_announceReceiptTimeoutTime = m_timeAwareSystem->ReadCurrentTime() + m_portGlobal->announceReceiptTimeoutTimeInterval;
-                m_portGlobal->rcvdMsg = false;
+                m_announceReceiptTimeoutTime = m_timeAwareSystem->ReadCurrentTime() + m_systemPort->GetAnnounceReceiptTimeoutTimeInterval();
+                m_systemPort->SetRcvdMsg(false);
                 /*rcvdAnnouncePtr = FALSE;*/
                 m_state = STATE_REPEATED_MASTER_PORT;
             }
             else
             {
-                m_portGlobal->rcvdMsg = FALSE;
+                m_systemPort->SetRcvdMsg(false);
                 /*rcvdAnnouncePtr = FALSE;*/
                 m_state = STATE_INFERIOR_MASTER_OR_OTHER_PORT;
             }
@@ -156,25 +155,25 @@ void PortAnnounceInformation::ProcessState()
 
 void PortAnnounceInformation::ExecuteDisabledState()
 {
-    m_portGlobal->rcvdMsg = false;
+    m_systemPort->SetRcvdMsg(false);
     m_announceReceiptTimeoutTime = m_timeAwareSystem->ReadCurrentTime();
-    m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_DISABLED;
-    m_portGlobal->reselect = true;
-    m_portGlobal->selected = false;
+    m_systemPort->SetInfoIs(SPANNING_TREE_PORT_STATE_DISABLED);
+    m_systemPort->SetReselect(true);
+    m_systemPort->SetSelected(false);
 }
 
 void PortAnnounceInformation::ExecuteAgedState()
 {
-    m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_AGED;
-    m_portGlobal->reselect = true;
-    m_portGlobal->selected = false;
+    m_systemPort->SetInfoIs(SPANNING_TREE_PORT_STATE_AGED);
+    m_systemPort->SetReselect(true);
+    m_systemPort->SetSelected(false);
 }
 
 void PortAnnounceInformation::ExecuteUpdateState()
 {
-    m_portGlobal->portPriority = m_portGlobal->masterPriority;
-    m_portGlobal->portStepsRemoved = m_timeAwareSystem->GetMasterStepsRemoved();
-    m_portGlobal->updtInfo = false;
-    m_portGlobal->infoIs = SPANNING_TREE_PORT_STATE_MINE;
-    m_portGlobal->newInfo = true;
+    m_systemPort->SetPortPriority(m_systemPort->GetMasterPriority());
+    m_systemPort->SetPortStepsRemoved(m_timeAwareSystem->GetMasterStepsRemoved());
+    m_systemPort->SetUpdtInfo(false);
+    m_systemPort->SetInfoIs(SPANNING_TREE_PORT_STATE_MINE);
+    m_systemPort->SetNewInfo(true);
 }

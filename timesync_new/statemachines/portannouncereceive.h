@@ -11,7 +11,7 @@ class PortAnnounceReceive : public StateMachineBasePort
 {
 public:
 
-    PortAnnounceReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port, PortAnnounceInformation* portAnnounceInformation);
+    PortAnnounceReceive(TimeAwareSystem* timeAwareSystem, SystemPort* port, PortAnnounceInformation* portAnnounceInformation);
 
 
     virtual ~PortAnnounceReceive();

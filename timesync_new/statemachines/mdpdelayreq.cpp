@@ -1,6 +1,6 @@
 #include "mdpdelayreq.h"
 
-MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort* networkPort) :
+MDPdelayReq::MDPdelayReq(TimeAwareSystem* timeAwareSystem, SystemPort* port, INetPort* networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_pdelayIntervalTimer.ns = 0;
@@ -32,7 +32,7 @@ MDPdelayReq::~MDPdelayReq()
 void MDPdelayReq::SetPdelayReq()
 {
     PortIdentity identity;
-    identity.portNumber = m_portGlobal->identity.portNumber;
+    identity.portNumber = m_systemPort->GetIdentity().portNumber;
 
     PtpMessageBase::GetClockIdentity(m_networkPort->GetMAC(), identity.clockIdentity);
     m_txPdelayReqPtr->SetSourcePortIdentity(&identity);
@@ -98,7 +98,7 @@ UScaledNs MDPdelayReq::ComputePropTime()
     }
 
     if(m_neighborRateRatioValid)
-        tsPropTime *= m_portGlobal->neighborRateRatio;
+        tsPropTime *= m_systemPort->GetNeighborRateRatio();
 
     propTime.ns = tsPropTime.sec * NS_PER_SEC + tsPropTime.ns;
     propTime.ns_frac = 0;
@@ -110,14 +110,14 @@ UScaledNs MDPdelayReq::ComputePropTime()
 
 void MDPdelayReq::ProcessState()
 {
-    if(m_timeAwareSystem->BEGIN || !m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled)
+    if(m_timeAwareSystem->BEGIN || !m_systemPort->IsPortEnabled() || !m_systemPort->IsPttPortEnabled())
         m_state = STATE_NOT_ENABLED;
     else
     {
         switch(m_state)
         {
         case STATE_NOT_ENABLED:
-            if(m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled)
+            if(m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled())
             {
                 if(m_timeAwareSystem->GetDomain() == TimeAwareSystem::GetDomainToMeasurePDelay())
                 {
@@ -131,16 +131,16 @@ void MDPdelayReq::ProcessState()
                     TxPdelayReq();
                     m_pdelayIntervalTimer = m_timeAwareSystem->ReadCurrentTime();
                     m_lostResponses = 0;
-                    m_portGlobal->isMeasuringDelay = false;
-                    m_portGlobal->asCapable = false;
+                    m_systemPort->SetIsMeasuringDelay(false);
+                    m_systemPort->SetAsCapable(false);
                     m_networkPort->SetASCapable(false);
                     m_state = STATE_INITIAL_SEND_PDELAY_REQ;
                 }
                 else
                 {
-                    m_portGlobal->asCapable = m_networkPort->GetASCapable();
-                    m_portGlobal->neighborPropDelay = {m_networkPort->GetPDelay(), 0};
-                    m_portGlobal->neighborRateRatio = m_networkPort->GetNeighborRatio();
+                    m_systemPort->SetAsCapable(m_networkPort->GetASCapable());
+                    m_systemPort->SetNeighborPropDelay({m_networkPort->GetPDelay(), 0});
+                    m_systemPort->SetNeighborRateRatio(m_networkPort->GetNeighborRatio());
                 }
             }
             break;
@@ -159,15 +159,15 @@ void MDPdelayReq::ProcessState()
             PtpMessageBase::GetClockIdentity(m_networkPort->GetMAC(), portClockIdentity);
             if(m_rcvdPdelayResp && (m_rcvdPdelayRespPtr->GetSequenceID() == m_txPdelayReqPtr->GetSequenceID())
                     && memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, CLOCK_ID_LENGTH) == 0 &&
-                    (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber == m_portGlobal->identity.portNumber))
+                    (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber == m_systemPort->GetIdentity().portNumber))
             {
                 m_rcvdPdelayResp = false;
                 m_state = STATE_WAITING_FOR_PDELAY_RESP_FOLLOW_UP;
             }
-            else if((m_timeAwareSystem->ReadCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval) ||
+            else if((m_timeAwareSystem->ReadCurrentTime() - m_pdelayIntervalTimer >= m_systemPort->GetPdelayReqInterval()) ||
                     (m_rcvdPdelayResp &&
                     (memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, CLOCK_ID_LENGTH) != 0 ||
-                    (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber != m_portGlobal->identity.portNumber) ||
+                    (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber != m_systemPort->GetIdentity().portNumber) ||
                     (m_rcvdPdelayRespPtr->GetSequenceID() != m_txPdelayReqPtr->GetSequenceID()))))
             {
                 ExecuteResetState();
@@ -182,33 +182,33 @@ void MDPdelayReq::ProcessState()
                     m_rcvdPdelayRespFollowUpPtr->GetSourcePortIdentity().portNumber == m_rcvdPdelayRespPtr->GetSourcePortIdentity().portNumber)
             {
                 m_rcvdPdelayRespFollowUp = false;
-                if (m_portGlobal->computeNeighborRateRatio)
+                if (m_systemPort->GetComputeNeighborRateRatio())
                 {
-                    m_portGlobal->neighborRateRatio = ComputePdelayRateRatio();
-                    m_networkPort->SetNeighborRatio(m_portGlobal->neighborRateRatio);
+                    m_systemPort->SetNeighborRateRatio(ComputePdelayRateRatio());
+                    m_networkPort->SetNeighborRatio(m_systemPort->GetNeighborRateRatio());
                 }
-                if (m_portGlobal->computeNeighborPropDelay)
+                if (m_systemPort->GetComputeNeighborPropDelay())
                 {
-                    m_portGlobal->neighborPropDelay = ComputePropTime();
-                    m_networkPort->SetPDelay(m_portGlobal->neighborPropDelay.ns);
+                    m_systemPort->SetNeighborPropDelay(ComputePropTime());
+                    m_networkPort->SetPDelay(m_systemPort->GetNeighborPropDelay().ns);
                 }
                 m_lostResponses = 0;
-                m_portGlobal->isMeasuringDelay = true;
-                if ((m_portGlobal->neighborPropDelay <= m_portGlobal->neighborPropDelayThresh) &&
+                m_systemPort->SetIsMeasuringDelay(true);
+                if ((m_systemPort->GetNeighborPropDelay() <= m_systemPort->GetNeighborPropDelayThresh()) &&
                         memcmp(m_rcvdPdelayRespPtr->GetSourcePortIdentity().clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH) != 0
                         && m_neighborRateRatioValid)
                 {
-                    m_portGlobal->asCapable = true;
+                    m_systemPort->SetAsCapable(true);
                     m_networkPort->SetASCapable(true);
                 }
                 else
                 {
-                    m_portGlobal->asCapable = false;
+                    m_systemPort->SetAsCapable(false);
                     m_networkPort->SetASCapable(false);
                 }
                 m_state = STATE_WAITING_FOR_PDELAY_INTERVAL_TIMER;
             }
-            else if((m_timeAwareSystem->ReadCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval) ||
+            else if((m_timeAwareSystem->ReadCurrentTime() - m_pdelayIntervalTimer >= m_systemPort->GetPdelayReqInterval()) ||
                     (m_rcvdPdelayResp && (m_rcvdPdelayRespPtr->GetSequenceID() == m_txPdelayReqPtr->GetSequenceID())))
             {
                 ExecuteResetState();
@@ -217,7 +217,7 @@ void MDPdelayReq::ProcessState()
             break;
 
         case STATE_WAITING_FOR_PDELAY_INTERVAL_TIMER:
-            if(m_timeAwareSystem->ReadCurrentTime() - m_pdelayIntervalTimer >= m_portGlobal->pdelayReqInterval)
+            if(m_timeAwareSystem->ReadCurrentTime() - m_pdelayIntervalTimer >= m_systemPort->GetPdelayReqInterval())
             {
                 ExecuteSendPDelayReqState();
                 m_state = STATE_SEND_PDELAY_REQ;
@@ -239,12 +239,12 @@ void MDPdelayReq::ProcessState()
 void MDPdelayReq::ExecuteResetState()
 {
     m_initPdelayRespReceived = false;
-    if (m_lostResponses <= m_portGlobal->allowedLostResponses)
+    if (m_lostResponses <= m_systemPort->GetAllowedLostResponses())
     m_lostResponses += 1;
     else
     {
-        m_portGlobal->isMeasuringDelay = false;
-        m_portGlobal->asCapable = false;
+        m_systemPort->SetIsMeasuringDelay(false);
+        m_systemPort->SetAsCapable(false);
         m_networkPort->SetASCapable(false);
     }
 }

@@ -66,6 +66,18 @@ public:
 
     bool StopPPS();
 
+
+    bool EnableExternalTimestamp(int pinIndex);
+
+
+    bool DisableExternalTimestamp(int pinIndex);
+
+
+    PtssType GetPtssType();
+
+
+    void SetPtssType(PtssType type);
+
 private:
 
     std::string ptpClockRootPath;
@@ -75,6 +87,12 @@ private:
 
 
     int m_clockFD;
+
+
+    PtssType m_ptssType;
+
+
+    bool SetExternalTimestamp(int pinIndex, bool enable);
 };
 
 #endif //__linux__

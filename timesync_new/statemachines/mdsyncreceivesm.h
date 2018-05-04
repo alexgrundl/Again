@@ -11,7 +11,7 @@ class MDSyncReceiveSM : public StateMachineBaseMD
 public:
 
 
-    MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, PortSyncSyncReceive* portSyncSyncReceive,
+    MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, SystemPort* port, PortSyncSyncReceive* portSyncSyncReceive,
                     INetPort *network);
 
 

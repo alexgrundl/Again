@@ -13,7 +13,7 @@ class MDPdelayResp : public StateMachineBaseMD
 public:
 
 
-    MDPdelayResp(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort *networkPort);
+    MDPdelayResp(TimeAwareSystem* timeAwareSystem, SystemPort* port, INetPort *networkPort);
 
 
     virtual ~MDPdelayResp();

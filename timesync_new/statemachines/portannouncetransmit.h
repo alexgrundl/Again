@@ -11,7 +11,7 @@ class PortAnnounceTransmit : public StateMachineBasePort
 public:
 
 
-    PortAnnounceTransmit(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDPortAnnounceTransmit* portAnnounceTransmit);
+    PortAnnounceTransmit(TimeAwareSystem* timeAwareSystem, SystemPort* port, MDPortAnnounceTransmit* portAnnounceTransmit);
 
 
     virtual ~PortAnnounceTransmit();

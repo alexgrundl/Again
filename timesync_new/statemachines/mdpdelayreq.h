@@ -14,7 +14,7 @@ class MDPdelayReq : public StateMachineBaseMD
 public:
 
 
-    MDPdelayReq(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort* networkPort);
+    MDPdelayReq(TimeAwareSystem* timeAwareSystem, SystemPort* port, INetPort* networkPort);
 
 
     virtual ~MDPdelayReq();

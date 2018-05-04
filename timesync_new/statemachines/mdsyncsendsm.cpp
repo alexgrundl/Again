@@ -1,6 +1,6 @@
 #include "mdsyncsendsm.h"
 
-MDSyncSendSM::MDSyncSendSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort* networkPort) :
+MDSyncSendSM::MDSyncSendSM(TimeAwareSystem* timeAwareSystem, SystemPort* port, INetPort* networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_rcvdMDSync = false;
@@ -23,7 +23,7 @@ void MDSyncSendSM::SetSync()
 {
     m_txSyncPtr->SetCorrectionField(0);
     m_txSyncPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
-    m_txSyncPtr->SetSequenceID(m_portGlobal->syncSequenceId);
+    m_txSyncPtr->SetSequenceID(m_systemPort->GetSyncSequenceId());
     m_txSyncPtr->SetLogMessageInterval((m_rcvdMDSyncPtr->logMessageInterval));
 
     m_txSyncPtr->SetDomainNumber(m_rcvdMDSyncPtr->domain);
@@ -83,11 +83,11 @@ void MDSyncSendSM::SetMDSyncSend(MDSyncSend* rcvdMDSyncPtr)
 
 void MDSyncSendSM::ProcessState()
 {
-    if(m_timeAwareSystem->BEGIN || (m_rcvdMDSync && (!m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled || !m_portGlobal->asCapable)))
+    if(m_timeAwareSystem->BEGIN || (m_rcvdMDSync && (!m_systemPort->IsPortEnabled() || !m_systemPort->IsPttPortEnabled() || !m_systemPort->GetAsCapable())))
     {
         m_rcvdMDSync = false;
         m_rcvdMDTimestampReceive = false;
-        m_portGlobal->syncSequenceId = rand() % 65536;
+        m_systemPort->SetSyncSequenceId(rand() % 65536);
         m_state = STATE_INITIALIZING;
     }
     else
@@ -96,12 +96,12 @@ void MDSyncSendSM::ProcessState()
         {
         case STATE_INITIALIZING:
         case STATE_SEND_FOLLOW_UP:
-            if(m_rcvdMDSync && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable)
+            if(m_rcvdMDSync && m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled() && m_systemPort->GetAsCapable())
             {
                 m_rcvdMDSync = false;
                 SetSync();
                 TxSync();
-                m_portGlobal->syncSequenceId += 1;
+                m_systemPort->IncreaseSyncSequenceId();
                 m_state = STATE_SEND_SYNC;
             }
             break;

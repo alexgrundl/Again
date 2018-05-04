@@ -53,13 +53,12 @@ SOURCES += main.cpp \
     types/timestamp.cpp \
     types/uscaledns.cpp \
     types/extendedtimestamp.cpp \
-    statemachines/timecontrol.cpp \
+    timecontrol.cpp \
     ipc/linuxsharedmemoryipc.cpp \
     statemachines/portipc.cpp \
     ptpclocklinux.cpp \
     ptpclockwindows.cpp \
     c-platform/win/platform_win.cpp \
-    portglobal.cpp \
     statemachines/linkdelaysyncintervalsetting.cpp \
     ptpmessage/ptpmessagesignaling.cpp \
     linuxnetport.cpp \
@@ -69,7 +68,8 @@ SOURCES += main.cpp \
     licensecheck/byte_order.c \
     licensecheck/licensecheck.cpp \
     licensecheck/licensechecklinux.cpp \
-    licensecheck/licensecheckwindows.cpp
+    licensecheck/licensecheckwindows.cpp \
+    systemport.cpp
 
 HEADERS += \
     types/types.h \
@@ -116,7 +116,7 @@ HEADERS += \
     types/timestamp.h \
     types/uscaledns.h \
     types/extendedtimestamp.h \
-    statemachines/timecontrol.h \
+    timecontrol.h \
     ipc/ipcdef.hpp \
     ipc/ptptypes.hpp \
     ipc/avbts_osipc.hpp \
@@ -127,7 +127,6 @@ HEADERS += \
     ptpclocklinux.h \
     ptpclockwindows.h \
     c-platform/win/platform_win.h \
-    portglobal.h \
     statemachines/linkdelaysyncintervalsetting.h \
     ptpmessage/ptpmessagesignaling.h \
     linuxnetport.h \
@@ -139,5 +138,6 @@ HEADERS += \
     licensecheck/byte_order.h \
     licensecheck/licensecheck.h \
     licensecheck/licensechecklinux.h \
-    licensecheck/licensecheckwindows.h
+    licensecheck/licensecheckwindows.h \
+    systemport.h
 

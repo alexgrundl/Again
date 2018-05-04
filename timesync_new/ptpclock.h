@@ -11,6 +11,16 @@ class PtpClock : public ClockSourceTime
 public:
 
 
+    enum PtssType
+    {
+        //Receives PPS signals from the root. Uses this signals to syntonize to the root clock.
+        PTSS_TYPE_SLAVE,
+        //The root of the platform time synchronization. Sends the PPS signal to the other clocks.
+        //Only one clock of this type should exist.
+        PTSS_TYPE_ROOT
+    };
+
+
     virtual ~PtpClock(){}
 
 
@@ -39,6 +49,12 @@ public:
 
 
     virtual bool StopPPS() = 0;
+
+
+    virtual PtssType GetPtssType() = 0;
+
+
+    virtual void SetPtssType(PtssType type) = 0;
 };
 
 #endif // PTPCLOCK_H

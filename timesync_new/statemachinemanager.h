@@ -37,7 +37,7 @@ class StateMachineManager
 {
 public:
 
-    StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<PortGlobal*> ports,
+    StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<SystemPort*> ports,
                         std::vector<INetPort*> networkPorts);
 
 

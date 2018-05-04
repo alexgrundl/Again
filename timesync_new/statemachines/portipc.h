@@ -12,7 +12,7 @@ class PortIPC : public StateMachineBaseMD
 {
 public:
 
-    PortIPC(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort* networkPort, int domain);
+    PortIPC(TimeAwareSystem* timeAwareSystem, SystemPort* port, INetPort* networkPort, int domain);
 
 
     virtual ~PortIPC();

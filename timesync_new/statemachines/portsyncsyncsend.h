@@ -10,7 +10,7 @@ class PortSyncSyncSend : public StateMachineBasePort
 {
 public:
 
-    PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, PortGlobal* port, MDSyncSendSM* mdSyncSendSM);
+    PortSyncSyncSend(TimeAwareSystem* timeAwareSystem, SystemPort* port, MDSyncSendSM* mdSyncSendSM);
 
 
     virtual ~PortSyncSyncSend();

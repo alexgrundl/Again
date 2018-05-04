@@ -9,7 +9,7 @@ class LinkDelaySyncIntervalSetting : public StateMachineBaseMD
 public:
 
 
-    LinkDelaySyncIntervalSetting(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort* networkPort);
+    LinkDelaySyncIntervalSetting(TimeAwareSystem* timeAwareSystem, SystemPort* port, INetPort* networkPort);
 
 
     ~LinkDelaySyncIntervalSetting();

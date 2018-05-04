@@ -25,10 +25,10 @@ void StateMachineBase::SetTimeAwareSystem(TimeAwareSystem* timeAwareSystem)
 
 
 
-StateMachineBasePort::StateMachineBasePort(TimeAwareSystem* timeAwareSystem, PortGlobal* portGlobal) :
+StateMachineBasePort::StateMachineBasePort(TimeAwareSystem* timeAwareSystem, SystemPort* portGlobal) :
     StateMachineBase(timeAwareSystem)
 {
-    m_portGlobal = portGlobal;
+    m_systemPort = portGlobal;
 }
 
 StateMachineBasePort::~StateMachineBasePort()
@@ -38,7 +38,7 @@ StateMachineBasePort::~StateMachineBasePort()
 
 
 
-StateMachineBaseMD::StateMachineBaseMD(TimeAwareSystem* timeAwareSystem, PortGlobal* portGlobal, INetPort *networkPort) :
+StateMachineBaseMD::StateMachineBaseMD(TimeAwareSystem* timeAwareSystem, SystemPort* portGlobal, INetPort *networkPort) :
     StateMachineBasePort(timeAwareSystem, portGlobal)
 {
     m_networkPort = networkPort;

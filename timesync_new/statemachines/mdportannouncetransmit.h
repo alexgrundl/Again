@@ -11,7 +11,7 @@ class MDPortAnnounceTransmit : public StateMachineBaseMD
 public:
 
 
-    MDPortAnnounceTransmit(TimeAwareSystem* timeAwareSystem, PortGlobal* port, INetPort* networkPort);
+    MDPortAnnounceTransmit(TimeAwareSystem* timeAwareSystem, SystemPort* port, INetPort* networkPort);
 
 
     virtual ~MDPortAnnounceTransmit();

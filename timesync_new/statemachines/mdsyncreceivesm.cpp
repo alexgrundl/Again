@@ -1,6 +1,6 @@
 #include "mdsyncreceivesm.h"
 
-MDSyncReceiveSM::MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, PortGlobal* port, PortSyncSyncReceive* portSyncSyncReceive,
+MDSyncReceiveSM::MDSyncReceiveSM(TimeAwareSystem* timeAwareSystem, SystemPort* port, PortSyncSyncReceive* portSyncSyncReceive,
                                  INetPort* networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
@@ -36,7 +36,7 @@ void MDSyncReceiveSM::SetMDSyncReceive()
     m_rcvdFollowUpPtr->GetFollowUpTLV(&tlv);
     m_txMDSyncReceivePtr->rateRatio = tlv.cumulativeScaledRateOffset * pow(2, -41) + 1.0;
 
-    m_txMDSyncReceivePtr->upstreamTxTime = m_rcvdSyncPtr->GetReceiveTime() - (m_portGlobal->neighborPropDelay / m_portGlobal->neighborRateRatio);
+    m_txMDSyncReceivePtr->upstreamTxTime = m_rcvdSyncPtr->GetReceiveTime() - (m_systemPort->GetNeighborPropDelay() / m_systemPort->GetNeighborRateRatio());
     /** upstreamTxTime is set equal to the <syncEventIngressTimestamp> for the most recently received
     Sync message, minus the mean propagation time on the link attached to this port
     (neighborPropDelay, see 10.2.4.7) divided by neighborRateRatio (see 10.2.4.6), minus
@@ -59,7 +59,7 @@ void MDSyncReceiveSM::TxMDSyncReceive()
 
 void MDSyncReceiveSM::ProcessState()
 {
-    if(m_timeAwareSystem->BEGIN || (m_rcvdSync && (!m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled || !m_portGlobal->asCapable)))
+    if(m_timeAwareSystem->BEGIN || (m_rcvdSync && (!m_systemPort->IsPortEnabled() || !m_systemPort->IsPttPortEnabled() || !m_systemPort->GetAsCapable())))
     {
         m_state = STATE_DISCARD;
         m_rcvdSync = false;
@@ -71,7 +71,7 @@ void MDSyncReceiveSM::ProcessState()
         {
         case STATE_DISCARD:
         case STATE_WAITING_FOR_SYNC:
-            if(m_rcvdSync && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable)
+            if(m_rcvdSync && m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled() && m_systemPort->GetAsCapable())
             {
                 m_rcvdSync = false;
                 m_upstreamSyncInterval.ns = NS_PER_SEC * pow(2, m_rcvdSyncPtr->GetLogMessageInterval());

@@ -8,7 +8,7 @@ class PortAnnounceInformation : public StateMachineBasePort
 {
 public:
 
-    PortAnnounceInformation(TimeAwareSystem* timeAwareSystem, PortGlobal* port);
+    PortAnnounceInformation(TimeAwareSystem* timeAwareSystem, SystemPort* port);
 
 
     virtual ~PortAnnounceInformation();

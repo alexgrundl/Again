@@ -1,6 +1,6 @@
 #include "portannouncetransmit.h"
 
-PortAnnounceTransmit::PortAnnounceTransmit(TimeAwareSystem *timeAwareSystem, PortGlobal *port, MDPortAnnounceTransmit* portAnnounceTransmit) :
+PortAnnounceTransmit::PortAnnounceTransmit(TimeAwareSystem *timeAwareSystem, SystemPort *port, MDPortAnnounceTransmit* portAnnounceTransmit) :
     StateMachineBasePort(timeAwareSystem, port)
 {
     m_mdPortAnnounceTransmit = portAnnounceTransmit;
@@ -17,15 +17,15 @@ void PortAnnounceTransmit::TxAnnounce()
     PortIdentity portIdentity;
 
     memcpy(portIdentity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH);
-    portIdentity.portNumber = m_portGlobal->identity.portNumber;
+    portIdentity.portNumber = m_systemPort->GetIdentity().portNumber;
     m_txAnnounceMessage->SetSourcePortIdentity(&portIdentity);
 
-    m_txAnnounceMessage->SetLogMessageInterval(m_portGlobal->currentLogAnnounceInterval);
+    m_txAnnounceMessage->SetLogMessageInterval(m_systemPort->GetCurrentLogAnnounceInterval());
     m_txAnnounceMessage->SetCurrentUtcOffset(m_timeAwareSystem->GetCurrentUtcOffset());
-    m_txAnnounceMessage->SetGrandmasterPriority1(m_portGlobal->masterPriority.identity.priority1);
-    m_txAnnounceMessage->SetGrandmasterClockQuality(m_portGlobal->masterPriority.identity.clockQuality);
-    m_txAnnounceMessage->SetGrandmasterPriority2(m_portGlobal->masterPriority.identity.priority2);
-    m_txAnnounceMessage->SetGrandmasterIdentity(m_portGlobal->masterPriority.identity.clockIdentity);
+    m_txAnnounceMessage->SetGrandmasterPriority1(m_systemPort->GetMasterPriority().identity.priority1);
+    m_txAnnounceMessage->SetGrandmasterClockQuality(m_systemPort->GetMasterPriority().identity.clockQuality);
+    m_txAnnounceMessage->SetGrandmasterPriority2(m_systemPort->GetMasterPriority().identity.priority2);
+    m_txAnnounceMessage->SetGrandmasterIdentity(m_systemPort->GetMasterPriority().identity.clockIdentity);
 
     m_txAnnounceMessage->SetStepsRemoved(m_timeAwareSystem->GetMasterStepsRemoved());
 
@@ -50,7 +50,7 @@ void PortAnnounceTransmit::ProcessState()
 {
     if(m_timeAwareSystem->BEGIN)
     {
-        m_portGlobal->newInfo = true;
+        m_systemPort->SetNewInfo(true);
         m_state = STATE_TRANSMIT_INIT;
     }
     else
@@ -69,15 +69,15 @@ void PortAnnounceTransmit::ProcessState()
             break;
 
         case STATE_IDLE:
-            if(m_timeAwareSystem->ReadCurrentTime() >= m_announceSendTime && m_portGlobal->selected && !m_portGlobal->updtInfo)
+            if(m_timeAwareSystem->ReadCurrentTime() >= m_announceSendTime && m_systemPort->IsSelected() && !m_systemPort->GetUpdtInfo())
             {
-                m_portGlobal->newInfo = m_portGlobal->newInfo || m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER;
+                m_systemPort->SetNewInfo(m_systemPort->GetNewInfo() || m_timeAwareSystem->GetSelectedRole(m_systemPort->GetIdentity().portNumber) == PORT_ROLE_MASTER);
                 m_state = STATE_TRANSMIT_PERIODIC;
             }
-            else if(m_portGlobal->newInfo && (m_timeAwareSystem->GetSelectedRole(m_portGlobal->identity.portNumber) == PORT_ROLE_MASTER) &&
-                    (m_timeAwareSystem->ReadCurrentTime() < m_announceSendTime) && m_portGlobal->selected && !m_portGlobal->updtInfo)
+            else if(m_systemPort->GetNewInfo() && (m_timeAwareSystem->GetSelectedRole(m_systemPort->GetIdentity().portNumber) == PORT_ROLE_MASTER) &&
+                    (m_timeAwareSystem->ReadCurrentTime() < m_announceSendTime) && m_systemPort->IsSelected() && !m_systemPort->GetUpdtInfo())
             {
-                m_portGlobal->newInfo = false;
+                m_systemPort->SetNewInfo(false);
                 TxAnnounce();
                 m_sequenceID++;
                 m_state = STATE_TRANSMIT_ANNOUNCE;
@@ -93,5 +93,5 @@ void PortAnnounceTransmit::ProcessState()
 
 void PortAnnounceTransmit::ExecuteIdleState()
 {
-    m_announceSendTime = m_timeAwareSystem->ReadCurrentTime() + m_portGlobal->announceInterval;
+    m_announceSendTime = m_timeAwareSystem->ReadCurrentTime() + m_systemPort->GetAnnounceInterval();
 }

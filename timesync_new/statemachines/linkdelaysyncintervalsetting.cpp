@@ -1,6 +1,6 @@
 #include "linkdelaysyncintervalsetting.h"
 
-LinkDelaySyncIntervalSetting::LinkDelaySyncIntervalSetting(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetPort *networkPort) :
+LinkDelaySyncIntervalSetting::LinkDelaySyncIntervalSetting(TimeAwareSystem *timeAwareSystem, SystemPort *port, INetPort *networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_rcvdSignalingMsg1 = false;
@@ -23,7 +23,7 @@ void LinkDelaySyncIntervalSetting::SetSignalingMessage(ReceivePackage *package)
 
 void LinkDelaySyncIntervalSetting::ProcessState()
 {
-    if(m_timeAwareSystem->BEGIN || !m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled)
+    if(m_timeAwareSystem->BEGIN || !m_systemPort->IsPortEnabled() || !m_systemPort->IsPttPortEnabled())
     {
         m_state = STATE_NOT_ENABLED;
     }
@@ -32,16 +32,15 @@ void LinkDelaySyncIntervalSetting::ProcessState()
         switch(m_state)
         {
         case STATE_NOT_ENABLED:
-            if(m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled)
+            if(m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled())
             {
-                m_portGlobal->currentLogPdelayReqInterval = m_portGlobal->initialLogPdelayReqInterval;
-                m_portGlobal->currentLogSyncInterval = m_portGlobal->initialLogSyncInterval;
-                m_portGlobal->pdelayReqInterval.ns = NS_PER_SEC * pow(2, m_portGlobal->initialLogPdelayReqInterval);
-                m_portGlobal->pdelayReqInterval.ns_frac = 0;
-                m_portGlobal->syncInterval.ns = NS_PER_SEC * pow(2, m_portGlobal->initialLogSyncInterval);
-                m_portGlobal->syncInterval.ns_frac = 0;
-                m_portGlobal->computeNeighborRateRatio = true;
-                m_portGlobal->computeNeighborPropDelay = true;
+                m_systemPort->SetCurrentLogPdelayReqInterval(m_systemPort->GetInitialLogPdelayReqInterval());
+                m_systemPort->SetCurrentLogSyncInterval(m_systemPort->GetInitialLogSyncInterval());
+                m_systemPort->SetPdelayReqInterval({(uint64_t)(NS_PER_SEC * pow(2, m_systemPort->GetInitialLogPdelayReqInterval())), 0});
+
+                m_systemPort->SetSyncInterval({(uint64_t)(NS_PER_SEC * pow(2, m_systemPort->GetInitialLogSyncInterval())), 0});
+                m_systemPort->SetComputeNeighborRateRatio(true);
+                m_systemPort->SetComputeNeighborPropDelay(true);
                 m_rcvdSignalingMsg1 = false;
                 m_state = STATE_INITIALIZING;
             }
@@ -55,16 +54,14 @@ void LinkDelaySyncIntervalSetting::ProcessState()
                 case (-128): /* don’t change the interval */
                     break;
                 case 126: /* set interval to initial value */
-                    m_portGlobal->currentLogPdelayReqInterval = m_portGlobal->initialLogPdelayReqInterval;
-                    m_portGlobal->pdelayReqInterval.ns = NS_PER_SEC * pow(2, m_portGlobal->initialLogPdelayReqInterval);
-                    m_portGlobal->pdelayReqInterval.ns_frac = 0;
+                    m_systemPort->SetCurrentLogPdelayReqInterval(m_systemPort->GetInitialLogPdelayReqInterval());
+                    m_systemPort->SetPdelayReqInterval({(uint64_t)(NS_PER_SEC * pow(2, m_systemPort->GetInitialLogPdelayReqInterval())), 0});
                     break;
                 default:
                     /* Use indicated value; note that the value of 127 will result in an interval of
                     * 2^127 s, or approximately 5.4 * 10^30 years, which indicates that the Pdelay
                     * requester should stop sending for all practical purposes. */
-                    m_portGlobal->pdelayReqInterval.ns = NS_PER_SEC * pow(2, m_rcvdSignalingPtr->GetLinkDelayInterval());
-                    m_portGlobal->pdelayReqInterval.ns_frac = 0;
+                    m_systemPort->SetPdelayReqInterval({(uint64_t)(NS_PER_SEC * pow(2, m_rcvdSignalingPtr->GetLinkDelayInterval())), 0});
                     break;
                 }
 
@@ -73,16 +70,14 @@ void LinkDelaySyncIntervalSetting::ProcessState()
                 case (-128): /* don’t change the interval */
                     break;
                 case 126: /* set interval to initial value */
-                    m_portGlobal->currentLogSyncInterval = m_portGlobal->initialLogSyncInterval;
-                    m_portGlobal->syncInterval.ns = NS_PER_SEC * pow(2, m_portGlobal->initialLogSyncInterval);
-                    m_portGlobal->syncInterval.ns_frac = 0;
+                    m_systemPort->SetCurrentLogSyncInterval(m_systemPort->GetInitialLogSyncInterval());
+                    m_systemPort->SetSyncInterval({(uint64_t)(NS_PER_SEC * pow(2, m_systemPort->GetInitialLogSyncInterval())), 0});
                     break;
                 default:
                     /* Use indicated value; note that the value of 127 will result in an interval of
                     * 2^127 s, or approximately 5.4 * 10^30 years, which indicates that the sender
                     * should stop sending for all practical purposes. */
-                    m_portGlobal->syncInterval.ns = NS_PER_SEC * pow(2, m_rcvdSignalingPtr->GetTimeSyncInterval());
-                    m_portGlobal->syncInterval.ns_frac = 0;
+                    m_systemPort->SetSyncInterval({(uint64_t)(NS_PER_SEC * pow(2, m_rcvdSignalingPtr->GetTimeSyncInterval())), 0});
                     break;
                 }
 
@@ -91,21 +86,19 @@ void LinkDelaySyncIntervalSetting::ProcessState()
                 case (-128): /* don’t change the interval */
                     break;
                 case 126: /* set interval to initial value */
-                    m_portGlobal->currentLogAnnounceInterval = m_portGlobal->initialLogAnnounceInterval;
-                    m_portGlobal->announceInterval.ns = NS_PER_SEC * pow(2, m_portGlobal->initialLogAnnounceInterval);
-                    m_portGlobal->announceInterval.ns_frac = 0;
+                    m_systemPort->SetCurrentLogAnnounceInterval(m_systemPort->GetInitialLogAnnounceInterval());
+                    m_systemPort->SetAnnounceInterval({(uint64_t)(NS_PER_SEC * pow(2, m_systemPort->GetInitialLogAnnounceInterval())), 0});
                     break;
                 default:
                     /* Use indicated value; note that the value of 127 will result in an interval of
                     * 2^127 s, or approximately 5.4 * 10^30 years, which indicates that the sender
                     * should stop sending for all practical purposes. */
-                    m_portGlobal->announceInterval.ns = NS_PER_SEC * pow(2, m_rcvdSignalingPtr->GetAnnounceInterval());
-                    m_portGlobal->announceInterval.ns_frac = 0;
+                    m_systemPort->SetAnnounceInterval({(uint64_t)(NS_PER_SEC * pow(2, m_rcvdSignalingPtr->GetAnnounceInterval())), 0});
                     break;
                 }
 
-                m_portGlobal->computeNeighborRateRatio = m_rcvdSignalingPtr->GetComputeNeighborRateRatio();
-                m_portGlobal->computeNeighborPropDelay = m_rcvdSignalingPtr->GetComputeNeighborPropDelay();
+                m_systemPort->SetComputeNeighborRateRatio(m_rcvdSignalingPtr->GetComputeNeighborRateRatio());
+                m_systemPort->SetComputeNeighborPropDelay(m_rcvdSignalingPtr->GetComputeNeighborPropDelay());
 
                 m_rcvdSignalingMsg1 = false;
                 m_state = STATE_SET_INTERVALS;

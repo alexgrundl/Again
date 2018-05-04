@@ -7,7 +7,7 @@
 
 #include "commstructs.h"
 #include "timeawaresystem.h"
-#include "portglobal.h"
+#include "systemport.h"
 
 #include "inetport.h"
 #include "platform.h"
@@ -99,7 +99,7 @@ class StateMachineBasePort : public StateMachineBase
 
 public:
 
-    StateMachineBasePort(TimeAwareSystem* timeAwareSystem, PortGlobal* portGlobal);
+    StateMachineBasePort(TimeAwareSystem* timeAwareSystem, SystemPort* portGlobal);
 
 
     virtual ~StateMachineBasePort();
@@ -107,7 +107,7 @@ public:
 
 protected:
 
-    PortGlobal* m_portGlobal;
+    SystemPort* m_systemPort;
 };
 
 
@@ -117,7 +117,7 @@ class StateMachineBaseMD : public StateMachineBasePort
 
 public:
 
-    StateMachineBaseMD(TimeAwareSystem* timeAwareSystem, PortGlobal* portGlobal, INetPort* network);
+    StateMachineBaseMD(TimeAwareSystem* timeAwareSystem, SystemPort* portGlobal, INetPort* network);
 
 
     virtual ~StateMachineBaseMD();

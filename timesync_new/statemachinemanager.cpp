@@ -1,6 +1,6 @@
 #include "statemachinemanager.h"
 
-StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<PortGlobal*> ports,
+StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<SystemPort*> ports,
                                          std::vector<INetPort*> networkPorts)
 {
     m_timeAwareSystem = timeAwareSystem;
@@ -8,7 +8,7 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
 
     m_timeAwareSystem->SetLocalClockTickInterval({(uint64_t)m_granularity_ms * 1000 * 1000, 0});
 
-    for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
+    for (std::vector<SystemPort*>::size_type i = 0; i < ports.size(); ++i)
     {
         m_mdPdelayReq.push_back(new MDPdelayReq(timeAwareSystem, ports[i], networkPorts[i]));
         m_mdPdelayResp.push_back(new MDPdelayResp(timeAwareSystem, ports[i], networkPorts[i]));
@@ -23,13 +23,13 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
     m_siteSyncSync = new SiteSyncSync(timeAwareSystem, m_clockSlaveSync, m_portSyncSyncSends);
     m_clockMasterSyncSend = new ClockMasterSyncSend(timeAwareSystem, m_siteSyncSync);
 
-    for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
+    for (std::vector<SystemPort*>::size_type i = 0; i < ports.size(); ++i)
     {
         m_portSyncSyncReceive.push_back(new PortSyncSyncReceive(timeAwareSystem, ports[i], m_siteSyncSync));
         m_mdSyncReceiveSM.push_back(new MDSyncReceiveSM(timeAwareSystem, ports[i], m_portSyncSyncReceive[i], networkPorts[i]));
     }
 
-    for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
+    for (std::vector<SystemPort*>::size_type i = 0; i < ports.size(); ++i)
     {
         m_portAnnounceInformation.push_back(new PortAnnounceInformation(timeAwareSystem, ports[i]));
         m_portAnnounceReceive.push_back(new PortAnnounceReceive(timeAwareSystem, ports[i], m_portAnnounceInformation[i]));
@@ -51,7 +51,7 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
     m_stateMachines.push_back(m_clockMasterSyncOffset);
 
 
-    for (std::vector<PortGlobal*>::size_type i = 0; i < ports.size(); ++i)
+    for (std::vector<SystemPort*>::size_type i = 0; i < ports.size(); ++i)
     {
         m_stateMachines.push_back(m_mdPdelayReq[i]);
         m_stateMachines.push_back(m_mdPdelayResp[i]);

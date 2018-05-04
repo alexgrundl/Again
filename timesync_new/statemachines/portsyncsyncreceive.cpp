@@ -1,6 +1,6 @@
 #include "portsyncsyncreceive.h"
 
-PortSyncSyncReceive::PortSyncSyncReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port, SiteSyncSync* siteSyncSync) :
+PortSyncSyncReceive::PortSyncSyncReceive(TimeAwareSystem* timeAwareSystem, SystemPort* port, SiteSyncSync* siteSyncSync) :
     StateMachineBasePort(timeAwareSystem, port)
 {
     m_rcvdMDSync = false;
@@ -19,7 +19,7 @@ PortSyncSyncReceive::~PortSyncSyncReceive()
 
 void PortSyncSyncReceive::SetPSSyncPSSR (MDSyncReceive* rcvdMDSyncPtr, UScaledNs syncReceiptTimeoutTimeInterval, double rateRatio)
 {
-    m_txPSSyncPtr->localPortNumber = m_portGlobal->identity.portNumber;
+    m_txPSSyncPtr->localPortNumber = m_systemPort->GetIdentity().portNumber;
     m_txPSSyncPtr->followUpCorrectionField = rcvdMDSyncPtr->followUpCorrectionField;
     m_txPSSyncPtr->sourcePortIdentity = rcvdMDSyncPtr->sourcePortIdentity;
     m_txPSSyncPtr->logMessageInterval = rcvdMDSyncPtr->logMessageInterval;
@@ -54,7 +54,7 @@ void PortSyncSyncReceive::ProcessSync(MDSyncReceive* rcvd)
 
 void PortSyncSyncReceive::ProcessState()
 {
-    if(m_timeAwareSystem->BEGIN || (m_rcvdMDSync && (!m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled || !m_portGlobal->asCapable)))
+    if(m_timeAwareSystem->BEGIN || (m_rcvdMDSync && (!m_systemPort->IsPortEnabled() || !m_systemPort->IsPttPortEnabled() || !m_systemPort->GetAsCapable())))
     {
         m_rcvdMDSync = false;
         m_state = STATE_DISCARD;
@@ -65,7 +65,7 @@ void PortSyncSyncReceive::ProcessState()
         {
         case STATE_DISCARD:
         case STATE_RECEIVED_SYNC:
-            if(m_rcvdMDSync && m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled && m_portGlobal->asCapable
+            if(m_rcvdMDSync && m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled() && m_systemPort->GetAsCapable()
                     && (m_state == STATE_DISCARD ||
                         (memcmp(m_rcvdMDSyncPtr->sourcePortIdentity.clockIdentity, m_timeAwareSystem->GetGmPriority().sourcePortIdentity.clockIdentity,
                                 CLOCK_ID_LENGTH) == 0 && m_rcvdMDSyncPtr->sourcePortIdentity.portNumber ==
@@ -73,12 +73,11 @@ void PortSyncSyncReceive::ProcessState()
             {
                 m_rcvdMDSync = false;
                 m_rateRatio = m_rcvdMDSyncPtr->rateRatio;
-                m_rateRatio += m_portGlobal->neighborRateRatio - 1.0;
-                m_portGlobal->syncReceiptTimeoutTimeInterval.ns = (uint64_t)m_portGlobal->syncReceiptTimeout * NS_PER_SEC
-                        * pow(2, m_rcvdMDSyncPtr->logMessageInterval);
-                m_portGlobal->syncReceiptTimeoutTimeInterval.ns_frac = 0;
+                m_rateRatio += m_systemPort->GetNeighborRateRatio() - 1.0;
+                uint64_t timeoutNs = (uint64_t)(m_systemPort->GetSyncReceiptTimeout() * NS_PER_SEC * pow(2, m_rcvdMDSyncPtr->logMessageInterval));
+                m_systemPort->SetSyncReceiptTimeoutTimeInterval({timeoutNs, 0});
 
-                SetPSSyncPSSR(m_rcvdMDSyncPtr, m_portGlobal->syncReceiptTimeoutTimeInterval, m_rateRatio);
+                SetPSSyncPSSR(m_rcvdMDSyncPtr, m_systemPort->GetSyncReceiptTimeoutTimeInterval(), m_rateRatio);
                 TxPSSyncPSSR();
 
                 m_state = STATE_RECEIVED_SYNC;

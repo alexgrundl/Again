@@ -112,8 +112,8 @@ int main()
         TimeAwareSystem tas1;
 
         std::vector<INetPort*> networkPorts;
-        std::vector<PortGlobal*> ports;
-        std::vector<PortGlobal*> ports1;
+        std::vector<SystemPort*> systemPortsDom0;
+        std::vector<SystemPort*> systemPortsDom1;
 
     #ifndef __linux__
         PtpClock* clockDom0 = new PtpClockWindows();
@@ -141,13 +141,15 @@ int main()
 
                     for (int i = 0; i < 2; ++i)
                     {
-                        PortGlobal* port = new PortGlobal();
-                        PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), port->identity.clockIdentity);
-                        port->identity.portNumber = networkPorts.size();
+                        PortIdentity portIdentity;
+                        SystemPort* port = new SystemPort();
+                        PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), portIdentity.clockIdentity);
+                        portIdentity.portNumber = networkPorts.size();
+                        port->SetIdentity(portIdentity);
 
                         if(i == 0)
                         {
-                            ports.push_back(port);
+                            systemPortsDom0.push_back(port);
 
                             tas.AddSelectedRole(PORT_ROLE_SLAVE);
 
@@ -163,7 +165,7 @@ int main()
                         }
                         else
                         {
-                            ports1.push_back(port);
+                            systemPortsDom1.push_back(port);
 
                             tas1.AddSelectedRole(PORT_ROLE_SLAVE);
                             tas1.SetDomain(1);
@@ -186,9 +188,9 @@ int main()
 
         std::vector<StateMachineManager*> smManagers;
 
-        StateMachineManager smManager(&tas, ports, networkPorts);
+        StateMachineManager smManager(&tas, systemPortsDom0, networkPorts);
         smManagers.push_back(&smManager);
-        StateMachineManager smManager1(&tas1, ports1, networkPorts);
+        StateMachineManager smManager1(&tas1, systemPortsDom1, networkPorts);
         smManagers.push_back(&smManager1);
         smManager.StartProcessing();
         smManager1.StartProcessing();

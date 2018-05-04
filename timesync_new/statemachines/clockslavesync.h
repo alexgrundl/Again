@@ -11,7 +11,7 @@ class ClockSlaveSync : public StateMachineBase
 {
 public:
 
-    ClockSlaveSync(TimeAwareSystem *timeAwareSystem, std::vector<PortGlobal*> ports, ClockMasterSyncOffset* clockMasterSyncOffset);
+    ClockSlaveSync(TimeAwareSystem *timeAwareSystem, std::vector<SystemPort*> ports, ClockMasterSyncOffset* clockMasterSyncOffset);
 
 
     virtual ~ClockSlaveSync();
@@ -55,7 +55,7 @@ private:
     PortSyncSync* m_rcvdPSSyncPtr;
 
 
-    std::vector<PortGlobal*> m_ports;
+    std::vector<SystemPort*> m_ports;
 
 
     ClockMasterSyncOffset* m_clockMasterSyncOffset;

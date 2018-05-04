@@ -10,7 +10,7 @@ class PortSyncSyncReceive : public StateMachineBasePort
 {
 public:
 
-    PortSyncSyncReceive(TimeAwareSystem* timeAwareSystem, PortGlobal* port, SiteSyncSync* siteSyncSync);
+    PortSyncSyncReceive(TimeAwareSystem* timeAwareSystem, SystemPort* port, SiteSyncSync* siteSyncSync);
 
 
     virtual ~PortSyncSyncReceive();

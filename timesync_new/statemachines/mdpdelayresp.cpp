@@ -1,6 +1,6 @@
 #include "mdpdelayresp.h"
 
-MDPdelayResp::MDPdelayResp(TimeAwareSystem *timeAwareSystem, PortGlobal *port, INetPort* networkPort) :
+MDPdelayResp::MDPdelayResp(TimeAwareSystem *timeAwareSystem, SystemPort *port, INetPort* networkPort) :
     StateMachineBaseMD(timeAwareSystem, port, networkPort)
 {
     m_rcvdPdelayReq = false;
@@ -22,7 +22,7 @@ void MDPdelayResp::SetPdelayResp()
     PortIdentity identity;
     Timestamp receiveTime;
 
-    identity.portNumber = m_portGlobal->identity.portNumber;
+    identity.portNumber = m_systemPort->GetIdentity().portNumber;
     memcpy(identity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), sizeof(identity.clockIdentity));
 
     m_txPdelayRespPtr->SetSourcePortIdentity(&identity);
@@ -50,7 +50,7 @@ void MDPdelayResp::SetPdelayRespFollowUp()
     PortIdentity identity;
     Timestamp sendTime;
 
-    identity.portNumber = m_portGlobal->identity.portNumber;
+    identity.portNumber = m_systemPort->GetIdentity().portNumber;
     memcpy(identity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), sizeof(identity.clockIdentity));
 
     m_txPdelayRespFollowUpPtr->SetSourcePortIdentity(&identity);
@@ -69,14 +69,14 @@ void MDPdelayResp::TxPdelayRespFollowUp()
 
 void MDPdelayResp::ProcessState()
 {
-    if(m_timeAwareSystem->BEGIN || !m_portGlobal->portEnabled || !m_portGlobal->pttPortEnabled)
+    if(m_timeAwareSystem->BEGIN || !m_systemPort->IsPortEnabled() || !m_systemPort->IsPttPortEnabled())
         m_state = STATE_NOT_ENABLED;
     else
     {
         switch(m_state)
         {
         case STATE_NOT_ENABLED:
-            if(m_portGlobal->portEnabled && m_portGlobal->pttPortEnabled)
+            if(m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled())
             {
                 m_rcvdPdelayReq = false;
                 m_state = STATE_INITIAL_WAITING_FOR_PDELAY_REQ;
@@ -116,6 +116,6 @@ void MDPdelayResp::SetPDelayRequest(ReceivePackage *package)
 {
     m_rcvdPdelayReqPtr->ParsePackage(package->GetBuffer());
     m_rcvdPdelayReqPtr->SetReceiveTime(package->GetTimestamp());
-    m_portGlobal->pdelayCount++;
+    m_systemPort->IncreasePdelayCount();
     m_rcvdPdelayReq = true;
 }
