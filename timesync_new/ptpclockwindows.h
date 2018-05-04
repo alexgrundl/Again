@@ -42,6 +42,17 @@ public:
 
 
     bool StopPPS() {return true;}
+
+
+    PtssType GetPtssType();
+
+
+    void SetPtssType(PtssType type);
+
+
+private:
+
+    PtssType m_ptssType;
 };
 
 #endif //__linux__
