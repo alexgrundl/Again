@@ -211,7 +211,7 @@ void PtpMessageAnnounce::ParsePackage(const uint8_t* bytes)
 
     m_currentUtcOffset = (bytes[kMessageHeaderLength + 10] << 8) + bytes[kMessageHeaderLength + 11];
     m_grandmasterPriority1 = bytes[kMessageHeaderLength + 13];
-    m_grandmasterClockQuality.clockClass = (ClockClass)bytes[kMessageHeaderLength + 14];
+    m_grandmasterClockQuality.clockClass = bytes[kMessageHeaderLength + 14];
     m_grandmasterClockQuality.clockAccuracy = (ClockAccuracy)bytes[kMessageHeaderLength + 15];
     m_grandmasterClockQuality.offsetScaledLogVariance = (bytes[kMessageHeaderLength + 16] << 8) + bytes[kMessageHeaderLength + 17];
     m_grandmasterPriority2 = bytes[kMessageHeaderLength + 18];

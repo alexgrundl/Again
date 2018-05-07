@@ -24,35 +24,35 @@ struct PortIdentity
     uint16_t portNumber;
 };
 
-enum ClockClass
-{
-    CLOCK_CLASS_PRIMARY = 6,        // A clock that is synchronized to a primary reference time source.
-    CLOCK_CLASS_PRIMARY_LOST = 7,    // A clock that has previously been designated as CLOCK_CLASS_PRIMARY but that has lost the ability to synchronize.
-                                    // to a primary reference time source and is in holdover mode and within holdover specifications.
-    CLOCK_CLASS_APPLICATION = 13,       // A clock that is synchronized to an application-specific source of time.
-    CLOCK_CLASS_APPLICATION_LOST = 14,  // A clock that has previously been designated as CLOCK_CLASS_APPLICATION but that has lost the ability to synchronize to an
-                                        // application-specific source of time and is in holdover mode and within holdover specifications.
+/* A clock that is synchronized to a primary reference time source. */
+#define CLOCK_CLASS_PRIMARY 6
+/* A clock that has previously been designated as CLOCK_CLASS_PRIMARY but that has lost the ability to synchronize. */
+#define CLOCK_CLASS_PRIMARY_LOST 7
+/* A clock that is synchronized to an application-specific source of time. */
+#define CLOCK_CLASS_APPLICATION 13
+/* A clock that has previously been designated as CLOCK_CLASS_APPLICATION but that has lost the ability to synchronize to an application-specific source of time and
+ * is in holdover mode and within holdover specifications. */
+#define CLOCK_CLASS_APPLICATION_LOST 14
+/* 52: Degradation alternative A for a clock of clockClass 7 that is not within holdover specification */
+#define CLOCK_CLASS_PRIMARY_LOST_DEGRADED_A 52
+/* Degradation alternative A for a clock of clockClass 14 that is not within holdover specification */
+#define CLOCK_CLASS_APPLICATION_LOST_DEGRADED_A 58
 
-    /** To be defined... */
+//68..122: For use by alternate PTP profiles (68..122),
+//133..170: For use by alternate PTP profiles (133..170),
 
-//    52: Degradation alternative A for a clock of clockClass 7 that
-//    is not within holdover specification,
-//    58: Degradation alternative A for a clock of clockClass 14 that
-//    is not within holdover specification,
-//    68..122: For use by alternate PTP profiles (68..122),
-//    133..170: For use by alternate PTP profiles (133..170),
-//    187: Degradation alternative B for a clock of clockClass 7 that
-//    is not within holdover specification,
-//    193: Degradation alternative B for a clock of clockClass 14 that
-//    is not within holdover specification,
+/* Degradation alternative B for a clock of clockClass 7 that is not within holdover specification */
+#define CLOCK_CLASS_PRIMARY_LOST_DEGRADED_B 187
+/* Degradation alternative B for a clock of clockClass 14 that is not within holdover specification */
+#define CLOCK_CLASS_APPLICATION_LOST_DEGRADED_B 193
+
 //    216..232: For use by alternate PTP profiles,
-//    248: Default none of the other clockClass definitions apply,
 
-    /**
-     * A slave-only clock.
-     */
-    CLOCK_CLASS_SLAVE_ONLY = 255
-};
+/* Default none of the other clockClass definitions apply */
+#define CLOCK_CLASS_DEFAULT 248
+/* A slave-only clock */
+#define CLOCK_CLASS_SLAVE_ONLY 255
+
 
 enum ClockAccuracy
 {
@@ -80,7 +80,7 @@ enum ClockAccuracy
 
 struct ClockQuality
 {
-    ClockClass clockClass;
+    uint8_t clockClass;
     ClockAccuracy clockAccuracy;
     uint16_t offsetScaledLogVariance;
 };

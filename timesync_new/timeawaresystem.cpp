@@ -61,8 +61,8 @@ TimeAwareSystem::TimeAwareSystem()
     m_sysTimeSource = CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR;
 
     m_systemPriority.identity.priority1 = 254;
-    m_systemPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
-    m_systemPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
+    m_systemPriority.identity.clockQuality.clockClass = CLOCK_CLASS_DEFAULT;
+    m_systemPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_NS_250;
     m_systemPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
     m_systemPriority.identity.priority2 = 255;
     memset(m_systemPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
@@ -72,8 +72,8 @@ TimeAwareSystem::TimeAwareSystem()
     m_systemPriority.portNumber = 0;
 
     m_gmPriority.identity.priority1 = 255;
-    m_gmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
-    m_gmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
+    m_gmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_DEFAULT;
+    m_gmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_NS_250;
     m_gmPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
     m_gmPriority.identity.priority2 = 255;
     memset(m_gmPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
@@ -83,8 +83,8 @@ TimeAwareSystem::TimeAwareSystem()
     m_gmPriority.portNumber = UINT16_MAX;
 
     m_lastGmPriority.identity.priority1 = 255;
-    m_lastGmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
-    m_lastGmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
+    m_lastGmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_DEFAULT;
+    m_lastGmPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_NS_250;
     m_lastGmPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
     m_lastGmPriority.identity.priority2 = 255;
     memset(m_lastGmPriority.identity.clockIdentity, 255, CLOCK_ID_LENGTH);
