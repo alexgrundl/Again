@@ -52,6 +52,9 @@ public:
     void GetTime(struct timespec* ts);
 
 
+    void SetTime(struct timespec* ts);
+
+
     bool GetSystemAndDeviceTime(struct timespec* tsSystem, struct timespec* tsDevice);
 
 

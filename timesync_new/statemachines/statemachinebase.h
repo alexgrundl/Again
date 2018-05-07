@@ -18,7 +18,7 @@ public:
 
     enum State
     {
-        STATE_INITIALIZING,
+        STATE_INITIALIZING = 0,
         STATE_RECEIVING_SYNC,
         STATE_DISCARD,
         STATE_RECEIVED_SYNC,

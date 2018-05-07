@@ -43,6 +43,11 @@ void PtpClockLinux::GetTime(struct timespec* ts)
     clock_gettime(FD_TO_CLOCKID(m_clockFD), ts);
 }
 
+void PtpClockLinux::SetTime(struct timespec* ts)
+{
+    clock_settime(FD_TO_CLOCKID(m_clockFD), ts);
+}
+
 void PtpClockLinux::AdjustPhase(int64_t nanoseconds)
 {
 //    struct timespec tsOld, tsNew;

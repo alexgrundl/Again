@@ -74,7 +74,7 @@ void PortSyncSyncReceive::ProcessState()
                 m_rcvdMDSync = false;
                 m_rateRatio = m_rcvdMDSyncPtr->rateRatio;
                 m_rateRatio += m_systemPort->GetNeighborRateRatio() - 1.0;
-                uint64_t timeoutNs = (uint64_t)(m_systemPort->GetSyncReceiptTimeout() * NS_PER_SEC * pow(2, m_rcvdMDSyncPtr->logMessageInterval));
+                uint64_t timeoutNs = (uint64_t)m_systemPort->GetSyncReceiptTimeout() * NS_PER_SEC * pow(2, m_rcvdMDSyncPtr->logMessageInterval);
                 m_systemPort->SetSyncReceiptTimeoutTimeInterval({timeoutNs, 0});
 
                 SetPSSyncPSSR(m_rcvdMDSyncPtr, m_systemPort->GetSyncReceiptTimeoutTimeInterval(), m_rateRatio);

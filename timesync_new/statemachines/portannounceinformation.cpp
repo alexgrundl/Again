@@ -121,7 +121,7 @@ void PortAnnounceInformation::ProcessState()
                 m_systemPort->SetPortPriority(m_messagePriority);
                 m_systemPort->SetPortStepsRemoved(m_systemPort->GetRcvdAnnouncePtr()->GetStepsRemoved());
                 RecordOtherAnnounceInfo(m_systemPort->GetRcvdAnnouncePtr());
-                uint64_t intervalNs = m_systemPort->GetAnnounceReceiptTimeout() * NS_PER_SEC * pow(2, /*16 +*/ m_systemPort->GetRcvdAnnouncePtr()->GetLogMessageInterval());
+                uint64_t intervalNs = (uint64_t)m_systemPort->GetAnnounceReceiptTimeout() * NS_PER_SEC * pow(2, /*16 +*/ m_systemPort->GetRcvdAnnouncePtr()->GetLogMessageInterval());
                 m_systemPort->SetAnnounceReceiptTimeoutTimeInterval({intervalNs, 0});
                 m_announceReceiptTimeoutTime = m_timeAwareSystem->ReadCurrentTime() + m_systemPort->GetAnnounceReceiptTimeoutTimeInterval();
                 m_systemPort->SetInfoIs(SPANNING_TREE_PORT_STATE_RECEIVED);

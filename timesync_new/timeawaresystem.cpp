@@ -202,16 +202,16 @@ UScaledNs TimeAwareSystem::ReadCurrentTime()
     struct timespec ts;
     UScaledNs uscaled;
 
-    if(m_clockLocal != NULL)
-        m_clockLocal->GetTime(&ts);
-    else
-    {
+//    if(m_clockLocal != NULL)
+//        m_clockLocal->GetTime(&ts);
+//    else
+//    {
 #ifdef __linux__
-        clock_gettime(CLOCK_MONOTONIC, &ts);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
 #else
     //Windows get time function
 #endif
-    }
+//    }
 
     uscaled.ns = (uint64_t)ts.tv_sec * 1000000000 + ts.tv_nsec;
     uscaled.ns_frac = 0;
@@ -365,9 +365,19 @@ std::vector<uint8_t*> TimeAwareSystem::GetPathTrace()
 
 void TimeAwareSystem::InitLocalClock(PtpClock *clock, int clockIndex)
 {
+    struct timespec ts_workingClock = {0, 0};
+
     m_clockLocal = clock;
     m_clockLocal->SetPtssType(PtpClock::PTSS_TYPE_ROOT);
     m_clockLocal->Open(clockIndex);
+
+#ifdef __linux__
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts_workingClock);
+#else
+    //Get time on windows
+#endif
+
+    m_clockLocal->SetTime(&ts_workingClock);
     if(m_domain == 0)
     {
         //m_clockLocal->StopPPS();

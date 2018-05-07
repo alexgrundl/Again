@@ -36,6 +36,9 @@ public:
     virtual void GetTime(struct timespec* ts) = 0;
 
 
+    virtual void SetTime(struct timespec* ts) = 0;
+
+
     virtual bool GetSystemAndDeviceTime(struct timespec* tsSystem, struct timespec* tsDevice) = 0;
 
 
