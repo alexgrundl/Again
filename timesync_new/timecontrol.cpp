@@ -57,7 +57,7 @@ int64_t TimeControl::Syntonize(PtpClock *localClock, struct timespec& tsExtEvent
 
     localClock->GetSystemAndDeviceTime(&tsSystem, &tsDevice);
 
-    nsOffsetSystem = abs((uint64_t)tsSystem.tv_sec * NS_PER_SEC + tsSystem.tv_nsec - tsSystemOfEvent.tv_sec * NS_PER_SEC - tsSystemOfEvent.tv_nsec);
+    nsOffsetSystem = abs((int64_t)tsSystem.tv_sec * NS_PER_SEC + tsSystem.tv_nsec - tsSystemOfEvent.tv_sec * NS_PER_SEC - tsSystemOfEvent.tv_nsec);
     //printf("tsDevice:   %lu\n", (uint64_t)tsDevice.tv_sec * NS_PER_SEC + tsDevice.tv_nsec);
 
     //System time offset from now to the time the SDP external timestamp was signaled has to be less than 100 ms.

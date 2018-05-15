@@ -70,7 +70,8 @@ SOURCES += main.cpp \
     licensecheck/licensechecklinux.cpp \
     licensecheck/licensecheckwindows.cpp \
     systemport.cpp \
-    statemachines/platformsync.cpp
+    statemachines/platformsync.cpp \
+    timesyncdaemon.cpp
 
 HEADERS += \
     types/types.h \
@@ -141,5 +142,6 @@ HEADERS += \
     licensecheck/licensechecklinux.h \
     licensecheck/licensecheckwindows.h \
     systemport.h \
-    statemachines/platformsync.h
+    statemachines/platformsync.h \
+    timesyncdaemon.h
 

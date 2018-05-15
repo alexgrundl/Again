@@ -58,7 +58,7 @@ void ClockMasterSyncReceive::ProcessState()
     }
     else
     {
-        /* Should be invoked elsewhere. Just for testing... */
+        /* Should probably be invoked elsewhere. */
         if(m_timeAwareSystem->GetLocalClock() != NULL)
         {
             ClockSourceTimeParams params;

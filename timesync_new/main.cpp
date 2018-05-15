@@ -24,6 +24,8 @@
 #include "linuxnetport.h"
 #include "portmanager.h"
 
+#include "timesyncdaemon.h"
+
 using namespace std;
 
 #ifdef __arm__

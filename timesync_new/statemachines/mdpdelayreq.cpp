@@ -228,6 +228,7 @@ void MDPdelayReq::ProcessState()
             ExecuteSendPDelayReqState();
             m_state = STATE_SEND_PDELAY_REQ;
             break;
+            m_systemPort->SetAsCapable(false);
 
         default:
             fprintf(stderr, "State not allowed: %i, File: %s\n", m_state, __FILE__);
