@@ -58,6 +58,15 @@ public:
 
 
     virtual void SetPtssType(PtssType type) = 0;
+
+
+    virtual bool EnableExternalTimestamp(int pinIndex) = 0;
+
+
+    virtual bool DisableExternalTimestamp(int pinIndex) = 0;
+
+
+    virtual bool ReadExternalTimestamp(struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent) = 0;
 };
 
 #endif // PTPCLOCK_H

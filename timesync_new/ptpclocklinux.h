@@ -15,6 +15,7 @@
 #include <limits.h>
 
 #include "ptpclock.h"
+#include "platform.h"
 
 #define CLOCKFD 3
 #define FD_TO_CLOCKID(fd) ((~(clockid_t) (fd) << 3) | CLOCKFD)
@@ -76,10 +77,14 @@ public:
     bool DisableExternalTimestamp(int pinIndex);
 
 
+    bool ReadExternalTimestamp(struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent);
+
+
     PtssType GetPtssType();
 
 
     void SetPtssType(PtssType type);
+
 
 private:
 
@@ -93,6 +98,9 @@ private:
 
 
     PtssType m_ptssType;
+
+
+    pal::SectionLock_t m_lock;
 
 
     bool SetExternalTimestamp(int pinIndex, bool enable);

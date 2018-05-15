@@ -34,15 +34,14 @@ LinuxNetPort::LinuxNetPort(char const* const devname)
     m_EventSock = pal::SocketCreate(PF_PACKET, SOCK_DGRAM, 0);
     m_GeneralSock = pal::SocketCreate(PF_PACKET, SOCK_DGRAM, 0);
     m_ptpClock = new PtpClockLinux();
+    m_cardType = ReadNetworkCardTypeFromSysFs();
 }
 
 LinuxNetPort::~LinuxNetPort()
 {
-    if(m_EventSock)
-    {
-        pal::SocketDelete(m_EventSock);
-    }
     pal::LockedRegionDelete(m_EventLock);
+    pal::SocketDelete(m_GeneralSock);
+    pal::SocketDelete(m_EventSock);
 
     delete m_ptpClock;
 }
@@ -371,11 +370,11 @@ uint8_t const* LinuxNetPort::GetMAC()
 
 uint32_t LinuxNetPort::GetRxLinkDelay_ns()
 {
-    return 0;//1500;//00; // just value from eMI
+    return m_cardType != NETWORK_CARD_TYPE_X540 ? 0 : 750;
 }
 uint32_t LinuxNetPort::GetTxLinkDelay_ns()
 {
-    return 0;//1500;//00; // just value from eMI
+    return m_cardType != NETWORK_CARD_TYPE_X540 ? 0 : 750;
 }
 
 PtpClock* LinuxNetPort::GetPtpClock()
@@ -462,5 +461,103 @@ bool LinuxNetPort::IsCarrierSet()
 
     return nRead > 0 && val[0] == '1';
 }
+
+NetworkCardType LinuxNetPort::GetNetworkCardType()
+{
+    return m_cardType;
+}
+
+NetworkCardType LinuxNetPort::ReadNetworkCardTypeFromSysFs()
+{
+    NetworkCardType cardType = NETWORK_CARD_TYPE_UNKNOWN;
+    char bufRead[100] = {0};
+    std::string deviceIDPath = std::string("/sys/class/net/") + m_IfcName + std::string("/device/device");
+    std::string vendorIDPath = std::string("/sys/class/net/") + m_IfcName + std::string("/device/vendor");
+    int fdVendorID = open(vendorIDPath.c_str(), O_RDONLY);
+
+    int fdDeviceID;
+
+    if(fdVendorID != -1)
+    {
+        if(read(fdVendorID, bufRead, sizeof(bufRead)) > 0)
+        {
+            if(memcmp(bufRead, intelVendorID, strlen(intelVendorID)) == 0)
+            {
+                fdDeviceID = open(deviceIDPath.c_str(), O_RDONLY);
+                if(fdDeviceID != -1)
+                {
+                    if(read(fdDeviceID, bufRead, sizeof(bufRead)) > 0)
+                    {
+                        if(memcmp(bufRead, i210DeviceID, strlen(i210DeviceID)) == 0)
+                            cardType = NETWORK_CARD_TYPE_I210;
+                        else if(memcmp(bufRead, x540DeviceID, strlen(x540DeviceID)) == 0)
+                            cardType = NETWORK_CARD_TYPE_X540;
+                    }
+                    else
+                        logerror("Read of path %s failed.", deviceIDPath.c_str());
+
+                    close(fdDeviceID);
+                }
+                else
+                    logerror("Couldn't open path %s.", deviceIDPath.c_str());
+            }
+        }
+        else
+            logerror("Read of path %s failed.", vendorIDPath.c_str());
+
+        close(fdVendorID);
+    }
+    else
+        logerror("Couldn't open path %s.", vendorIDPath.c_str());
+
+
+    return cardType;
+}
+
+bool LinuxNetPort::IsWireless()
+{
+      int sock = -1;
+      struct iwreq pwrq;
+      memset(&pwrq, 0, sizeof(pwrq));
+      strncpy(pwrq.ifr_name, m_IfcName.c_str(), IFNAMSIZ);
+
+      if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+      {
+        perror("socket");
+        return false;
+      }
+
+      if (ioctl(sock, SIOCGIWNAME, &pwrq) != -1)
+      {
+        close(sock);
+        return true;
+      }
+
+      close(sock);
+
+      return false;
+}
+
+//int LinuxNetPort::GetSpeed()
+//{
+//    struct ifreq ifr;
+//    struct ethtool_cmd edata;
+//    int rc;
+
+//    strncpy(ifr.ifr_name, m_IfcName.c_str(), sizeof(ifr.ifr_name));
+//    ifr.ifr_data = (char*)&edata;
+
+//    edata.cmd = ETHTOOL_GSET;
+
+//    // issue ioctl
+//    rc = ioctl(pal::GetRawSocket(m_GeneralSock), SIOCETHTOOL, &ifr);
+//    if (rc < 0)
+//    {
+//        logerror("Get speed of interface %s failed.", ifr.ifr_name);
+//        return 0;
+//    }
+
+//    return edata.speed;
+//}
 
 #endif

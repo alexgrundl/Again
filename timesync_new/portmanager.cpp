@@ -10,8 +10,13 @@ PortManager::PortManager(INetPort* networkPort, std::vector<StateMachineManager 
         m_stateMachineManagers.push_back(stateMachineManagers[i]);
     }
 
-    m_portThread = std::unique_ptr<CThreadWrapper<PortManager>>(new CThreadWrapper<PortManager>(this,
-        &PortManager::Receive, std::string("Port manager thread ") + std::to_string(portIndex)));
+    m_portThread = new CThreadWrapper<PortManager>(this, &PortManager::Receive, std::string("Port manager thread ") +
+                                                   std::to_string(portIndex));
+}
+
+PortManager::~PortManager()
+{
+    delete m_portThread;
 }
 
 void PortManager::StartReceiving()

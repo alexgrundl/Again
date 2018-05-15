@@ -96,7 +96,7 @@ public:
 
     void SetClockSourceLastGmFreqChange(double value);
 
-    /**leap61
+    /**
      * @brief  The current value of time relative to the LocalClock entity clock.
      */
     UScaledNs ReadCurrentTime();
@@ -298,6 +298,15 @@ public:
 
 
     void SetDomain(uint8_t domain);
+
+
+    bool IsPtssEnabled();
+
+
+    void EnablePtss();
+
+
+    void DisablePtss();
 
 
     static uint8_t GetDomainToSyntonize();
@@ -546,6 +555,9 @@ private:
 
 
     uint8_t m_domain;
+
+
+    bool m_ptssEnabled;
 
 
     static uint8_t s_domainToSyntonize;

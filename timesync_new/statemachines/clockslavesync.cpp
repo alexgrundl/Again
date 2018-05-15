@@ -94,11 +94,10 @@ void ClockSlaveSync::ProcessState()
                                                                                                                             m_lastSyncReceiptLocalTime).ns > 0 ?
                                 (m_timeAwareSystem->GetSyncReceiptTime() - m_lastSyncReceiptTime) / (m_timeAwareSystem->GetSyncReceiptLocalTime() - m_lastSyncReceiptLocalTime) : 1.0);
                     if(m_timeAwareSystem->GetDomain() == TimeAwareSystem::GetDomainToSyntonize())
-                        m_timeControl.Syntonize(m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetRemoteLocalDelta(), m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetRemoteLocalRate());
+                        m_timeControl.Syntonize(m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetRemoteLocalDelta(),
+                                m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetRemoteLocalRate(), m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetCurrentLogSyncInterval());
                     m_lastSyncReceiptTime = m_timeAwareSystem->GetSyncReceiptTime();
                     m_lastSyncReceiptLocalTime = m_timeAwareSystem->GetSyncReceiptLocalTime();
-//                    if(m_timeAwareSystem->GetDomain() == 0)
-//                        printf("Diff Port %u: %li\n", m_rcvdPSSyncPtr->localPortNumber, m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->remoteLocalDelta.ns);
                 }
 
                 m_clockMasterSyncOffset->SignalSyncReceiptTimeReceive();

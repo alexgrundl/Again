@@ -7,12 +7,15 @@ PtpClockLinux::PtpClockLinux()
     ptpClockRootPath = "/dev/ptp";
     m_clockFD = -1;
     m_ptssType = PTSS_TYPE_SLAVE;
+    m_lock = pal::LockedRegionCreate();
 }
 
 PtpClockLinux::~PtpClockLinux()
 {
     if(m_clockFD != -1)
         close(m_clockFD);
+
+    pal::LockedRegionDelete(m_lock);
 }
 
 bool PtpClockLinux::Open(int clockIndex)
@@ -75,6 +78,8 @@ void PtpClockLinux::AdjustFrequency(double ppm)
 
 bool PtpClockLinux::GetSystemAndDeviceTime(struct timespec* tsSystem, struct timespec* tsDevice)
 {
+    pal::LockedRegionEnter(m_lock);
+
     struct ptp_clock_time *firstTime;
     struct ptp_clock_time *systemTime = NULL, *deviceTime = NULL;
     int64_t interval = LLONG_MAX;
@@ -114,6 +119,7 @@ bool PtpClockLinux::GetSystemAndDeviceTime(struct timespec* tsSystem, struct tim
         tsSystem->tv_nsec = systemTime->nsec;
     }
 
+    pal::LockedRegionLeave(m_lock);
     return true;
 }
 
@@ -222,34 +228,63 @@ bool PtpClockLinux::SetExternalTimestamp(int pinIndex, bool enable)
 {
     bool success = false;
     struct ptp_extts_request exttsRequest;
+    struct ptp_pin_desc desc;
 
-    exttsRequest.index = pinIndex;
-    exttsRequest.flags = enable ? PTP_ENABLE_FEATURE : 0;
-    if (ioctl(m_clockFD, PTP_EXTTS_REQUEST, &exttsRequest))
+    memset(&desc, 0, sizeof(desc));
+    desc.func = PTP_PF_EXTTS;
+    desc.index = pinIndex;
+    desc.chan = 0;
+
+    if(ioctl(m_clockFD, PTP_PIN_SETFUNC, &desc))
     {
-        logwarning("PTP_EXTTS_REQUEST failed");
+        logwarning("PTP_PIN_SETFUNC SDP%i failed.\n", pinIndex);
     }
     else
     {
-        success = true;
-        lognotice("%s: External timestamping of SDP%i %s.", m_clockPath.c_str(), pinIndex, enable ? "enabled" : "disabled");
+        memset(&exttsRequest, 0, sizeof(exttsRequest));
+        exttsRequest.index = 0;
+        exttsRequest.flags = enable ? PTP_ENABLE_FEATURE : 0;
+        if (ioctl(m_clockFD, PTP_EXTTS_REQUEST, &exttsRequest))
+        {
+            logwarning("PTP_EXTTS_REQUEST failed");
+        }
+        else
+        {
+            success = true;
+            lognotice("%s: External timestamping of SDP%i %s.", m_clockPath.c_str(), pinIndex, enable ? "enabled" : "disabled");
+        }
     }
 
     return success;
 }
 
-//    struct ptp_extts_event event;
-//    for (; extts; extts--)
-//    {
-//        cnt = read(fd, &event, sizeof(event));
-//        if (cnt != sizeof(event))
-//        {
-//            perror("read");
-//            break;
-//        }
-//        printf("event index %u at %lld.%09u\n", event.index,
-//               event.t.sec, event.t.nsec);
-//        fflush(stdout);
-//    }
+bool PtpClockLinux::ReadExternalTimestamp(struct timespec& tsExtEvent, struct timespec& tsSystemOfEvent)
+{
+    bool success = false;
+    struct ptp_extts_event event;
+    struct timespec ts;
+
+    ssize_t cnt = read(m_clockFD, &event, sizeof(event));
+
+    clock_gettime(CLOCK_REALTIME, &ts);
+    if (cnt != sizeof(event))
+    {
+        logerror("Read of external timestamp failed.");
+    }
+    else
+    {
+        tsExtEvent.tv_sec = event.t.sec;
+        tsExtEvent.tv_nsec = event.t.nsec;
+
+        tsSystemOfEvent.tv_sec = ts.tv_sec;
+        tsSystemOfEvent.tv_nsec = ts.tv_nsec;
+
+        success = true;
+
+        //printf("%s: tsExtEvent.tv_sec: %lu, tsExtEvent.tv_nsec: %lu\n", m_clockPath.c_str(), tsExtEvent.tv_sec, tsExtEvent.tv_nsec);
+    }
+
+    return success;
+}
 
 #endif //__linux__

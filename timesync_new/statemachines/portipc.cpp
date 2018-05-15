@@ -33,6 +33,7 @@ void PortIPC::ProcessState()
         FrequencyRatio masterLocalFrequencyOffset, localSystemFrequencyOffset;
         uint64_t deviceTime, systemTime;
         PortState portState;
+        PortRole portRole;
         SystemTimeBase timeBase;
         const uint8_t* masterClockIdentity;
         uint16_t systemPortNumber = m_systemPort->GetIdentity().portNumber;
@@ -65,8 +66,21 @@ void PortIPC::ProcessState()
         m_timeSystemPrevious = systemTime;
         m_timeDevicePrevious = deviceTime;
 
+        portRole = m_timeAwareSystem->GetSelectedRole(systemPortNumber);
+        switch(portRole)
+        {
+        case PORT_ROLE_MASTER:
+            portState = PTP_MASTER;
+            break;
+        case PORT_ROLE_SLAVE:
+            portState = PTP_SLAVE;
+            break;
+        case PORT_ROLE_DISABLED:
+        case PORT_ROLE_PASSIVE:
+            portState = PTP_DISABLED;
+            break;
+        }
 
-        portState = m_timeAwareSystem->GetSelectedRole(systemPortNumber) == PORT_ROLE_MASTER ? PTP_MASTER : PTP_SLAVE;
         timeBase = GPTP_CLOCK_REALTIME;
         masterClockIdentity =  m_timeAwareSystem->GetSelectedRole(systemPortNumber) == PORT_ROLE_MASTER ?
                     m_timeAwareSystem->GetClockIdentity() : m_timeAwareSystem->GetGmPriority().sourcePortIdentity.clockIdentity;

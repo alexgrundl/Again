@@ -20,6 +20,9 @@ public:
     PortManager(INetPort* networkPort, std::vector<StateMachineManager*>& stateMachineManagers, int portIndex);
 
 
+    virtual ~PortManager();
+
+
     void StartReceiving();
 
 private:
@@ -30,7 +33,7 @@ private:
     uint32_t Receive(bool_t *pbIsRunning, pal::EventHandle_t pWaitHandle);
 
 
-    std::unique_ptr<CThreadWrapper<PortManager>> m_portThread;
+    CThreadWrapper<PortManager>* m_portThread;
 
 
     int m_portIndex;

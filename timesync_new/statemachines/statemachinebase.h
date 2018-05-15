@@ -62,7 +62,8 @@ public:
         STATE_TRANSMIT_PERIODIC,
         STATE_IDLE,
 
-        STATE_SET_INTERVALS
+        STATE_SET_INTERVALS,
+        STATE_PLATFORM_SYNC
     };
 
 

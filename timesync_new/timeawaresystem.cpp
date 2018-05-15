@@ -1,6 +1,6 @@
 #include "timeawaresystem.h"
 
-uint8_t TimeAwareSystem::s_domainToSyntonize = 0;
+uint8_t TimeAwareSystem::s_domainToSyntonize = 1;
 
 uint8_t TimeAwareSystem::s_domainToMeasurePDelay = 0;
 
@@ -11,35 +11,23 @@ TimeAwareSystem::TimeAwareSystem()
     BEGIN = true;
 //    clockMasterSyncInterval.ns = 0;
 //    clockMasterSyncInterval.ns_frac = 0;
-    m_clockSlaveTime.sec = 0;
-    m_clockSlaveTime.ns = 0;
-    m_clockSlaveTime.ns_frac = 0;
-    m_syncReceiptTime.sec = 0;
-    m_syncReceiptTime.ns = 0;
-    m_syncReceiptTime.ns_frac = 0;
-    m_syncReceiptLocalTime.ns = 0;
-    m_syncReceiptLocalTime.ns_frac = 0;
+    m_clockSlaveTime = {0, 0, 0};
+    m_syncReceiptTime = {0, 0, 0};
+    m_syncReceiptLocalTime = {0, 0};
     m_clockSourceFreqOffset = 1.0;
-    m_clockSourcePhaseOffset.ns = 0;
-    m_clockSourcePhaseOffset.ns_frac = 0;
+    m_clockSourcePhaseOffset = {0, 0};
     m_clockSourceTimeBaseIndicator = 0;
     m_clockSourceTimeBaseIndicatorOld = 0;
-    m_clockSourceLastGmPhaseChange.ns = 0;
-    m_clockSourceLastGmPhaseChange.ns_frac = 0;
+    m_clockSourceLastGmPhaseChange = {0, 0};
     m_clockSourceLastGmFreqChange = 1.0;
     m_gmPresent = false;
     m_gmRateRatio = 1.0;
     m_gmTimeBaseIndicator = 0;
-    m_lastGmPhaseChange.ns = 0;
-    m_lastGmPhaseChange.ns_frac = 0;
+    m_lastGmPhaseChange = {0, 0};
     m_lastGmFreqChange = 1.0;
-    m_localClockTickInterval.ns = 0;
-    m_localClockTickInterval.ns_frac = 0;
-    m_localTime.ns = 0;
-    m_localTime.ns_frac = 0;
-    m_masterTime.sec = 0;
-    m_masterTime.ns = 0;
-    m_masterTime.ns_frac = 0;
+    m_localClockTickInterval = {0, 0};
+    m_localTime = {0, 0};
+    m_masterTime = {0, 0, 0};
     memset(m_thisClock, 255, sizeof(m_thisClock));
     m_clockMasterLogSyncInterval = -3;
 
@@ -97,6 +85,7 @@ TimeAwareSystem::TimeAwareSystem()
 
     m_clockLocal = NULL;
     m_domain = 0;
+    m_ptssEnabled = false;
 }
 
 TimeAwareSystem::~TimeAwareSystem()
@@ -598,4 +587,19 @@ PriorityVector TimeAwareSystem::GetLastGmPriority()
 void TimeAwareSystem::SetLastGmPriority(PriorityVector priority)
 {
     m_lastGmPriority = priority;
+}
+
+bool TimeAwareSystem::IsPtssEnabled()
+{
+    return m_ptssEnabled;
+}
+
+void TimeAwareSystem::EnablePtss()
+{
+    m_ptssEnabled = true;
+}
+
+void TimeAwareSystem::DisablePtss()
+{
+    m_ptssEnabled = false;
 }

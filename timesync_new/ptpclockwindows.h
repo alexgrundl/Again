@@ -53,6 +53,15 @@ public:
     void SetPtssType(PtssType type);
 
 
+    bool EnableExternalTimestamp(int pinIndex) {return true;}
+
+
+    bool DisableExternalTimestamp(int pinIndex) {return true;}
+
+
+    bool ReadExternalTimestamp(struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent) {return true;}
+
+
 private:
 
     PtssType m_ptssType;

@@ -9,7 +9,6 @@
 #include "licensechecklinux.h"
 #include <ifaddrs.h>
 #include <sys/ioctl.h>
-#include <linux/wireless.h>
 #include "ptpclocklinux.h"
 #else
 #include <io.h>
@@ -64,33 +63,6 @@ void wait_for_signals()
 #endif
 }
 
-bool check_wireless(const char* ifname, char* protocol)
-{
-#ifdef __linux__
-  int sock = -1;
-  struct iwreq pwrq;
-  memset(&pwrq, 0, sizeof(pwrq));
-  strncpy(pwrq.ifr_name, ifname, IFNAMSIZ);
-
-  if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-  {
-    perror("socket");
-    return false;
-  }
-
-  if (ioctl(sock, SIOCGIWNAME, &pwrq) != -1)
-  {
-    if (protocol)
-        strncpy(protocol, pwrq.u.name, IFNAMSIZ);
-    close(sock);
-    return true;
-  }
-
-  close(sock);
-#endif
-  return false;
-}
-
 int main()
 {
     LicenseCheck* licenseCheck;
@@ -131,11 +103,11 @@ int main()
         while (next)
         {
             if (next->ifa_addr && next->ifa_addr->sa_family == AF_PACKET &&
-                    (next->ifa_flags & IFF_LOOPBACK) == 0 && !check_wireless(next->ifa_name, NULL))
+                    (next->ifa_flags & IFF_LOOPBACK) == 0)
             {
-    //            if(strcmp(next->ifa_name, "enp15s0") == 0 || strcmp(next->ifa_name, "enp3s0f0") == 0)
-    //            {
-                    INetPort* networkPort = new LinuxNetPort(next->ifa_name);
+                INetPort* networkPort = new LinuxNetPort(next->ifa_name);
+                if(networkPort->GetNetworkCardType() != NETWORK_CARD_TYPE_UNKNOWN)
+                {
                     networkPort->Initialize();
                     networkPorts.push_back(networkPort);
 
@@ -179,7 +151,9 @@ int main()
                             }
                         }
                     }
-    //            }
+                }
+                else
+                    delete networkPort;
             }
             next = next->ifa_next;
         }

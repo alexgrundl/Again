@@ -37,7 +37,9 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
         m_portAnnounceTransmit.push_back(new PortAnnounceTransmit(m_timeAwareSystem, ports[i], m_mdPortAnnounceTransmit[i]));
 
         m_linkDelaySyncIntervalSetting.push_back(new LinkDelaySyncIntervalSetting(timeAwareSystem, ports[i], networkPorts[i]));
-
+        if(m_timeAwareSystem->GetDomain() == 0 &&// networkPorts[i]->GetNetworkCardType() == NETWORK_CARD_TYPE_X540 &&// networkPorts[i]->GetPortNumber() == 4 &&
+                networkPorts[i]->GetPtpClock()->GetPtssType() == PtpClock::PTSS_TYPE_SLAVE)
+            m_platformSync.push_back(new PlatformSync(m_timeAwareSystem, ports[i], networkPorts[i]));
 #ifdef __linux__
         m_portIPC.push_back(new PortIPC(m_timeAwareSystem, ports[i], networkPorts[i], m_timeAwareSystem->GetDomain()));
 #endif
@@ -50,6 +52,13 @@ StateMachineManager::StateMachineManager(TimeAwareSystem* timeAwareSystem, std::
     m_stateMachines.push_back(m_clockMasterSyncReceive);
     m_stateMachines.push_back(m_clockMasterSyncOffset);
 
+    if(m_timeAwareSystem->GetDomain() == 0)
+    {
+        for (std::vector<PlatformSync*>::size_type i = 0; i < m_platformSync.size(); ++i)
+        {
+            m_stateMachines.push_back(m_platformSync[i]);
+        }
+    }
 
     for (std::vector<SystemPort*>::size_type i = 0; i < ports.size(); ++i)
     {

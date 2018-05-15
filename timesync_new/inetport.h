@@ -5,6 +5,14 @@
 
 #include "ptpmessagebase.h"
 #include "receivepackage.h"
+#include "ptpclock.h"
+
+enum NetworkCardType
+{
+    NETWORK_CARD_TYPE_UNKNOWN,
+    NETWORK_CARD_TYPE_I210,
+    NETWORK_CARD_TYPE_X540
+};
 
 class INetPort
 {
@@ -24,6 +32,10 @@ class INetPort
     virtual void SetNeighborRatio(double ratio) = 0;
     virtual bool GetASCapable() = 0;
     virtual void SetASCapable(bool asCapable) = 0;
+    virtual PtpClock* GetPtpClock() = 0;
+    virtual NetworkCardType GetNetworkCardType() = 0;
+    virtual bool IsWireless() = 0;
+//    virtual int GetSpeed() = 0;
     virtual ~INetPort(){}
   protected:
     INetPort(){}

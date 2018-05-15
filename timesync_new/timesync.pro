@@ -69,7 +69,8 @@ SOURCES += main.cpp \
     licensecheck/licensecheck.cpp \
     licensecheck/licensechecklinux.cpp \
     licensecheck/licensecheckwindows.cpp \
-    systemport.cpp
+    systemport.cpp \
+    statemachines/platformsync.cpp
 
 HEADERS += \
     types/types.h \
@@ -139,5 +140,6 @@ HEADERS += \
     licensecheck/licensecheck.h \
     licensecheck/licensechecklinux.h \
     licensecheck/licensecheckwindows.h \
-    systemport.h
+    systemport.h \
+    statemachines/platformsync.h
 

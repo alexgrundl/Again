@@ -5,6 +5,7 @@
 
 #include <deque>
 #include <ifaddrs.h>
+#include <linux/wireless.h>
 
 #include "types.h"
 #include "platform.h"
@@ -52,6 +53,13 @@ class LinuxNetPort : public INetPort
 
         PtpClock* GetPtpClock();
 
+        NetworkCardType GetNetworkCardType();
+
+
+        bool IsWireless();
+
+//        int GetSpeed();
+
         virtual uint8_t const* GetMAC();
 
         virtual uint32_t GetRxLinkDelay_ns();
@@ -72,6 +80,13 @@ protected:
     pal::SectionLock_t m_EventLock;
 
 private:
+
+    const char* intelVendorID = "0x8086";
+
+    const char* i210DeviceID = "0x1533";
+
+    const char* x540DeviceID = "0x1528";
+
     pal::Socket_t m_EventSock;
 
     pal::Socket_t m_GeneralSock;
@@ -94,12 +109,18 @@ private:
 
     double m_neighborRatio;
 
+    NetworkCardType m_cardType;
+
+
     /**
      * @brief IsCarrierSet Checks if the parameter "/sys/class/net/<m_IfcName>/carrier" is set.
      * This seems to be the information if the link is up and the interface is connected to another end.
      * @return True if "carrier" is set, false otherwise.
      */
     bool IsCarrierSet();
+
+
+    NetworkCardType ReadNetworkCardTypeFromSysFs();
 };
 
 #endif
