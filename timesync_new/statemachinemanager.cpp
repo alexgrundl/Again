@@ -33,6 +33,11 @@ StateMachineManager::~StateMachineManager()
     delete m_clockMasterSyncReceive;
     delete m_clockMasterSyncOffset;
     delete m_portRoleSelection;
+
+    for (std::vector<PlatformSync*>::size_type i = 0; i < m_platformSync.size(); ++i)
+    {
+        delete m_platformSync[i];
+    }
 }
 
 void StateMachineManager::Initialize(TimeAwareSystem* timeAwareSystem, std::vector<INetPort*> networkPorts)
@@ -120,8 +125,7 @@ void StateMachineManager::Initialize(TimeAwareSystem* timeAwareSystem, std::vect
 
 void StateMachineManager::StartProcessing()
 {
-    if(!m_stateThread->IsStarted())
-        m_stateThread->Start();
+    m_stateThread->Start();
 }
 
 void StateMachineManager::StopProcessing()

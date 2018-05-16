@@ -261,29 +261,38 @@ bool PtpClockLinux::SetExternalTimestamp(int pinIndex, bool enable)
 bool PtpClockLinux::ReadExternalTimestamp(struct timespec& tsExtEvent, struct timespec& tsSystemOfEvent)
 {
     bool success = false;
-    struct ptp_extts_event event;
-    struct timespec ts;
+    struct timeval timeout;
+    fd_set set;
 
-    ssize_t cnt = read(m_clockFD, &event, sizeof(event));
-
-    clock_gettime(CLOCK_REALTIME, &ts);
-    if (cnt != sizeof(event))
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 500000;
+    FD_ZERO(&set);
+    FD_SET(m_clockFD, &set);
+    if(select(m_clockFD + 1, &set, NULL, NULL, &timeout) > 0)
     {
-        logerror("Read of external timestamp failed.");
+        struct ptp_extts_event event;
+        struct timespec ts;
+        ssize_t cnt;
+
+        cnt = read(m_clockFD, &event, sizeof(event));
+        clock_gettime(CLOCK_REALTIME, &ts);
+        if (cnt != sizeof(event))
+        {
+            logerror("Read of external timestamp failed.");
+        }
+        else
+        {
+            tsExtEvent.tv_sec = event.t.sec;
+            tsExtEvent.tv_nsec = event.t.nsec;
+
+            tsSystemOfEvent.tv_sec = ts.tv_sec;
+            tsSystemOfEvent.tv_nsec = ts.tv_nsec;
+
+            success = true;
+
+            //printf("%s: tsExtEvent.tv_sec: %lu, tsExtEvent.tv_nsec: %lu\n", m_clockPath.c_str(), tsExtEvent.tv_sec, tsExtEvent.tv_nsec);
+        }
     }
-    else
-    {
-        tsExtEvent.tv_sec = event.t.sec;
-        tsExtEvent.tv_nsec = event.t.nsec;
-
-        tsSystemOfEvent.tv_sec = ts.tv_sec;
-        tsSystemOfEvent.tv_nsec = ts.tv_nsec;
-
-        success = true;
-
-        //printf("%s: tsExtEvent.tv_sec: %lu, tsExtEvent.tv_nsec: %lu\n", m_clockPath.c_str(), tsExtEvent.tv_sec, tsExtEvent.tv_nsec);
-    }
-
     return success;
 }
 

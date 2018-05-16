@@ -18,13 +18,16 @@ public:
     virtual ~TimeSyncDaemon();
 
 
-    bool CheckLicense();
+    bool LicenseValid();
 
 
     void InitializeManagers();
 
 
     void Start();
+
+
+    void Stop();
 
 
     virtual void InitalizePorts() = 0;
@@ -47,11 +50,6 @@ protected:
 
     LicenseCheck* m_licenseCheck;
 
-
-    bool LicenseValid();
-
-
-private:
 
     void DeleteManagers();
 };

@@ -23,7 +23,7 @@ void TimeSyncDaemon::InitializeManagers()
 {
     DeleteManagers();
 
-    for (std::vector<StateMachineManager*>::size_type i = 0; i < m_timeAwareSystems.size(); ++i)
+    for (std::vector<TimeAwareSystem*>::size_type i = 0; i < m_timeAwareSystems.size(); ++i)
     {
         m_stateManagers.push_back(new StateMachineManager());
         m_stateManagers[i]->Initialize(m_timeAwareSystems[i], m_networkPorts);
@@ -58,6 +58,15 @@ void TimeSyncDaemon::Start()
 {
     for (std::vector<StateMachineManager*>::size_type i = 0; i < m_stateManagers.size(); ++i)
        m_stateManagers[i]->StartProcessing();
-    for (std::vector<INetPort*>::size_type i = 0; i < m_networkPorts.size(); ++i)
+    for (std::vector<PortManager*>::size_type i = 0; i < m_portManagers.size(); ++i)
         m_portManagers[i]->StartReceiving();
 }
+
+void TimeSyncDaemon::Stop()
+{
+    for (std::vector<StateMachineManager*>::size_type i = 0; i < m_stateManagers.size(); ++i)
+        m_stateManagers[i]->StopProcessing();
+    for (std::vector<PortManager*>::size_type i = 0; i < m_portManagers.size(); ++i)
+        m_portManagers[i]->StopReceiving();
+}
+

@@ -10,6 +10,7 @@ TimeSyncDaemonLinux::TimeSyncDaemonLinux(int nDomains) : TimeSyncDaemon(nDomains
 TimeSyncDaemonLinux::~TimeSyncDaemonLinux()
 {
     delete m_licenseCheck;
+    DeleteManagers();
     DeleteNetworkPorts();
 }
 

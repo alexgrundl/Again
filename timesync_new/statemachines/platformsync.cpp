@@ -11,6 +11,7 @@ PlatformSync::PlatformSync(TimeAwareSystem *timeAwareSystem, SystemPort *port, I
 
 PlatformSync::~PlatformSync()
 {
+    m_portThread->Stop();
     delete m_portThread;
 }
 

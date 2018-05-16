@@ -25,6 +25,9 @@ public:
 
     void StartReceiving();
 
+
+    void StopReceiving();
+
 private:
 
     INetPort* m_networkPort;

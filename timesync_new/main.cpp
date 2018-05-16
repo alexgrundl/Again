@@ -16,7 +16,7 @@
 
 using namespace std;
 
-void wait_for_signals()
+void waitForSignals()
 {
 #ifdef __linux__
 
@@ -57,12 +57,16 @@ int main()
 
 #endif
 
-    timeSyncDaemon->InitalizePorts();
-    timeSyncDaemon->InitializeManagers();
-    timeSyncDaemon->Start();
+    if(timeSyncDaemon->LicenseValid())
+    {
+        timeSyncDaemon->InitalizePorts();
+        timeSyncDaemon->InitializeManagers();
+        timeSyncDaemon->Start();
 
-    wait_for_signals();
+        waitForSignals();
+    }
 
+    timeSyncDaemon->Stop();
     delete timeSyncDaemon;
 //    clockDom0->StopPPS();
 //    delete clockDom0;

@@ -24,6 +24,11 @@ void PortManager::StartReceiving()
     m_portThread->Start();
 }
 
+void PortManager::StopReceiving()
+{
+    m_portThread->Stop();
+}
+
 uint32_t PortManager::Receive(bool_t* pbIsRunning, pal::EventHandle_t pWaitHandle)
 {
     pal::EventWaitResult_e dwWaitResult;
@@ -44,7 +49,9 @@ uint32_t PortManager::Receive(bool_t* pbIsRunning, pal::EventHandle_t pWaitHandl
             }
         }
         else
-            pal::ms_sleep(1000);
+        {
+            pal::ms_sleep(10);
+        }
     }
 
     return 0;
