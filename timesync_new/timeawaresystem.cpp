@@ -92,6 +92,12 @@ TimeAwareSystem::~TimeAwareSystem()
 {
     ClearPathTrace();
 
+    for (std::vector<SystemPort*>::size_type i = 0; i < m_systemPorts.size(); ++i)
+    {
+        delete m_systemPorts[i];
+    }
+    m_systemPorts.clear();
+
 //    if(m_domain == 0 && m_clockLocal != NULL)
 //        m_clockLocal->StopPPS();
 }
@@ -602,4 +608,19 @@ void TimeAwareSystem::EnablePtss()
 void TimeAwareSystem::DisablePtss()
 {
     m_ptssEnabled = false;
+}
+
+void TimeAwareSystem::AddSystemPort(PortIdentity portIdentity)
+{
+    SystemPort* port = new SystemPort();
+
+    port->SetIdentity(portIdentity);
+    m_systemPorts.push_back(port);
+    AddSelectedRole(PORT_ROLE_SLAVE);
+}
+
+SystemPort* TimeAwareSystem::GetSystemPort(int portIndex)
+{
+    return portIndex >= 0 && portIndex < (int)m_systemPorts.size() ? m_systemPorts[portIndex] : NULL;
+
 }

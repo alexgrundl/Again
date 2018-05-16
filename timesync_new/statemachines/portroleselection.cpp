@@ -1,6 +1,6 @@
 #include "portroleselection.h"
 
-PortRoleSelection::PortRoleSelection(TimeAwareSystem *timeAwareSystem, std::vector<SystemPort*> ports) : StateMachineBase(timeAwareSystem)
+PortRoleSelection::PortRoleSelection(TimeAwareSystem *timeAwareSystem, std::vector<INetPort*> ports) : StateMachineBase(timeAwareSystem)
 {
     m_ports = ports;
 }
@@ -39,13 +39,13 @@ void PortRoleSelection::UpdtRoleDisabledTree()
 void PortRoleSelection::ClearReselectTree()
 {
     for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
-        m_ports[i]->SetReselect(false);
+        m_timeAwareSystem->GetSystemPort(i)->SetReselect(false);
 }
 
 void PortRoleSelection::SetSelectedTree()
 {
     for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
-        m_ports[i]->SetSelected(true);
+        m_timeAwareSystem->GetSystemPort(i)->SetSelected(true);
 }
 
 void PortRoleSelection::UpdtRolesTree()
@@ -64,7 +64,7 @@ void PortRoleSelection::UpdtRolesTree()
 
     for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
     {
-        SystemPort* port = m_ports[i];
+        SystemPort* port = m_timeAwareSystem->GetSystemPort(i);
         PriorityVector gmPathPriortiy = port->GetPortPriority();
         gmPathPriortiy.stepsRemoved++;
 
@@ -99,7 +99,7 @@ void PortRoleSelection::UpdtRolesTree()
      * masterPriorityVector for each port (i.e., everything except the portNumber of the fourth component) */
     for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
     {
-        SystemPort* port = m_ports[i];
+        SystemPort* port = m_timeAwareSystem->GetSystemPort(i);
         PriorityVector portMasterPriority;
         portMasterPriority.identity = m_timeAwareSystem->GetGmPriority().identity;
         portMasterPriority.stepsRemoved = m_timeAwareSystem->GetGmPriority().stepsRemoved;
@@ -139,7 +139,7 @@ void PortRoleSelection::UpdtRolesTree()
       * portPriorityVector, selectedRole[j] set to MasterPort and updtInfo is set to TRUE. */
      for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
      {
-         SystemPort* port = m_ports[i];
+         SystemPort* port = m_timeAwareSystem->GetSystemPort(i);
          if(port->GetInfoIs() == SPANNING_TREE_PORT_STATE_DISABLED)
              m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_DISABLED);
          else if(port->GetInfoIs() == SPANNING_TREE_PORT_STATE_AGED)
@@ -240,11 +240,12 @@ void PortRoleSelection::ProcessState()
         case STATE_ROLE_SELECTION:
             for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
             {
-                if(m_ports[i]->GetReselect())
+                SystemPort* port = m_timeAwareSystem->GetSystemPort(i);
+                if(port->GetReselect())
                 {
                     reselect = true;
                 }
-                if(m_ports[i]->GetInfoIs() == SPANNING_TREE_PORT_STATE_AGED)
+                if(port->GetInfoIs() == SPANNING_TREE_PORT_STATE_AGED)
                 {
                     resetPortPriority = true;
                 }
@@ -256,7 +257,7 @@ void PortRoleSelection::ProcessState()
             {
                 for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
                 {
-                    m_ports[i]->ResetPortPriority();
+                    m_timeAwareSystem->GetSystemPort(i)->ResetPortPriority();
                 }
             }
 

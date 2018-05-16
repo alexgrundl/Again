@@ -1,6 +1,6 @@
 #include "clockslavesync.h"
 
-ClockSlaveSync::ClockSlaveSync(TimeAwareSystem* timeAwareSystem, std::vector<SystemPort*> ports, ClockMasterSyncOffset *clockMasterSyncOffset) :
+ClockSlaveSync::ClockSlaveSync(TimeAwareSystem* timeAwareSystem, ClockMasterSyncOffset *clockMasterSyncOffset) :
     StateMachineBase(timeAwareSystem)
 {
     m_rcvdPSSync = false;
@@ -8,7 +8,6 @@ ClockSlaveSync::ClockSlaveSync(TimeAwareSystem* timeAwareSystem, std::vector<Sys
     m_clockMasterSyncOffset = clockMasterSyncOffset;
     m_rcvdPSSyncPtr = new PortSyncSync();
 
-    m_ports = ports;
     m_lastSyncReceiptTime = {0, 0, 0};
     m_lastSyncReceiptLocalTime = {0, 0};
     m_timeControl.SetPtpClock(m_timeAwareSystem->GetLocalClock());
@@ -71,9 +70,10 @@ void ClockSlaveSync::ProcessState()
 
                 if(m_rcvdPSSyncPtr->localPortNumber > 0)
                 {
-                    neighborPropDelay = m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetNeighborPropDelay();
-                    neighborRateRatio = m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetNeighborRateRatio();
-                    delayAsymmetry = m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetDelayAsymmetry();
+                    SystemPort* systemPort = m_timeAwareSystem->GetSystemPort(m_rcvdPSSyncPtr->localPortNumber - 1);
+                    neighborPropDelay = systemPort->GetNeighborPropDelay();
+                    neighborRateRatio = systemPort->GetNeighborRateRatio();
+                    delayAsymmetry = systemPort->GetDelayAsymmetry();
                     if(neighborRateRatio == 0)
                         neighborRateRatio = 1.0;
                 }
@@ -89,13 +89,13 @@ void ClockSlaveSync::ProcessState()
 
                 if(m_rcvdPSSyncPtr->localPortNumber > 0)
                 {
-                    m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->SetRemoteLocalDelta(m_timeAwareSystem->GetSyncReceiptTime() - m_timeAwareSystem->GetSyncReceiptLocalTime());
-                    m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->SetRemoteLocalRate(m_lastSyncReceiptLocalTime.ns > 0 && (m_timeAwareSystem->GetSyncReceiptLocalTime() -
-                                                                                                                            m_lastSyncReceiptLocalTime).ns > 0 ?
+                    SystemPort* systemPort = m_timeAwareSystem->GetSystemPort(m_rcvdPSSyncPtr->localPortNumber - 1);
+                    systemPort->SetRemoteLocalDelta(m_timeAwareSystem->GetSyncReceiptTime() - m_timeAwareSystem->GetSyncReceiptLocalTime());
+                    systemPort->SetRemoteLocalRate(m_lastSyncReceiptLocalTime.ns > 0 && (m_timeAwareSystem->GetSyncReceiptLocalTime() -
+                                                                                         m_lastSyncReceiptLocalTime).ns > 0 ?
                                 (m_timeAwareSystem->GetSyncReceiptTime() - m_lastSyncReceiptTime) / (m_timeAwareSystem->GetSyncReceiptLocalTime() - m_lastSyncReceiptLocalTime) : 1.0);
                     if(m_timeAwareSystem->GetDomain() == TimeAwareSystem::GetDomainToSyntonize())
-                        m_timeControl.Syntonize(m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetRemoteLocalDelta(),
-                                m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetRemoteLocalRate(), m_ports[m_rcvdPSSyncPtr->localPortNumber - 1]->GetCurrentLogSyncInterval());
+                        m_timeControl.Syntonize(systemPort->GetRemoteLocalDelta(), systemPort->GetRemoteLocalRate(), systemPort->GetCurrentLogSyncInterval());
                     m_lastSyncReceiptTime = m_timeAwareSystem->GetSyncReceiptTime();
                     m_lastSyncReceiptLocalTime = m_timeAwareSystem->GetSyncReceiptLocalTime();
                 }

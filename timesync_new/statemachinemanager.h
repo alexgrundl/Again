@@ -38,14 +38,19 @@ class StateMachineManager
 {
 public:
 
-    StateMachineManager(TimeAwareSystem* timeAwareSystem, std::vector<SystemPort*> ports,
-                        std::vector<INetPort*> networkPorts);
+    StateMachineManager();
 
 
     ~StateMachineManager();
 
 
+    void Initialize(TimeAwareSystem* timeAwareSystem, std::vector<INetPort*> networkPorts);
+
+
     void StartProcessing();
+
+
+    void StopProcessing();
 
 
     void ProcessPackage(int portIndex, ReceivePackage *package);

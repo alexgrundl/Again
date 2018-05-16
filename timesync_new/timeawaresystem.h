@@ -7,6 +7,7 @@
 #include <ptpclock.h>
 
 #include "types.h"
+#include "systemport.h"
 #include "linuxsharedmemoryipc.h"
 
 class TimeAwareSystem
@@ -309,6 +310,12 @@ public:
     void DisablePtss();
 
 
+    void AddSystemPort(PortIdentity portIdentity);
+
+
+    SystemPort* GetSystemPort(int portIndex);
+
+
     static uint8_t GetDomainToSyntonize();
 
 
@@ -321,6 +328,9 @@ public:
     static void SetDomainToMeasurePDelay(uint8_t domain);
 
 private:
+
+
+    std::vector<SystemPort*> m_systemPorts;
 
     /**
      * @brief The synchronized time maintained, at the slave, at the granularity of the LocalClock entity [i.e., a new value is computed every

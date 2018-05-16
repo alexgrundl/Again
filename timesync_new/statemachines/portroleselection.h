@@ -11,7 +11,7 @@ class PortRoleSelection : public StateMachineBase
 public:
 
 
-    PortRoleSelection(TimeAwareSystem *timeAwareSystem, std::vector<SystemPort*> ports);
+    PortRoleSelection(TimeAwareSystem *timeAwareSystem, std::vector<INetPort*> ports);
 
 
     virtual ~PortRoleSelection();
@@ -42,7 +42,7 @@ public:
 
 private:
 
-    std::vector<SystemPort*> m_ports;
+    std::vector<INetPort*> m_ports;
 
 
     const char* GetStrPortRole(PortRole role);
