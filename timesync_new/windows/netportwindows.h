@@ -10,13 +10,13 @@
 #include "platform.h"
 #include "ptpclock.h"
 
-class WindowsNetPort : public INetPort
+class NetPortWindows : public INetPort
 {
 public:
 
-    WindowsNetPort();
+    NetPortWindows();
 
-    ~WindowsNetPort();
+    ~NetPortWindows();
 
     bool Initialize() {return true;}
     bool SetRxQueueEnabled(bool settoenabled) {return true;}

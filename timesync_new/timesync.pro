@@ -73,8 +73,9 @@ SOURCES += main.cpp \
     linux/netportlinux.cpp \
     linux/sharedmemoryipclinux.cpp \
     windows/licensecheckwindows.cpp \
-    windows/windowsnetport.cpp \
-    windows/ptpclockwindows.cpp
+    windows/ptpclockwindows.cpp \
+    windows/timesyncdaemonwindows.cpp \
+    windows/netportwindows.cpp
 
 HEADERS += \
     common/types/types.h \
@@ -143,8 +144,9 @@ HEADERS += \
     linux/netportlinux.h \
     linux/sharedmemoryipclinux.h \
     windows/ptpclockwindows.h \
-    windows/windowsnetport.h \
-    windows/licensecheckwindows.h
+    windows/licensecheckwindows.h \
+    windows/timesyncdaemonwindows.h \
+    windows/netportwindows.h
 
 DISTFILES +=
 

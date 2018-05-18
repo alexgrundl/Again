@@ -9,8 +9,7 @@
 #include "timesyncdaemonlinux.h"
 #else
 #include <io.h>
-#include "ptpclockwindows.h"
-#include "licensecheckwindows.h"
+#include "timesyncdaemonwindows.h"
 #endif
 
 
@@ -54,7 +53,7 @@ int main()
 #ifdef __linux__
     timeSyncDaemon = new TimeSyncDaemonLinux(2);
 #else
-
+    timeSyncDaemon = new TimeSyncDaemonWindows(2);
 #endif
 
     if(timeSyncDaemon->LicenseValid())
