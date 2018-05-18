@@ -9,10 +9,8 @@ PortIPC::PortIPC(TimeAwareSystem *timeAwareSystem, SystemPort *port, INetPort *n
     m_timeSystemPrevious = 0;
     m_timeDevicePrevious = 0;
 
-    LinuxIPCArg arg;
-    arg.setIfnameAndDomain(((LinuxNetPort*)networkPort)->GetInterfaceName().c_str(), m_domain);
     m_ipc = new LinuxSharedMemoryIPC();
-    m_ipc->init(&arg);
+    m_ipc->init(((LinuxNetPort*)networkPort)->GetInterfaceName(), m_domain);
     m_ipc->set_if_phc_index(((LinuxNetPort*)networkPort)->GetPtpClockIndex());
 
     m_ptpClock = ((LinuxNetPort*)networkPort)->GetPtpClock();
@@ -77,7 +75,7 @@ void PortIPC::ProcessState()
             break;
         case PORT_ROLE_DISABLED:
         case PORT_ROLE_PASSIVE:
-            portState = PTP_DISABLED;
+            portState = PTP_SLAVE;//PTP_DISABLED;
             break;
         }
 

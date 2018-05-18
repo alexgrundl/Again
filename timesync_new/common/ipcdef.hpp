@@ -62,7 +62,28 @@
 #error "ERROR. OS not supported"
 #endif /*__unix__ / _WIN*/
 
-#include <ptptypes.hpp>
+#if defined(__clang__) &&  defined(__x86_64__)
+// Clang/llvm has incompatible long double (fp128) for x86_64.
+typedef double FrequencyRatio;		/*!< Frequency Ratio */
+#else
+typedef long double FrequencyRatio;	/*!< Frequency Ratio */
+#endif
+
+/**
+ * @brief PortState enumeration
+ */
+typedef enum {
+    PTP_UNKNOWN = 0,
+    PTP_MASTER = 6,		//!< Port is PTP Master
+    PTP_PRE_MASTER,		//!< Port is not PTP Master yet.
+    PTP_SLAVE,			//!< Port is PTP Slave
+    PTP_UNCALIBRATED,	//!< Port is uncalibrated.
+    PTP_DISABLED,		//!< Port is not PTP enabled. All messages are ignored when in this state.
+    PTP_FAULTY,			//!< Port is in a faulty state. Recovery is implementation specific.
+    PTP_INITIALIZING,	//!< Port's initial state.
+    PTP_LISTENING		//!< Port is in a PTP listening state. Currently not in use.
+} PortState;
+
 
 typedef enum {
     GPTP_DEFAULT=0,
@@ -70,6 +91,7 @@ typedef enum {
     GPTP_CLOCK_MONOTONIC_RAW
 } SystemTimeBase;
 
+#define PTP_CLOCK_IDENTITY_LENGTH 8
 
 /**
  * @brief Provides a data structure for gPTP time

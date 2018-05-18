@@ -17,40 +17,14 @@ LinuxSharedMemoryIPC::~LinuxSharedMemoryIPC()
         logerror("error shm_unlink: %s\n", strerror(errno));
 }
 
-bool LinuxSharedMemoryIPC::init( OS_IPC_ARG *barg )
+bool LinuxSharedMemoryIPC::init(std::string if_name, unsigned char domain)
 {
-    LinuxIPCArg *arg;
-    struct group *grp;
-    std::string group_name;
+    this->if_name = if_name;
+    this->domain = domain;
     pthread_mutexattr_t shared;
     mode_t oldumask = umask(0);
 
-    if( barg == NULL )
-    {
-        group_name = DEFAULT_GROUPNAME;
-    }
-    else
-    {
-        arg = dynamic_cast<LinuxIPCArg *> (barg);
-        if( arg == NULL )
-        {
-            logerror("Wrong IPC init arg type, File: %s\n", __FILE__);
-            goto exit_error;
-        }
-        else
-        {
-            group_name = arg->group_name.length() > 0 ? arg->group_name : DEFAULT_GROUPNAME;
-            if_name = arg->if_name;
-            domain = arg->domain;
-        }
-    }
-    grp = getgrnam( group_name.c_str() );
-    if( grp == NULL )
-    {
-        //GPTP_LOG_ERROR( "Group %s not found, will try root (0) instead", group_name.c_str() );
-    }
-
-    OS_IPC::GetShmName(if_name, domain, shm_name);
+    GetShmName(if_name, domain, shm_name);
     shm_fd = shm_open( shm_name.c_str(), O_RDWR | O_CREAT, 0660 );
     if( shm_fd == -1 )
     {
@@ -58,7 +32,7 @@ bool LinuxSharedMemoryIPC::init( OS_IPC_ARG *barg )
         goto exit_error;
     }
     (void) umask(oldumask);
-    if (fchown(shm_fd, -1, grp != NULL ? grp->gr_gid : 0) < 0)
+    if (fchown(shm_fd, -1, 0) < 0)
     {
         logerror("shm_open(): Failed to set ownership, File: %s\n", __FILE__);
     }

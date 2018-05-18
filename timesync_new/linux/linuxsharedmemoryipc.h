@@ -10,11 +10,12 @@
 #include <grp.h>
 #include <string.h>
 #include <unistd.h>
+#include <sstream>
 
 #include "types.h"
-#include "avbts_osipc.hpp"
-#include "linuxipcarg.h"
+#include "ipcdef.hpp"
 
+#define SHM_NAME_DEFAULT  "/ptp"    /*!< Start of every shared memory name*/
 #define DEFAULT_GROUPNAME "ptp"		/*!< Default groupname for the shared memory interface*/
 #define SHM_SIZE (sizeof(gPtpTimeData) + sizeof(pthread_mutex_t))   /*!< Shared memory size*/
 
@@ -25,7 +26,7 @@
 /**
  * @brief Linux shared memory interface
  */
-class LinuxSharedMemoryIPC:public OS_IPC {
+class LinuxSharedMemoryIPC {
 private:
     int shm_fd;
     char *master_offset_buffer;
@@ -34,6 +35,24 @@ private:
     unsigned char domain;
     std::string shm_name;
     void setpid();
+
+
+    /**
+     * @brief  Gets the name of shared memory depending on the name of
+     * the ethernet interface and the domain. Only useful in linux. In
+     * Windows nothing is done.
+     * @param if_name The name of the ethernet interface (e.g. eth1)
+     * @param domain The current domain
+     * @shm_name Will contain the name of the shared memory
+     */
+    static void GetShmName(std::string if_name, int domain, std::string& shm_name)
+    {
+        #ifdef __linux__
+            std::stringstream ss;
+            ss << SHM_NAME_DEFAULT << "_" << if_name << "_" << domain;
+            shm_name = ss.str();
+        #endif
+    }
 
 public:
     /**
@@ -50,7 +69,7 @@ public:
      * @param  barg Groupname of the shared memory
      * @return TRUE if no error, FALSE otherwise
      */
-    virtual bool init( OS_IPC_ARG *barg = NULL );
+    virtual bool init(std::string if_name, unsigned char  domain);
 
     /**
      * @brief Updates IPC values
