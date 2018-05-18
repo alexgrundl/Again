@@ -1,6 +1,8 @@
 #ifndef LICENSECHECKLINUX_H
 #define LICENSECHECKLINUX_H
 
+#ifdef __linux__
+
 #include "licensecheck.h"
 
 #include <net/if.h>
@@ -39,5 +41,7 @@ private:
 
     uint32_t CountSetBits(uint32_t number);
 };
+
+#endif __linux__
 
 #endif // LICENSECHECKLINUX_H

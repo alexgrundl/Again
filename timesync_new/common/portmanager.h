@@ -10,7 +10,7 @@
 #ifdef __linux
 #include "netportlinux.h"
 #else
-#include "windowsnetport.h"
+#include "netportwindows.h"
 #endif
 
 class PortManager

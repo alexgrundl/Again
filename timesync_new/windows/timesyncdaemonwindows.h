@@ -1,7 +1,7 @@
 #ifndef TIMESYNCDAEMONWINDOWS_H
 #define TIMESYNCDAEMONWINDOWS_H
 
-#ifdef __linux__
+#ifndef __linux__
 
 #include "licensecheckwindows.h"
 #include "ptpclockwindows.h"

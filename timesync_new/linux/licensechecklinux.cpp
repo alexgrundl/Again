@@ -1,5 +1,7 @@
 #include "licensechecklinux.h"
 
+#ifdef __linux__
+
 LicenseCheckLinux::LicenseCheckLinux()
 {
     m_licenseIdentifier = '7';
@@ -176,3 +178,5 @@ uint32_t LicenseCheckLinux::CountSetBits(uint32_t number)
      number = (number & 0x33333333) + ((number >> 2) & 0x33333333);
      return (((number + (number >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
 }
+
+#endif __linux__
