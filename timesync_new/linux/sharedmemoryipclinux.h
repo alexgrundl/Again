@@ -26,7 +26,7 @@
 /**
  * @brief Linux shared memory interface
  */
-class LinuxSharedMemoryIPC {
+class SharedMemoryIPCLinux {
 private:
     int shm_fd;
     char *master_offset_buffer;
@@ -58,11 +58,11 @@ public:
     /**
      * @brief Initializes the internal flags
      */
-    LinuxSharedMemoryIPC();
+    SharedMemoryIPCLinux();
     /**
      * @brief Destroys and unlinks shared memory
      */
-    virtual ~LinuxSharedMemoryIPC();
+    virtual ~SharedMemoryIPCLinux();
 
     /**
      * @brief  Initializes shared memory with DEFAULT_GROUPNAME case arg is null

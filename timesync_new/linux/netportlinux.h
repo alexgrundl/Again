@@ -13,13 +13,13 @@
 #include "inetport.h"
 #include "ptpclocklinux.h"
 
-class LinuxNetPort : public INetPort
+class NetPortLinux : public INetPort
 {
     public:
 
-        LinuxNetPort(char const* const devname);
+        NetPortLinux(char const* const devname);
 
-        ~LinuxNetPort();
+        ~NetPortLinux();
 
         uint64_t GetPDelay();
 

@@ -8,7 +8,7 @@
 #include "ThreadWrapper.h"
 #include "statemachinemanager.h"
 #ifdef __linux
-#include "linuxnetport.h"
+#include "netportlinux.h"
 #else
 #include "windowsnetport.h"
 #endif

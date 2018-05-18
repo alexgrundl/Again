@@ -9,11 +9,11 @@ PortIPC::PortIPC(TimeAwareSystem *timeAwareSystem, SystemPort *port, INetPort *n
     m_timeSystemPrevious = 0;
     m_timeDevicePrevious = 0;
 
-    m_ipc = new LinuxSharedMemoryIPC();
-    m_ipc->init(((LinuxNetPort*)networkPort)->GetInterfaceName(), m_domain);
-    m_ipc->set_if_phc_index(((LinuxNetPort*)networkPort)->GetPtpClockIndex());
+    m_ipc = new SharedMemoryIPCLinux();
+    m_ipc->init(((NetPortLinux*)networkPort)->GetInterfaceName(), m_domain);
+    m_ipc->set_if_phc_index(((NetPortLinux*)networkPort)->GetPtpClockIndex());
 
-    m_ptpClock = ((LinuxNetPort*)networkPort)->GetPtpClock();
+    m_ptpClock = ((NetPortLinux*)networkPort)->GetPtpClock();
 
     m_ipcUpdateTime = m_timeAwareSystem->ReadCurrentTime() + UScaledNs({NS_PER_SEC / 10, 0});
 }

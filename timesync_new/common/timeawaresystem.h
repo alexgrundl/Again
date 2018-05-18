@@ -8,7 +8,7 @@
 
 #include "types.h"
 #include "systemport.h"
-#include "linuxsharedmemoryipc.h"
+#include "sharedmemoryipclinux.h"
 
 class TimeAwareSystem
 {

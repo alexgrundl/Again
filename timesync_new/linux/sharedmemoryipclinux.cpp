@@ -1,8 +1,8 @@
 #ifdef __linux__
 
-#include "linuxsharedmemoryipc.h"
+#include "sharedmemoryipclinux.h"
 
-LinuxSharedMemoryIPC::LinuxSharedMemoryIPC()
+SharedMemoryIPCLinux::SharedMemoryIPCLinux()
 {
     shm_fd = 0;
     err = 0;
@@ -10,14 +10,14 @@ LinuxSharedMemoryIPC::LinuxSharedMemoryIPC()
     domain = 0;
 }
 
-LinuxSharedMemoryIPC::~LinuxSharedMemoryIPC()
+SharedMemoryIPCLinux::~SharedMemoryIPCLinux()
 {
     munmap(master_offset_buffer, SHM_SIZE);
     if(shm_unlink(shm_name.c_str()) != 0)
         logerror("error shm_unlink: %s\n", strerror(errno));
 }
 
-bool LinuxSharedMemoryIPC::init(std::string if_name, unsigned char domain)
+bool SharedMemoryIPCLinux::init(std::string if_name, unsigned char domain)
 {
     this->if_name = if_name;
     this->domain = domain;
@@ -73,7 +73,7 @@ bool LinuxSharedMemoryIPC::init(std::string if_name, unsigned char domain)
     return false;
 }
 
-bool LinuxSharedMemoryIPC::update(int64_t ml_phoffset,
+bool SharedMemoryIPCLinux::update(int64_t ml_phoffset,
     int64_t ls_phoffset,
     FrequencyRatio ml_freqoffset,
     FrequencyRatio ls_freqoffset,
@@ -110,7 +110,7 @@ bool LinuxSharedMemoryIPC::update(int64_t ml_phoffset,
     }
     return true;
 }
-void LinuxSharedMemoryIPC::setpid()
+void SharedMemoryIPCLinux::setpid()
 {
     int buf_offset = 0;
     char *shm_buffer = master_offset_buffer;
@@ -124,7 +124,7 @@ void LinuxSharedMemoryIPC::setpid()
     pthread_mutex_unlock((pthread_mutex_t *) shm_buffer);
 }
 
-void LinuxSharedMemoryIPC::set_ifname(const char* ifname)
+void SharedMemoryIPCLinux::set_ifname(const char* ifname)
 {
 
     int buf_offset = 0;
@@ -137,7 +137,7 @@ void LinuxSharedMemoryIPC::set_ifname(const char* ifname)
     memcpy(ptimedata->ifname, ifname, ARRAY_SIZE(ptimedata->ifname)-1);
     pthread_mutex_unlock((pthread_mutex_t *) shm_buffer);
 }
-void LinuxSharedMemoryIPC::set_if_phc_index(int phc_idx)
+void SharedMemoryIPCLinux::set_if_phc_index(int phc_idx)
 {
     int buf_offset = 0;
     char *shm_buffer = master_offset_buffer;
@@ -150,7 +150,7 @@ void LinuxSharedMemoryIPC::set_if_phc_index(int phc_idx)
 }
 
 
-bool LinuxSharedMemoryIPC::update_grandmaster(
+bool SharedMemoryIPCLinux::update_grandmaster(
     uint8_t gptp_grandmaster_id[],
     uint8_t gptp_domain_number )
 {
@@ -170,7 +170,7 @@ bool LinuxSharedMemoryIPC::update_grandmaster(
     return true;
 }
 
-bool LinuxSharedMemoryIPC::update_network_interface(
+bool SharedMemoryIPCLinux::update_network_interface(
     const uint8_t  clock_identity[],
     uint8_t  priority1,
     uint8_t  clock_class,
@@ -208,7 +208,7 @@ bool LinuxSharedMemoryIPC::update_network_interface(
     return true;
 }
 
-void LinuxSharedMemoryIPC::stop() {
+void SharedMemoryIPCLinux::stop() {
     if( master_offset_buffer != NULL ) {
         munmap( master_offset_buffer, SHM_SIZE );
         shm_unlink( shm_name.c_str() );

@@ -7,7 +7,7 @@
 #include <ifaddrs.h>
 #include <sys/ioctl.h>
 #include "ptpclocklinux.h"
-#include "linuxnetport.h"
+#include "netportlinux.h"
 
 #include "timesyncdaemon.h"
 

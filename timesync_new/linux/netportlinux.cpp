@@ -20,9 +20,9 @@
 #include "types.h"
 #include "commondefs.h"
 #include "ptpmessagebase.h"
-#include "linuxnetport.h"
+#include "netportlinux.h"
 
-LinuxNetPort::LinuxNetPort(char const* const devname)
+NetPortLinux::NetPortLinux(char const* const devname)
 {
     m_PtpClockIndex = -1;
     m_PDelay = 0;
@@ -37,7 +37,7 @@ LinuxNetPort::LinuxNetPort(char const* const devname)
     m_cardType = ReadNetworkCardTypeFromSysFs();
 }
 
-LinuxNetPort::~LinuxNetPort()
+NetPortLinux::~NetPortLinux()
 {
     pal::LockedRegionDelete(m_EventLock);
     pal::SocketDelete(m_GeneralSock);
@@ -46,37 +46,37 @@ LinuxNetPort::~LinuxNetPort()
     delete m_ptpClock;
 }
 
-uint64_t LinuxNetPort::GetPDelay()
+uint64_t NetPortLinux::GetPDelay()
 {
     return m_PDelay;
 }
 
-void LinuxNetPort::SetPDelay(uint64_t pDelay)
+void NetPortLinux::SetPDelay(uint64_t pDelay)
 {
     m_PDelay = pDelay;
 }
 
-bool LinuxNetPort::GetASCapable()
+bool NetPortLinux::GetASCapable()
 {
     return m_asCapable;
 }
 
-void LinuxNetPort::SetASCapable(bool asCapable)
+void NetPortLinux::SetASCapable(bool asCapable)
 {
     m_asCapable = asCapable;
 }
 
-double LinuxNetPort::GetNeighborRatio()
+double NetPortLinux::GetNeighborRatio()
 {
     return m_neighborRatio;
 }
 
-void LinuxNetPort::SetNeighborRatio(double ratio)
+void NetPortLinux::SetNeighborRatio(double ratio)
 {
     m_neighborRatio = ratio;
 }
 
-bool LinuxNetPort::Initialize()
+bool NetPortLinux::Initialize()
 {
     struct ifreq ifr;
     pal::SocketGetHwAddr(m_EventSock, m_IfcName.c_str(), m_MAC, &m_IfcIndex);
@@ -179,7 +179,7 @@ bool LinuxNetPort::Initialize()
     return true;
 }
 
-bool LinuxNetPort::SetRxQueueEnabled(bool settoenabled)
+bool NetPortLinux::SetRxQueueEnabled(bool settoenabled)
 {
     struct packet_mreq mr_8021as;
     memset(&mr_8021as, 0, sizeof(mr_8021as));
@@ -219,12 +219,12 @@ bool LinuxNetPort::SetRxQueueEnabled(bool settoenabled)
     }
 }
 
-uint16_t LinuxNetPort::GetPortNumber()
+uint16_t NetPortLinux::GetPortNumber()
 {
     return m_IfcIndex;
 }
 
-bool LinuxNetPort::SendGenericMessage(PtpMessageBase* Msg)
+bool NetPortLinux::SendGenericMessage(PtpMessageBase* Msg)
 {
     if(IsCarrierSet())
     {
@@ -249,7 +249,7 @@ bool LinuxNetPort::SendGenericMessage(PtpMessageBase* Msg)
     return true;
 }
 
-UScaledNs LinuxNetPort::SendEventMessage(PtpMessageBase* Msg)
+UScaledNs NetPortLinux::SendEventMessage(PtpMessageBase* Msg)
 {
     UScaledNs timestamp = {0, 0};
     if(IsCarrierSet())
@@ -280,7 +280,7 @@ UScaledNs LinuxNetPort::SendEventMessage(PtpMessageBase* Msg)
     return timestamp;
 }
 
-void LinuxNetPort::ReceiveMessage(ReceivePackage* pRet)
+void NetPortLinux::ReceiveMessage(ReceivePackage* pRet)
 {
     if(IsCarrierSet())
     {
@@ -348,41 +348,41 @@ void LinuxNetPort::ReceiveMessage(ReceivePackage* pRet)
     }
 }
 
-void LinuxNetPort::PushRxTime(UScaledNs& ts)
+void NetPortLinux::PushRxTime(UScaledNs& ts)
 {
     m_Timestamps.push_front(ts);
 }
 
-int32_t LinuxNetPort::GetPtpClockIndex()
+int32_t NetPortLinux::GetPtpClockIndex()
 {
     return m_PtpClockIndex;
 }
 
-std::string LinuxNetPort::GetInterfaceName()
+std::string NetPortLinux::GetInterfaceName()
 {
     return m_IfcName;
 }
 
-uint8_t const* LinuxNetPort::GetMAC()
+uint8_t const* NetPortLinux::GetMAC()
 {
     return (uint8_t*)m_MAC;
 }
 
-uint32_t LinuxNetPort::GetRxLinkDelay_ns()
+uint32_t NetPortLinux::GetRxLinkDelay_ns()
 {
     return m_cardType != NETWORK_CARD_TYPE_X540 ? 0 : 750;
 }
-uint32_t LinuxNetPort::GetTxLinkDelay_ns()
+uint32_t NetPortLinux::GetTxLinkDelay_ns()
 {
     return m_cardType != NETWORK_CARD_TYPE_X540 ? 0 : 750;
 }
 
-PtpClock* LinuxNetPort::GetPtpClock()
+PtpClock* NetPortLinux::GetPtpClock()
 {
     return m_ptpClock;
 }
 
-UScaledNs LinuxNetPort::GetLastTxMessage(int timeout_ms)
+UScaledNs NetPortLinux::GetLastTxMessage(int timeout_ms)
 {
     UScaledNs timestamp = {0, 0};
     CTimeMeas ct;
@@ -447,7 +447,7 @@ UScaledNs LinuxNetPort::GetLastTxMessage(int timeout_ms)
     return timestamp;
 }
 
-bool LinuxNetPort::IsCarrierSet()
+bool NetPortLinux::IsCarrierSet()
 {
     int nRead = 0;
     int fdCarrier = open((std::string("/sys/class/net/") + std::string(m_IfcName) + std::string("/carrier")).c_str(), O_RDONLY);
@@ -462,12 +462,12 @@ bool LinuxNetPort::IsCarrierSet()
     return nRead > 0 && val[0] == '1';
 }
 
-NetworkCardType LinuxNetPort::GetNetworkCardType()
+NetworkCardType NetPortLinux::GetNetworkCardType()
 {
     return m_cardType;
 }
 
-NetworkCardType LinuxNetPort::ReadNetworkCardTypeFromSysFs()
+NetworkCardType NetPortLinux::ReadNetworkCardTypeFromSysFs()
 {
     NetworkCardType cardType = NETWORK_CARD_TYPE_UNKNOWN;
     char bufRead[100] = {0};
@@ -514,7 +514,7 @@ NetworkCardType LinuxNetPort::ReadNetworkCardTypeFromSysFs()
     return cardType;
 }
 
-bool LinuxNetPort::IsWireless()
+bool NetPortLinux::IsWireless()
 {
       int sock = -1;
       struct iwreq pwrq;

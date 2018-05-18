@@ -4,9 +4,9 @@
 #ifdef __linux__
 
 #include "statemachinebase.h"
-#include "linuxsharedmemoryipc.h"
+#include "sharedmemoryipclinux.h"
 #include "inetport.h"
-#include "linuxnetport.h"
+#include "netportlinux.h"
 
 class PortIPC : public StateMachineBaseMD
 {
@@ -32,7 +32,7 @@ private:
     PtpClock* m_ptpClock;
 
 
-    LinuxSharedMemoryIPC* m_ipc;
+    SharedMemoryIPCLinux* m_ipc;
 
 
     uint64_t m_timeSystemPrevious;

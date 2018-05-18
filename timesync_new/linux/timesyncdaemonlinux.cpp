@@ -32,7 +32,7 @@ void TimeSyncDaemonLinux::InitalizePorts()
             if (next->ifa_addr && next->ifa_addr->sa_family == AF_PACKET &&
                     (next->ifa_flags & IFF_LOOPBACK) == 0)
             {
-                INetPort* networkPort = new LinuxNetPort(next->ifa_name);
+                INetPort* networkPort = new NetPortLinux(next->ifa_name);
                 if(networkPort->GetNetworkCardType() != NETWORK_CARD_TYPE_UNKNOWN)
                 {
                     networkPort->Initialize();
@@ -52,7 +52,7 @@ void TimeSyncDaemonLinux::InitalizePorts()
                             uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
                             PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
                             m_timeAwareSystems[i]->SetClockIdentity(clockIdentityFromMAC);
-                            m_timeAwareSystems[i]->InitLocalClock(networkPort->GetPtpClock(), ((LinuxNetPort*)networkPort)->GetPtpClockIndex());
+                            m_timeAwareSystems[i]->InitLocalClock(networkPort->GetPtpClock(), ((NetPortLinux*)networkPort)->GetPtpClockIndex());
                         }
                     }
                 }

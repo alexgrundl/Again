@@ -67,11 +67,11 @@ SOURCES += main.cpp \
     c-platform/win/platform_win.cpp \
     c-extensions/ThreadWrapper.cpp \
     c-extensions/TimeMeas.cpp \
-    linux/linuxsharedmemoryipc.cpp \
     linux/ptpclocklinux.cpp \
-    linux/linuxnetport.cpp \
     linux/licensechecklinux.cpp \
     linux/timesyncdaemonlinux.cpp \
+    linux/netportlinux.cpp \
+    linux/sharedmemoryipclinux.cpp \
     windows/licensecheckwindows.cpp \
     windows/windowsnetport.cpp \
     windows/ptpclockwindows.cpp
@@ -137,11 +137,11 @@ HEADERS += \
     common/licensecheck/ustd.h \
     common/licensecheck/byte_order.h \
     common/licensecheck/licensecheck.h \
-    linux/linuxsharedmemoryipc.h \
     linux/ptpclocklinux.h \
-    linux/linuxnetport.h \
     linux/licensechecklinux.h \
     linux/timesyncdaemonlinux.h \
+    linux/netportlinux.h \
+    linux/sharedmemoryipclinux.h \
     windows/ptpclockwindows.h \
     windows/windowsnetport.h \
     windows/licensecheckwindows.h
