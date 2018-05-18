@@ -1,5 +1,7 @@
 #include "timesyncdaemonwindows.h"
 
+#ifndef __linux__
+
 TimeSyncDaemonWindows::TimeSyncDaemonWindows(int nDomains) : TimeSyncDaemon(nDomains)
 {
     m_licenseCheck = new LicenseCheckWindows();
@@ -22,3 +24,5 @@ void TimeSyncDaemonWindows::DeleteNetworkPorts()
         delete m_networkPorts[i];
     m_networkPorts.clear();
 }
+
+#endif //__linux__

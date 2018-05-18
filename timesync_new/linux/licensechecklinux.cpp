@@ -179,4 +179,4 @@ uint32_t LicenseCheckLinux::CountSetBits(uint32_t number)
      return (((number + (number >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
 }
 
-#endif __linux__
+#endif //__linux__

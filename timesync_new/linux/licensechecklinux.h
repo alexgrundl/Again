@@ -42,6 +42,6 @@ private:
     uint32_t CountSetBits(uint32_t number);
 };
 
-#endif __linux__
+#endif //__linux__
 
 #endif // LICENSECHECKLINUX_H
