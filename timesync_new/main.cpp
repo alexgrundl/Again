@@ -12,6 +12,7 @@
 #include "timesyncdaemonwindows.h"
 #endif
 
+#include "ptpconfig.h"
 
 using namespace std;
 
@@ -46,7 +47,7 @@ void waitForSignals()
 #endif
 }
 
-int main()
+int main(int argc, char **argv)
 {
     TimeSyncDaemon* timeSyncDaemon;
 
@@ -56,20 +57,24 @@ int main()
     timeSyncDaemon = new TimeSyncDaemonWindows(2);
 #endif
 
-    if(timeSyncDaemon->LicenseValid())
+    PtpConfig config(timeSyncDaemon);
+    if(config.ParseArgs(argc, argv))
     {
-        timeSyncDaemon->InitalizePorts();
-        timeSyncDaemon->InitializeManagers();
-        timeSyncDaemon->Start();
+        if(timeSyncDaemon->LicenseValid())
+        {
+            timeSyncDaemon->InitalizePorts();
+            timeSyncDaemon->InitializeManagers();
+            timeSyncDaemon->Start();
 
-        waitForSignals();
+            waitForSignals();
+        }
+
+        timeSyncDaemon->Stop();
+//        clockDom0->StopPPS();
+//        delete clockDom0;
+//        delete clockDom1;
     }
-
-    timeSyncDaemon->Stop();
     delete timeSyncDaemon;
-//    clockDom0->StopPPS();
-//    delete clockDom0;
-//    delete clockDom1;
 
     return 0;
 }

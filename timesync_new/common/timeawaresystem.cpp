@@ -622,5 +622,9 @@ void TimeAwareSystem::AddSystemPort(PortIdentity portIdentity)
 SystemPort* TimeAwareSystem::GetSystemPort(int portIndex)
 {
     return portIndex >= 0 && portIndex < (int)m_systemPorts.size() ? m_systemPorts[portIndex] : NULL;
+}
 
+void TimeAwareSystem::SetSystemPriority1(uint8_t priority1)
+{
+    m_systemPriority.identity.priority1 = priority1;
 }

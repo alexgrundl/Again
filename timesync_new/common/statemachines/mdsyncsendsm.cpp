@@ -60,10 +60,7 @@ void MDSyncSendSM::TxSync()
 {
     m_txSyncPtr->SetSendTime(m_networkPort->SendEventMessage(m_txSyncPtr));
 
-//    if(m_txSyncPtr->GetSendTime().ns > 0)
-//        printf("Sync SendTime Port %u: %lu\n", ((NetworkPort*)m_networkPort)->GetPtpClockIndex(), m_txSyncPtr->GetSendTime().ns);
-
-    m_rcvdMDTimestampReceive = true;
+    m_rcvdMDTimestampReceive = m_txSyncPtr->GetSendTime().ns > 0;
 }
 
 void MDSyncSendSM::SetMDSyncSend(MDSyncSend* rcvdMDSyncPtr)
@@ -112,8 +109,10 @@ void MDSyncSendSM::ProcessState()
                 m_rcvdMDTimestampReceive = false;
                 SetFollowUp();
                 TxFollowUp();
-                m_state = STATE_SEND_FOLLOW_UP;
             }
+            else
+                logerror("Couldn't get transmit timestamp of Sync message.");
+            m_state = STATE_SEND_FOLLOW_UP;
             break;
 
         default:

@@ -7,6 +7,7 @@ PtpClockLinux::PtpClockLinux()
     ptpClockRootPath = "/dev/ptp";
     m_clockFD = -1;
     m_ptssType = PTSS_TYPE_SLAVE;
+    m_systemClock = SYSTEM_CLOCK_UNKNOWN;
     m_lock = pal::LockedRegionCreate();
 }
 
@@ -88,7 +89,7 @@ bool PtpClockLinux::GetSystemAndDeviceTime(struct timespec* tsSystem, struct tim
     memset( &offset, 0, sizeof(offset));
     offset.n_samples = PTP_MAX_SAMPLES;
 
-    if( ioctl( m_clockFD, PTP_SYS_OFFSET, &offset ) == -1 )
+    if(!GetSystemAndDeviceTime(&offset))
         return false;
 
     firstTime = &offset.ts[0];
@@ -121,6 +122,33 @@ bool PtpClockLinux::GetSystemAndDeviceTime(struct timespec* tsSystem, struct tim
 
     pal::LockedRegionLeave(m_lock);
     return true;
+}
+
+bool PtpClockLinux::GetSystemAndDeviceTime(struct ptp_sys_offset* offset)
+{
+    if (m_systemClock == SYSTEM_CLOCK_UNKNOWN)
+    {
+        // try to find out, whether b-plus specific ptp ioctl is available
+        // do it once
+        if( ioctl( m_clockFD, PTP_SYS_OFFSET_MONO, offset ) == -1 )
+        {
+            // no such ioctl
+            // errno.h: ENOTTY  25 // Inappropriate ioctl for device
+            if(errno == ENOTTY)
+            {
+                // do default method: gettimeofday/PTP_SYS_OFFSET
+                m_systemClock = SYSTEM_CLOCK_REALTIME;
+            }
+        }
+        else
+        {
+            // looks like kernel supports b-plus ioctl mono raw
+            m_systemClock = SYSTEM_CLOCK_MONOTONIC_RAW;
+            lognotice("Kernel supports PTP_SYS_OFFSET_MONO. Switching to: SYSTEM_CLOCK_MONOTONIC_RAW\n");
+        }
+    }
+
+    return ioctl( m_clockFD, m_systemClock == SYSTEM_CLOCK_MONOTONIC_RAW ? PTP_SYS_OFFSET_MONO : PTP_SYS_OFFSET, offset ) != -1;
 }
 
 PtpClock::PtssType PtpClockLinux::GetPtssType()
@@ -275,7 +303,7 @@ bool PtpClockLinux::ReadExternalTimestamp(struct timespec& tsExtEvent, struct ti
         ssize_t cnt;
 
         cnt = read(m_clockFD, &event, sizeof(event));
-        clock_gettime(CLOCK_REALTIME, &ts);
+        clock_gettime(m_systemClock == SYSTEM_CLOCK_MONOTONIC_RAW ? CLOCK_MONOTONIC_RAW : CLOCK_REALTIME, &ts);
         if (cnt != sizeof(event))
         {
             logerror("Read of external timestamp failed.");
@@ -294,6 +322,12 @@ bool PtpClockLinux::ReadExternalTimestamp(struct timespec& tsExtEvent, struct ti
         }
     }
     return success;
+}
+
+
+PtpClockLinux::SystemClock PtpClockLinux::GetSystemClock()
+{
+    return m_systemClock;
 }
 
 #endif //__linux__

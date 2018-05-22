@@ -36,6 +36,7 @@ public:
     PtpClock* GetPtpClock() {return m_ptpClock;}
     NetworkCardType GetNetworkCardType() {return NETWORK_CARD_TYPE_UNKNOWN;}
     bool IsWireless() {return false;}
+    std::string GetInterfaceName() {return std::string("");}
 //    int GetSpeed() {return -1;}
 
 private:

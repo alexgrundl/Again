@@ -75,7 +75,8 @@ SOURCES += main.cpp \
     windows/licensecheckwindows.cpp \
     windows/ptpclockwindows.cpp \
     windows/timesyncdaemonwindows.cpp \
-    windows/netportwindows.cpp
+    windows/netportwindows.cpp \
+    common/ptpconfig.cpp
 
 HEADERS += \
     common/types/types.h \
@@ -146,7 +147,8 @@ HEADERS += \
     windows/ptpclockwindows.h \
     windows/licensecheckwindows.h \
     windows/timesyncdaemonwindows.h \
-    windows/netportwindows.h
+    windows/netportwindows.h \
+    common/ptpconfig.h
 
 DISTFILES +=
 

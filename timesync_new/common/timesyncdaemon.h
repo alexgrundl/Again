@@ -30,6 +30,9 @@ public:
     void Stop();
 
 
+    TimeAwareSystem* GetTimeAwareSystem(int index);
+
+
     virtual void InitalizePorts() = 0;
 
 

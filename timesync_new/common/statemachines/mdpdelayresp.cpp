@@ -41,8 +41,7 @@ void MDPdelayResp::TxPdelayResp()
     m_txPdelayRespPtr->SetSendTime(m_networkPort->SendEventMessage(m_txPdelayRespPtr));
 //    printf("TxPdelayResp: %lu\n", m_txPdelayRespPtr->GetSendTime().ns);
 
-//    if(m_txPdelayRespPtr->GetSendTime().ns > 0)
-        m_rcvdMDTimestampReceive = true;
+     m_rcvdMDTimestampReceive = m_txPdelayRespPtr->GetSendTime().ns > 0;
 }
 
 void MDPdelayResp::SetPdelayRespFollowUp()
@@ -101,8 +100,10 @@ void MDPdelayResp::ProcessState()
                 m_rcvdMDTimestampReceive = false;
                 SetPdelayRespFollowUp();
                 TxPdelayRespFollowUp();
-                m_state = STATE_WAITING_FOR_PDELAY_REQ;
             }
+            else
+                logerror("Couldn't get transmit timestamp of PDelay response.");
+            m_state = STATE_WAITING_FOR_PDELAY_REQ;
             break;
 
         default:

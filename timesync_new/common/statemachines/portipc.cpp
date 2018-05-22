@@ -10,7 +10,7 @@ PortIPC::PortIPC(TimeAwareSystem *timeAwareSystem, SystemPort *port, INetPort *n
     m_timeDevicePrevious = 0;
 
     m_ipc = new SharedMemoryIPCLinux();
-    m_ipc->init(((NetPortLinux*)networkPort)->GetInterfaceName(), m_domain);
+    m_ipc->init(networkPort->GetInterfaceName(), m_domain);
     m_ipc->set_if_phc_index(((NetPortLinux*)networkPort)->GetPtpClockIndex());
 
     m_ptpClock = ((NetPortLinux*)networkPort)->GetPtpClock();
@@ -79,7 +79,9 @@ void PortIPC::ProcessState()
             break;
         }
 
-        timeBase = GPTP_CLOCK_REALTIME;
+        timeBase = ((PtpClockLinux*)m_ptpClock)->GetSystemClock() == PtpClockLinux::SYSTEM_CLOCK_MONOTONIC_RAW ? GPTP_CLOCK_MONOTONIC_RAW : GPTP_CLOCK_REALTIME;
+
+
         masterClockIdentity =  m_timeAwareSystem->GetSelectedRole(systemPortNumber) == PORT_ROLE_MASTER ?
                     m_timeAwareSystem->GetClockIdentity() : m_timeAwareSystem->GetGmPriority().sourcePortIdentity.clockIdentity;
 

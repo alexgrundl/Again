@@ -200,7 +200,16 @@ void PortRoleSelection::UpdtRolesTree()
     {
         PortRole portRole = m_timeAwareSystem->GetSelectedRole(i);
         if(portRole != PORT_ROLE_DISABLED)
-            lognotice("Domain %u\tPort role %lu, %s", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
+        {
+            if(i > 0)
+            {
+                lognotice("Domain %u\tPort %s: %s", m_timeAwareSystem->GetDomain(), m_ports[i - 1]->GetInterfaceName().c_str(), GetStrPortRole(portRole));
+            }
+            else
+            {
+                lognotice("Domain %u\tPort %lu: %s", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
+            }
+        }
     }
 }
 

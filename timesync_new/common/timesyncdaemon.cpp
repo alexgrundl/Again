@@ -70,3 +70,7 @@ void TimeSyncDaemon::Stop()
         m_portManagers[i]->StopReceiving();
 }
 
+TimeAwareSystem* TimeSyncDaemon::GetTimeAwareSystem(int index)
+{
+    return index >= 0 && index < (int)m_timeAwareSystems.size() ? m_timeAwareSystems[index] : NULL;
+}

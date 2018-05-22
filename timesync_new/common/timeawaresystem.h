@@ -316,6 +316,9 @@ public:
     SystemPort* GetSystemPort(int portIndex);
 
 
+    void SetSystemPriority1(uint8_t priority1);
+
+
     static uint8_t GetDomainToSyntonize();
 
 

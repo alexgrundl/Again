@@ -14,6 +14,8 @@
 #include <string.h>
 #include <limits.h>
 
+#include "types.h"
+
 #include "ptpclock.h"
 #include "platform.h"
 
@@ -28,9 +30,21 @@
 #define ADJ_NANO        0x2000
 #endif
 
+#define PTP_SYS_OFFSET_MONO  _IOW(PTP_CLK_MAGIC, 20, struct ptp_sys_offset)
+
 class PtpClockLinux : public PtpClock
 {
 public:
+
+
+    enum SystemClock
+    {
+        SYSTEM_CLOCK_UNKNOWN=0,
+        SYSTEM_CLOCK_DEFAULT,
+        SYSTEM_CLOCK_REALTIME,        // via ioct: PTP_SYS_OFFSET      : systime: gettimeofday64
+        SYSTEM_CLOCK_MONOTONIC_RAW,   // via ioct: PTP_SYS_OFFSET_MONO : systime: getrawmonotonic64
+    };
+
 
     PtpClockLinux();
 
@@ -86,6 +100,9 @@ public:
     void SetPtssType(PtssType type);
 
 
+    SystemClock GetSystemClock();
+
+
 private:
 
     std::string ptpClockRootPath;
@@ -103,7 +120,13 @@ private:
     pal::SectionLock_t m_lock;
 
 
+    SystemClock m_systemClock;
+
+
     bool SetExternalTimestamp(int pinIndex, bool enable);
+
+
+    bool GetSystemAndDeviceTime(ptp_sys_offset *offset);
 };
 
 #endif //__linux__
