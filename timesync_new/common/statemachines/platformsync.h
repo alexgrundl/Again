@@ -31,6 +31,18 @@ private:
     CThreadWrapper<PlatformSync>* m_portThread;
 
 
+    struct timespec m_tsExtEvent;
+
+
+    struct timespec m_tsSystem;
+
+
+    bool m_syntonize;
+
+
+    bool m_externalTimestampRead;
+
+
     uint32_t ReadTimestamp(bool_t *pbIsRunning, pal::EventHandle_t pWaitHandle);
 };
 

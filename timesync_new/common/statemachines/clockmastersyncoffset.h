@@ -2,6 +2,7 @@
 #define CLOCKMASTERSYNCOFFSET_H
 
 #include "statemachinebase.h"
+#include "timecontrol.h"
 
 class ClockMasterSyncOffset : public StateMachineBase
 {
@@ -34,10 +35,13 @@ private:
     bool m_rcvdSyncReceiptTime;
 
 
-    ExtendedTimestamp m_lastMasterTime;
+    UScaledNs m_lastSyncReceiptLocalTime;
 
 
     ExtendedTimestamp m_lastSyncReceiptTime;
+
+
+    TimeControl m_timeControl;
 };
 
 #endif // CLOCKMASTERSYNCOFFSET_H

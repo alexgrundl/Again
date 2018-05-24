@@ -5,6 +5,10 @@
 LicenseCheckLinux::LicenseCheckLinux()
 {
     m_licenseIdentifier = '7';
+
+    m_ctssEnabled = false;
+    m_ptssEnabled = false;
+    m_timeRelayEnabled = false;
 }
 
 LicenseCheckLinux::~LicenseCheckLinux()
@@ -32,14 +36,16 @@ bool LicenseCheckLinux::LicenseValid()
         if(fd != -1)
         {
             uint32_t invm[64];
+            sha3_ctx ctx;
+            rhash_sha3_256_init(&ctx);
+            unsigned char hashdata[42] = { 0 };
+            unsigned char result[32] = { 0 };
+            uint32_t counter;
+
             read(fd, invm, sizeof(invm));
             close(fd);
 
-            sha3_ctx ctx;
-            rhash_sha3_256_init(&ctx);
-
-            unsigned char hashdata[42] = { 0 };
-            unsigned char result[32] = { 0 };
+            GetFeatures(invm[4]);
 
             //SET MAC to hashdata[0..5]
             hashdata[0] = mac[0];
@@ -82,9 +88,6 @@ bool LicenseCheckLinux::LicenseValid()
 
             rhash_sha3_update(&ctx, hashdata, 42);
             rhash_sha3_final(&ctx, result);
-
-
-            uint32_t counter;
 
             if(invm[5] >= 0x20)
             {
@@ -177,6 +180,28 @@ uint32_t LicenseCheckLinux::CountSetBits(uint32_t number)
      number = number - ((number >> 1) & 0x55555555);
      number = (number & 0x33333333) + ((number >> 2) & 0x33333333);
      return (((number + (number >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+}
+
+bool LicenseCheckLinux::IsCTSSEnabled()
+{
+    return m_ctssEnabled;
+}
+
+bool LicenseCheckLinux::IsPTSSEnabled()
+{
+    return m_ptssEnabled;
+}
+
+bool LicenseCheckLinux::IsTimeRelayEnabled()
+{
+    return m_timeRelayEnabled;
+}
+
+void LicenseCheckLinux::GetFeatures(uint8_t features)
+{
+    m_ctssEnabled = features & FEATURE_CTSS;
+    m_ptssEnabled = features & FEATURE_PTSS;
+    m_timeRelayEnabled = features & FEATURE_TIME_RELAY;
 }
 
 #endif //__linux__

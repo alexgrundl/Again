@@ -7,10 +7,6 @@ ClockSlaveSync::ClockSlaveSync(TimeAwareSystem* timeAwareSystem, ClockMasterSync
     m_rcvdLocalClockTick = false;
     m_clockMasterSyncOffset = clockMasterSyncOffset;
     m_rcvdPSSyncPtr = new PortSyncSync();
-
-    m_lastSyncReceiptTime = {0, 0, 0};
-    m_lastSyncReceiptLocalTime = {0, 0};
-    m_timeControl.SetPtpClock(m_timeAwareSystem->GetLocalClock());
 }
 
 ClockSlaveSync::~ClockSlaveSync()
@@ -65,7 +61,7 @@ void ClockSlaveSync::ProcessState()
             if (m_rcvdPSSync)
             {
                 UScaledNs neighborPropDelay = {0, 0};
-                double neighborRateRatio = 0;
+                double neighborRateRatio = 1.0;
                 UScaledNs delayAsymmetry = {0, 0};
 
                 if(m_rcvdPSSyncPtr->localPortNumber > 0)
@@ -86,19 +82,6 @@ void ClockSlaveSync::ProcessState()
                 m_timeAwareSystem->SetLastGmPhaseChange(m_rcvdPSSyncPtr->lastGmPhaseChange);
                 m_timeAwareSystem->SetLastGmFreqChange(m_rcvdPSSyncPtr->lastGmFreqChange);
                 InvokeApplicationInterfaceFunction (NULL);//ClockTargetPhaseDiscontinuity.result);
-
-                if(m_rcvdPSSyncPtr->localPortNumber > 0)
-                {
-                    SystemPort* systemPort = m_timeAwareSystem->GetSystemPort(m_rcvdPSSyncPtr->localPortNumber - 1);
-                    systemPort->SetRemoteLocalDelta(m_timeAwareSystem->GetSyncReceiptTime() - m_timeAwareSystem->GetSyncReceiptLocalTime());
-                    systemPort->SetRemoteLocalRate(m_lastSyncReceiptLocalTime.ns > 0 && (m_timeAwareSystem->GetSyncReceiptLocalTime() -
-                                                                                         m_lastSyncReceiptLocalTime).ns > 0 ?
-                                (m_timeAwareSystem->GetSyncReceiptTime() - m_lastSyncReceiptTime) / (m_timeAwareSystem->GetSyncReceiptLocalTime() - m_lastSyncReceiptLocalTime) : 1.0);
-                    if(m_timeAwareSystem->GetDomain() == TimeAwareSystem::GetDomainToSyntonize())
-                        m_timeControl.Syntonize(systemPort->GetRemoteLocalDelta(), systemPort->GetRemoteLocalRate(), systemPort->GetCurrentLogSyncInterval());
-                    m_lastSyncReceiptTime = m_timeAwareSystem->GetSyncReceiptTime();
-                    m_lastSyncReceiptLocalTime = m_timeAwareSystem->GetSyncReceiptLocalTime();
-                }
 
                 m_clockMasterSyncOffset->SignalSyncReceiptTimeReceive();
             }

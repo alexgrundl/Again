@@ -4,11 +4,15 @@
 #include <time.h>
 #include <vector>
 #include <string.h>
-#include <ptpclock.h>
 
+#include "ptpclock.h"
 #include "types.h"
 #include "systemport.h"
 #include "sharedmemoryipclinux.h"
+
+#ifdef __linux__
+#include "ptpclocklinux.h"
+#endif
 
 class TimeAwareSystem
 {

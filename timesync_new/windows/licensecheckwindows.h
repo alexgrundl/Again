@@ -15,6 +15,26 @@ public:
 
 
     bool LicenseValid();
+
+
+    bool IsCTSSEnabled();
+
+
+    bool IsPTSSEnabled();
+
+
+    bool IsTimeRelayEnabled();
+
+
+private:
+
+    bool m_ctssEnabled;
+
+
+    bool m_ptssEnabled;
+
+
+    bool m_timeRelayEnabled;
 };
 
 #endif // LICENSECHECKWINDOWS_H

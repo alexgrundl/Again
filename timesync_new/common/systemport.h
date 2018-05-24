@@ -312,18 +312,6 @@ public:
     void IncreasePdelayCount();
 
 
-    ScaledNs GetRemoteLocalDelta();
-
-
-    void SetRemoteLocalDelta(ScaledNs delta);
-
-
-    double GetRemoteLocalRate();
-
-
-    void SetRemoteLocalRate(double rate);
-
-
 private:
 
     /**
@@ -598,12 +586,6 @@ private:
 
 
     uint32_t pdelayCount;
-
-
-    ScaledNs remoteLocalDelta;
-
-
-    double remoteLocalRate;
 };
 
 #endif // SYSTEMPORT_H

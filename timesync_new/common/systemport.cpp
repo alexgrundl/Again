@@ -64,8 +64,6 @@ SystemPort::SystemPort()
     identity.portNumber = 0;
     syncCount = 0;
     pdelayCount = 0;
-    remoteLocalDelta = {0, 0};
-    remoteLocalRate = 1.0;
 }
 
 SystemPort::~SystemPort()
@@ -571,24 +569,4 @@ void SystemPort::SetPdelayCount(uint32_t count)
 void SystemPort::IncreasePdelayCount()
 {
     pdelayCount++;
-}
-
-ScaledNs SystemPort::GetRemoteLocalDelta()
-{
-    return remoteLocalDelta;
-}
-
-void SystemPort::SetRemoteLocalDelta(ScaledNs delta)
-{
-    remoteLocalDelta = delta;
-}
-
-double SystemPort::GetRemoteLocalRate()
-{
-    return remoteLocalRate;
-}
-
-void SystemPort::SetRemoteLocalRate(double rate)
-{
-    remoteLocalRate = rate;
 }

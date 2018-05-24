@@ -265,7 +265,7 @@ bool PtpClockLinux::SetExternalTimestamp(int pinIndex, bool enable)
 
     if(ioctl(m_clockFD, PTP_PIN_SETFUNC, &desc))
     {
-        logwarning("PTP_PIN_SETFUNC SDP%i failed.\n", pinIndex);
+        logwarning("PTP_PIN_SETFUNC SDP%i failed.", pinIndex);
     }
     else
     {

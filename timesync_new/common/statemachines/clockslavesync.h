@@ -5,7 +5,6 @@
 
 #include "statemachinebase.h"
 #include "clockmastersyncoffset.h"
-#include "timecontrol.h"
 
 class ClockSlaveSync : public StateMachineBase
 {
@@ -56,15 +55,6 @@ private:
 
 
     ClockMasterSyncOffset* m_clockMasterSyncOffset;
-
-
-    TimeControl m_timeControl;
-
-
-    ExtendedTimestamp m_lastSyncReceiptTime;
-
-
-    UScaledNs m_lastSyncReceiptLocalTime;
 };
 
 #endif // CLOCKSLAVESYNC_H

@@ -43,15 +43,18 @@ void PortIPC::ProcessState()
         deviceTime = (uint64_t)tsDevice.tv_sec * NS_PER_SEC + (uint64_t)tsDevice.tv_nsec;
         systemTime = (uint64_t)tsSystem.tv_sec * NS_PER_SEC + tsSystem.tv_nsec;
 
-        if(m_timeAwareSystem->GetSelectedRole(systemPortNumber) != PORT_ROLE_MASTER)
+        //if(m_timeAwareSystem->GetSelectedRole(systemPortNumber) != PORT_ROLE_MASTER)
+        if(m_timeAwareSystem->GetSelectedRole(0) == PORT_ROLE_PASSIVE)
         {
-            masterLocalPhaseOffset = m_systemPort->GetRemoteLocalDelta().ns;
-            masterLocalFrequencyOffset = m_systemPort->GetRemoteLocalRate();
+            //Values are inverted because "xtss-monitor" interpretation of "masterLocalPhaseOffset" is "local - master time"
+            //and "masterLocalFrequencyOffset" is "local / master frequency"...
+            masterLocalPhaseOffset = -m_timeAwareSystem->GetClockSourcePhaseOffset().ns;
+            masterLocalFrequencyOffset = m_timeAwareSystem->GetClockSourceFreqOffset();// != 0 ? 1.0 / m_timeAwareSystem->GetClockSourceFreqOffset() : 1.0;
         }
         else
         {
             masterLocalPhaseOffset = 0;
-            masterLocalFrequencyOffset = 1;
+            masterLocalFrequencyOffset = 1.0;
         }
 
         localSystemPhaseOffset = systemTime - deviceTime;

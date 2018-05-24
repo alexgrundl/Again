@@ -197,16 +197,13 @@ UScaledNs TimeAwareSystem::ReadCurrentTime()
     struct timespec ts;
     UScaledNs uscaled;
 
-//    if(m_clockLocal != NULL)
-//        m_clockLocal->GetTime(&ts);
-//    else
-//    {
 #ifdef __linux__
-        clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+//    PtpClockLinux* clockLinux = (PtpClockLinux*)m_clockLocal;
+//    clock_gettime(clockLinux->GetSystemClock() == PtpClockLinux::SYSTEM_CLOCK_MONOTONIC_RAW ? CLOCK_MONOTONIC_RAW : CLOCK_REALTIME, &ts);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
 #else
     //Windows get time function
 #endif
-//    }
 
     uscaled.ns = (uint64_t)ts.tv_sec * 1000000000 + ts.tv_nsec;
     uscaled.ns_frac = 0;

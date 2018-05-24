@@ -91,7 +91,7 @@ int64_t TimeControl::Syntonize(PtpClock *localClock, struct timespec& tsExtEvent
 
 void TimeControl::ControlTimePPS(int64_t offset, uint64_t ppsSlaveTime, uint64_t ppsRootTime)
 {
-    if(m_oldBestSource > 0)
+    if(m_oldBestSource > 0 && ppsRootTime - m_oldBestSource != 0)
     {
         float periodInSec = 0.25;
         float rate = periodInSec * NS_PER_SEC / (ppsRootTime - m_oldBestSource);
