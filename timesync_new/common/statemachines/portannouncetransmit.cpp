@@ -78,8 +78,13 @@ void PortAnnounceTransmit::ProcessState()
                     (m_timeAwareSystem->ReadCurrentTime() < m_announceSendTime) && m_systemPort->IsSelected() && !m_systemPort->GetUpdtInfo())
             {
                 m_systemPort->SetNewInfo(false);
-                TxAnnounce();
-                m_sequenceID++;
+                //Only send the announce message if "time relay" feature is enabled or if we are the grandmaster,
+                //meaning the size of the path trace will be 1.
+                if(m_timeAwareSystem->IsTimeRelayEnabled() || m_timeAwareSystem->GetPathTrace().size() < 2)
+                {
+                    TxAnnounce();
+                    m_sequenceID++;
+                }
                 m_state = STATE_TRANSMIT_ANNOUNCE;
             }
             break;

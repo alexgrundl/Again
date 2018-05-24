@@ -55,6 +55,9 @@ protected:
 
 
     void DeleteManagers();
+
+
+    void SetFeatures(TimeAwareSystem *timeAwareSystem);
 };
 
 #endif // TIMESYNCDAEMON_H

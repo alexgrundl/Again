@@ -85,7 +85,9 @@ TimeAwareSystem::TimeAwareSystem()
 
     m_clockLocal = NULL;
     m_domain = 0;
+    m_ctssEnabled = false;
     m_ptssEnabled = false;
+    m_timeRelayEnabled = false;
 }
 
 TimeAwareSystem::~TimeAwareSystem()
@@ -592,21 +594,6 @@ void TimeAwareSystem::SetLastGmPriority(PriorityVector priority)
     m_lastGmPriority = priority;
 }
 
-bool TimeAwareSystem::IsPtssEnabled()
-{
-    return m_ptssEnabled;
-}
-
-void TimeAwareSystem::EnablePtss()
-{
-    m_ptssEnabled = true;
-}
-
-void TimeAwareSystem::DisablePtss()
-{
-    m_ptssEnabled = false;
-}
-
 void TimeAwareSystem::AddSystemPort(PortIdentity portIdentity)
 {
     SystemPort* port = new SystemPort();
@@ -624,4 +611,34 @@ SystemPort* TimeAwareSystem::GetSystemPort(int portIndex)
 void TimeAwareSystem::SetSystemPriority1(uint8_t priority1)
 {
     m_systemPriority.identity.priority1 = priority1;
+}
+
+bool TimeAwareSystem::IsCTSSEnabled()
+{
+    return m_ctssEnabled;
+}
+
+void TimeAwareSystem::SetCTSSEnabled(bool enable)
+{
+    m_ctssEnabled = enable;
+}
+
+bool TimeAwareSystem::IsPTSSEnabled()
+{
+    return m_ptssEnabled;
+}
+
+void TimeAwareSystem::SetPTSSEnabled(bool enable)
+{
+    m_ptssEnabled = enable;
+}
+
+bool TimeAwareSystem::IsTimeRelayEnabled()
+{
+    return m_timeRelayEnabled;
+}
+
+void TimeAwareSystem::SetTimeRelayEnabled(bool enable)
+{
+    m_timeRelayEnabled = enable;
 }

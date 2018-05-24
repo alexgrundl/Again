@@ -305,13 +305,22 @@ public:
     void SetDomain(uint8_t domain);
 
 
-    bool IsPtssEnabled();
+    bool IsCTSSEnabled();
 
 
-    void EnablePtss();
+    void SetCTSSEnabled(bool enable);
 
 
-    void DisablePtss();
+    bool IsPTSSEnabled();
+
+
+    void SetPTSSEnabled(bool enable);
+
+
+    bool IsTimeRelayEnabled();
+
+
+    void SetTimeRelayEnabled(bool enable);
 
 
     void AddSystemPort(PortIdentity portIdentity);
@@ -574,7 +583,13 @@ private:
     uint8_t m_domain;
 
 
+    bool m_ctssEnabled;
+
+
     bool m_ptssEnabled;
+
+
+    bool m_timeRelayEnabled;
 
 
     static uint8_t s_domainToSyntonize;

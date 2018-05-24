@@ -25,6 +25,7 @@ void TimeSyncDaemon::InitializeManagers()
 
     for (std::vector<TimeAwareSystem*>::size_type i = 0; i < m_timeAwareSystems.size(); ++i)
     {
+        SetFeatures(m_timeAwareSystems[i]);
         m_stateManagers.push_back(new StateMachineManager());
         m_stateManagers[i]->Initialize(m_timeAwareSystems[i], m_networkPorts);
     }
@@ -73,4 +74,11 @@ void TimeSyncDaemon::Stop()
 TimeAwareSystem* TimeSyncDaemon::GetTimeAwareSystem(int index)
 {
     return index >= 0 && index < (int)m_timeAwareSystems.size() ? m_timeAwareSystems[index] : NULL;
+}
+
+void TimeSyncDaemon::SetFeatures(TimeAwareSystem* timeAwareSystem)
+{
+    timeAwareSystem->SetCTSSEnabled(m_licenseCheck->IsCTSSEnabled());
+    timeAwareSystem->SetPTSSEnabled(m_licenseCheck->IsPTSSEnabled());
+    timeAwareSystem->SetTimeRelayEnabled(m_licenseCheck->IsTimeRelayEnabled());
 }
