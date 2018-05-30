@@ -75,8 +75,7 @@ bool NetPortLinux::Initialize()
         info.phc_index = -1;
         strcpy(ifr.ifr_name, m_IfcName.c_str());
         ifr.ifr_data = (char*)&info;
-        pal::DeviceIoCtlWrite(sock, SIOCETHTOOL, &ifr, sizeof(ifr));
-        if(info.phc_index < 0)
+        if(pal::DeviceIoCtlWrite(sock, SIOCETHTOOL, &ifr, sizeof(ifr)) == pal::Failure)
         {
             logerror("failed to contact ETHTOOL");
             return false;
@@ -85,7 +84,7 @@ bool NetPortLinux::Initialize()
         {
             m_PtpClockIndex = info.phc_index;
             m_ptpClock->Open(m_PtpClockIndex);
-            lognotice("found clock as ptp%d", m_PtpClockIndex);
+            //lognotice("found clock as ptp%d", m_PtpClockIndex);
         }
     }
 
@@ -104,7 +103,7 @@ bool NetPortLinux::Initialize()
         ifsock_addr.sll_protocol = htons(PTP_ETHERTYPE);
         if(pal::SocketBindTo(m_EventSock, &ifsock_addr, sizeof(ifsock_addr)))
         {
-            lognotice("added raw socket to port %u", m_IfcIndex);
+            //lognotice("added raw socket to port %u", m_IfcIndex);
         }
         else
         {
@@ -124,12 +123,11 @@ bool NetPortLinux::Initialize()
         if(pal::DeviceIoCtlWrite(m_EventSock, SIOCSHWTSTAMP, &ifr, sizeof(ifr)) == pal::Failure)
         {
             logerror("failed to set HW Timestamping filter");
-            //Check why that fails in Petalinux...
-//            return false;
+            return false;
         }
         else
         {
-            lognotice("set filter for HW Timestamping on PTP%d", m_PtpClockIndex);
+            //lognotice("set filter for HW Timestamping on PTP%d", m_PtpClockIndex);
         }
 
         uint32_t tsflags = 0;
@@ -145,7 +143,7 @@ bool NetPortLinux::Initialize()
         }
         else
         {
-            lognotice("configured Timestamping on PTP%d", m_PtpClockIndex);
+            //lognotice("configured Timestamping on PTP%d", m_PtpClockIndex);
         }
 
         uint32_t option = 1;
@@ -156,7 +154,7 @@ bool NetPortLinux::Initialize()
         }
         else
         {
-            lognotice("activated error queue on PTP%d", m_PtpClockIndex);
+            //lognotice("activated error queue on PTP%d", m_PtpClockIndex);
         }
     }
     return true;
@@ -178,7 +176,7 @@ bool NetPortLinux::SetRxQueueEnabled(bool settoenabled)
 
         if(pal::SocketSetOption(m_EventSock, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr_8021as, sizeof(mr_8021as)))
         {
-            lognotice("added PTP multicast to port %u", m_IfcIndex);
+            //lognotice("added PTP multicast to port %u", m_IfcIndex);
             return true;
         }
         else
@@ -191,7 +189,7 @@ bool NetPortLinux::SetRxQueueEnabled(bool settoenabled)
     {
         if(pal::SocketSetOption(m_EventSock, SOL_PACKET, PACKET_DROP_MEMBERSHIP, &mr_8021as, sizeof(mr_8021as)))
         {
-            lognotice("removed PTP multicast from port %u", m_IfcIndex);
+            //lognotice("removed PTP multicast from port %u", m_IfcIndex);
             return true;
         }
         else

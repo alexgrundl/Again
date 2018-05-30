@@ -10,6 +10,7 @@
 #include <linux/if_packet.h>
 #include <linux/net_tstamp.h>
 #include <net/if.h>
+#include <linux/sockios.h>
 #ifndef __arm__
 #include <linux/wireless.h>
 #endif
@@ -71,9 +72,6 @@ class NetPortLinux : public INetPort
         virtual uint32_t GetRxLinkDelay_ns();
 
         virtual uint32_t GetTxLinkDelay_ns();
-
-        static const uint32_t SIOCETHTOOL = 0x8946;
-        static const uint32_t SIOCSHWTSTAMP	= 0x89b0;
 
 protected:
 

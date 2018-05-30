@@ -92,6 +92,18 @@ void SiteSyncSync::ProcessState()
             {
                 PortSyncSync* rcvdPSSync;
                 m_rcvdPSSyncPtrs.pop_front(rcvdPSSync);
+
+                //Decision if the message should be given to the clock slave and port sync send state machines.
+                //Messages can come from two sources:
+                //
+                //-- ClockMasterSyncSend: The message is given to the next state machines only if the selected role
+                //of port 0 is "Slave". This would mean that our time aware system is the grandmaster as the role
+                //of port 0 is only "Slave" when no other port has the role "Slave"!
+                //
+                //-- PortSyncSyncReceive: We got a sync message from another system. Forward this message to all
+                //other PortSyncSyncSend state machines. These machines will then decide if the message should be
+                //sent from their respective port, namely if their port role is "Master". Do also forward this message
+                //to the clock slave state machine, so that our system can calculate the domain time.
                 if(m_timeAwareSystem->GetSelectedRole(rcvdPSSync->localPortNumber) == PORT_ROLE_SLAVE)
                 {
                     SetPSSyncSend(rcvdPSSync);

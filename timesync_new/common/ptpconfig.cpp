@@ -9,13 +9,17 @@ void PtpConfig::PrintUsage( char *arg0 )
 {
     fprintf( stderr,
             "%s "
-            "[-R <priority 1>] "
+            "[-P <priority>] "
+            "[-P0 <priority>] "
+            "[-P1 <priority>] "
 //            "[-D <10g_tx_delay,10g_rx_delay,gb_tx_delay,gb_rx_delay,mb_tx_delay,mb_rx_delay>] "
             "\n",
             arg0 );
     fprintf
         ( stderr,
-          "\t-R <priority 1> priority 1 value\n"
+          "\t-P <priority> priority value for all domains\n"
+          "\t-P0 <priority> priority value for domain 0\n"
+          "\t-P1 <priority> priority value for domain 1\n"
 //          "\t-D Phy Delay <10g_tx_delay,10g_rx_delay,gb_tx_delay,gb_rx_delay,mb_tx_delay,mb_rx_delay>\n"
         );
 }
@@ -30,11 +34,15 @@ bool PtpConfig::ParseArgs(int argc, char** argv)
 
         if( argv[i][0] == '-' )
         {
-            if( strcmp(argv[i] + 1,  "R") == 0 )
+            if( strcmp(argv[i] + 1,  "P") == 0 ||
+                strcmp(argv[i] + 1,  "P0") == 0 ||
+                strcmp(argv[i] + 1,  "P1") == 0)
             {
+                bool setPriority0 = strcmp(argv[i] + 1,  "P") == 0 || strcmp(argv[i] + 1,  "P0") == 0;
+                bool setPriority1 = strcmp(argv[i] + 1,  "P") == 0 || strcmp(argv[i] + 1,  "P1") == 0;
                 if( i+1 >= argc )
                 {
-                    printf( "Priority 1 value must be specified on "
+                    printf( "Priority value must be specified on "
                             "command line, using default value\n" );
                 }
                 else
@@ -48,7 +56,10 @@ bool PtpConfig::ParseArgs(int argc, char** argv)
                     }
                     else
                     {
-                        m_timeSyncDaemon->GetTimeAwareSystem(0)->SetSystemPriority1(tmp);
+                        if(setPriority0)
+                            m_timeSyncDaemon->GetTimeAwareSystem(0)->SetSystemPriority1(tmp);
+                        if(setPriority1)
+                            m_timeSyncDaemon->GetTimeAwareSystem(1)->SetSystemPriority1(tmp);
                     }
                 }
             }

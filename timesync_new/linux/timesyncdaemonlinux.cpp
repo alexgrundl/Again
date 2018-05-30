@@ -45,7 +45,7 @@ void TimeSyncDaemonLinux::InitalizePorts()
                         portIdentity.portNumber = m_networkPorts.size();
                         m_timeAwareSystems[i]->AddSystemPort(portIdentity);
 
-                        lognotice("Sending on interface: %s", next->ifa_name);
+                        lognotice("Domain %u - Sending on interface: %s", m_timeAwareSystems[i]->GetDomain(), next->ifa_name);
 
 #ifdef __arm__
                         memcpy(ifnameLicense, next->ifa_name, IFNAMSIZ);
@@ -53,7 +53,7 @@ void TimeSyncDaemonLinux::InitalizePorts()
 
                         if(strcmp(ifnameLicense, next->ifa_name) == 0)
                         {
-                            lognotice("Main ethernet interface: %s", next->ifa_name);
+                            lognotice("Domain %u - Main ethernet interface: %s", m_timeAwareSystems[i]->GetDomain(), next->ifa_name);
                             uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
                             PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
                             m_timeAwareSystems[i]->SetClockIdentity(clockIdentityFromMAC);
