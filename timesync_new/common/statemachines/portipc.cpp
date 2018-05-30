@@ -85,8 +85,7 @@ void PortIPC::ProcessState()
         timeBase = ((PtpClockLinux*)m_ptpClock)->GetSystemClock() == PtpClockLinux::SYSTEM_CLOCK_MONOTONIC_RAW ? GPTP_CLOCK_MONOTONIC_RAW : GPTP_CLOCK_REALTIME;
 
 
-        masterClockIdentity =  m_timeAwareSystem->GetSelectedRole(systemPortNumber) == PORT_ROLE_MASTER ?
-                    m_timeAwareSystem->GetClockIdentity() : m_timeAwareSystem->GetGmPriority().sourcePortIdentity.clockIdentity;
+        masterClockIdentity =  m_timeAwareSystem->GetGmPriority().identity.clockIdentity;
 
         m_ipc->update(masterLocalPhaseOffset, localSystemPhaseOffset, masterLocalFrequencyOffset, localSystemFrequencyOffset, deviceTime, 0,
                      m_systemPort->GetPdelayCount(), portState, m_systemPort->GetAsCapable(), timeBase, m_systemPort->GetNeighborPropDelay().ns);
