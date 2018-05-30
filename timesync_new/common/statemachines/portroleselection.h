@@ -2,6 +2,8 @@
 #define PORTROLESELECTION_H
 
 #include <memory>
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
 
 #include "statemachinebase.h"
 #include "ptpmessageannounce.h"

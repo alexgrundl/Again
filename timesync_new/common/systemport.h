@@ -1,6 +1,7 @@
 #ifndef SYSTEMPORT_H
 #define SYSTEMPORT_H
 
+#define __STDC_LIMIT_MACROS
 #include "types.h"
 #include "ptpmessageannounce.h"
 

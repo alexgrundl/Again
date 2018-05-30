@@ -3,8 +3,15 @@
 TimeControl::TimeControl()
 {
     m_ptpClock = NULL;
+
+//Different time control parameters for Brick (no "arm") and MDI ("arm")
+#ifndef __arm__
     m_integral = 0.0002;
     m_proportional = 0.5;
+#else
+    m_integral = 0.00003;
+    m_proportional = 1;
+#endif
 
     m_oldBestSource = 0;
     m_frequencyIntergral = 0;
@@ -22,23 +29,25 @@ void TimeControl::Syntonize(ScaledNs masterLocalOffset, double remoteLocalRate, 
 {
     if(m_ptpClock != NULL)
     {
-        if(abs(masterLocalOffset.ns) >= NS_PER_SEC / 1000)
+        if(abs(masterLocalOffset.ns) >= NS_PER_SEC / 100)
         {
             m_ptpClock->AdjustPhase(masterLocalOffset.ns);
 
             //m_ptpClock->StopPPS();
+#ifndef __arm__
             if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_ROOT)
                 m_ptpClock->StartPPS();
+#endif
         }
         else
         {
             float syncPerSec = 1.0 / pow(2, logSyncPerSec);
             m_ppm += (m_integral * syncPerSec * masterLocalOffset.ns) + m_proportional * (remoteLocalRate - 1.0)*1000000;
 
-            if(m_ppm < -250.0)
-                m_ppm = -250.0;
-            if(m_ppm > 250.0)
-                m_ppm = 250.0;
+            if(m_ppm < -2500.0)
+                m_ppm = -2500.0;
+            if(m_ppm > 2500.0)
+                m_ppm = 2500.0;
 
             //printf("PPM: %f\n", ppm);
             //printf("remoteLocalRate: %f\n", remoteLocalRate);
@@ -53,7 +62,7 @@ int64_t TimeControl::Syntonize(PtpClock *localClock, struct timespec& tsExtEvent
     uint64_t nsExtEvent, nsDevice, nsOffsetSystem;
     int64_t nsOffset = -1;
     int64_t remainder;
-    float periodInSec = 0.25;
+    float periodInSec = 0.125;
 
     localClock->GetSystemAndDeviceTime(&tsSystem, &tsDevice);
 

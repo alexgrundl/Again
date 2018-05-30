@@ -1,25 +1,5 @@
 #ifdef __linux__
 
-#include "netport.h"
-#include "platform.h"
-
-#include <stdio.h>
-#include <getopt.h>
-#include <string.h>
-#include <stdlib.h>
-#include <dlfcn.h>
-#include <deque>
-
-#include <net/if.h>
-#include <net/if_arp.h>
-#include <linux/if_packet.h>
-#include <linux/ethtool.h>
-#include <linux/net_tstamp.h>
-
-#include "TimeMeas.h"
-#include "types.h"
-#include "commondefs.h"
-#include "ptpmessagebase.h"
 #include "netportlinux.h"
 
 NetPortLinux::NetPortLinux(char const* const devname)
@@ -92,9 +72,11 @@ bool NetPortLinux::Initialize()
         pal::Socket_t sock = pal::SocketCreate(AF_UNIX, SOCK_DGRAM, 0);
 
         info.cmd = ETHTOOL_GET_TS_INFO;
+        info.phc_index = -1;
         strcpy(ifr.ifr_name, m_IfcName.c_str());
         ifr.ifr_data = (char*)&info;
-        if(pal::DeviceIoCtlWrite(sock, SIOCETHTOOL, &ifr, sizeof(ifr)) == pal::Failure)
+        pal::DeviceIoCtlWrite(sock, SIOCETHTOOL, &ifr, sizeof(ifr));
+        if(info.phc_index < 0)
         {
             logerror("failed to contact ETHTOOL");
             return false;
@@ -142,7 +124,8 @@ bool NetPortLinux::Initialize()
         if(pal::DeviceIoCtlWrite(m_EventSock, SIOCSHWTSTAMP, &ifr, sizeof(ifr)) == pal::Failure)
         {
             logerror("failed to set HW Timestamping filter");
-            return false;
+            //Check why that fails in Petalinux...
+//            return false;
         }
         else
         {
@@ -331,6 +314,7 @@ void NetPortLinux::ReceiveMessage(ReceivePackage* pRet)
                         UScaledNs timestamp;
                         timestamp.ns = (uint64_t)ts_device->tv_sec * NS_PER_SEC + ts_device->tv_nsec;
                         timestamp.ns -= GetRxLinkDelay_ns();
+                        timestamp.ns_frac = 0;
                         pPackage->SetTimestamp(timestamp);
                         //pRet->GetTimestamp(false)->Correct(-(int32_t)GetRxLinkDelay_ns());
                         pPackage->SetValid();
@@ -346,11 +330,6 @@ void NetPortLinux::ReceiveMessage(ReceivePackage* pRet)
             }
         }
     }
-}
-
-void NetPortLinux::PushRxTime(UScaledNs& ts)
-{
-    m_Timestamps.push_front(ts);
 }
 
 int32_t NetPortLinux::GetPtpClockIndex()
@@ -370,11 +349,11 @@ uint8_t const* NetPortLinux::GetMAC()
 
 uint32_t NetPortLinux::GetRxLinkDelay_ns()
 {
-    return m_cardType != NETWORK_CARD_TYPE_X540 ? 0 : 750;
+    return m_cardType == NETWORK_CARD_TYPE_I210 ? 0 : 750;
 }
 uint32_t NetPortLinux::GetTxLinkDelay_ns()
 {
-    return m_cardType != NETWORK_CARD_TYPE_X540 ? 0 : 750;
+    return m_cardType == NETWORK_CARD_TYPE_I210 ? 0 : 750;
 }
 
 PtpClock* NetPortLinux::GetPtpClock()
@@ -473,6 +452,8 @@ NetworkCardType NetPortLinux::ReadNetworkCardTypeFromSysFs()
     char bufRead[100] = {0};
     std::string deviceIDPath = std::string("/sys/class/net/") + m_IfcName + std::string("/device/device");
     std::string vendorIDPath = std::string("/sys/class/net/") + m_IfcName + std::string("/device/vendor");
+
+#ifndef __arm__
     int fdVendorID = open(vendorIDPath.c_str(), O_RDONLY);
 
     int fdDeviceID;
@@ -510,32 +491,37 @@ NetworkCardType NetPortLinux::ReadNetworkCardTypeFromSysFs()
     else
         logerror("Couldn't open path %s.", vendorIDPath.c_str());
 
+#else
+    cardType = NETWORK_CARD_TYPE_AXI_10G;
+#endif
 
     return cardType;
 }
 
 bool NetPortLinux::IsWireless()
 {
-      int sock = -1;
-      struct iwreq pwrq;
-      memset(&pwrq, 0, sizeof(pwrq));
-      strncpy(pwrq.ifr_name, m_IfcName.c_str(), IFNAMSIZ);
+#ifndef __arm__
+    int sock = -1;
+    struct iwreq pwrq;
+    memset(&pwrq, 0, sizeof(pwrq));
+    strncpy(pwrq.ifr_name, m_IfcName.c_str(), IFNAMSIZ);
 
-      if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-      {
-        perror("socket");
-        return false;
-      }
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    {
+    perror("socket");
+    return false;
+    }
 
-      if (ioctl(sock, SIOCGIWNAME, &pwrq) != -1)
-      {
-        close(sock);
-        return true;
-      }
+    if (ioctl(sock, SIOCGIWNAME, &pwrq) != -1)
+    {
+    close(sock);
+    return true;
+    }
 
-      close(sock);
+    close(sock);
+#endif
 
-      return false;
+    return false;
 }
 
 //int LinuxNetPort::GetSpeed()

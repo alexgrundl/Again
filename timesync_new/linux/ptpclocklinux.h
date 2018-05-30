@@ -13,6 +13,7 @@
 #include <sys/ioctl.h>
 #include <string.h>
 #include <limits.h>
+#include <syscall.h>
 
 #include "types.h"
 

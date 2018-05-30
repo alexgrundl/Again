@@ -35,7 +35,9 @@ double ClockMasterSyncOffset::ComputeClockSourceFreqOffset()
         if(diffLocal > NS_PER_SEC)
         {
             lognotice("Time jump detected");
+#ifndef __arm__
             m_timeAwareSystem->GetLocalClock()->StartPPS();
+#endif
         }
     }
 

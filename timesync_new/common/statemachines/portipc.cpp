@@ -60,7 +60,7 @@ void PortIPC::ProcessState()
         localSystemPhaseOffset = systemTime - deviceTime;
 
         if(m_timeSystemPrevious > 0 && m_timeDevicePrevious > 0 && systemTime - m_timeSystemPrevious > 0)
-            localSystemFrequencyOffset = (deviceTime - m_timeDevicePrevious) / (systemTime - m_timeSystemPrevious);
+            localSystemFrequencyOffset = (float)(deviceTime - m_timeDevicePrevious) / (float)(systemTime - m_timeSystemPrevious);
         else
             localSystemFrequencyOffset = 1.0;
 

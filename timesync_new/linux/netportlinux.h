@@ -5,10 +5,18 @@
 
 #include <deque>
 #include <ifaddrs.h>
+#include <linux/ethtool.h>
+#include <sys/socket.h>
+#include <linux/if_packet.h>
+#include <linux/net_tstamp.h>
+#include <net/if.h>
+#ifndef __arm__
 #include <linux/wireless.h>
+#endif
 
 #include "types.h"
 #include "platform.h"
+#include "TimeMeas.h"
 #include "receivepackage.h"
 #include "inetport.h"
 #include "ptpclocklinux.h"
@@ -44,8 +52,6 @@ class NetPortLinux : public INetPort
         UScaledNs SendEventMessage(PtpMessageBase* Msg);
 
         void ReceiveMessage(ReceivePackage* pRet);
-
-        virtual void PushRxTime(UScaledNs& ts);
 
         int32_t GetPtpClockIndex();
 

@@ -372,11 +372,13 @@ void TimeAwareSystem::InitLocalClock(PtpClock *clock, int clockIndex)
 #endif
 
     m_clockLocal->SetTime(&ts_workingClock);
+#ifndef __arm__
     if(m_domain == 0)
     {
         //m_clockLocal->StopPPS();
         m_clockLocal->StartPPS();
     }
+#endif
 }
 
 PtpClock* TimeAwareSystem::GetLocalClock()

@@ -47,7 +47,8 @@ void ClockMasterSyncSend::SetPSSyncCMSS(double gmRateRatio)
 
 void ClockMasterSyncSend::TxPSSyncCMSS()
 {
-    m_siteSyncSync->SetSync(m_txPSSyncPtr);
+    if(m_timeAwareSystem->IsGmPresent())
+        m_siteSyncSync->SetSync(m_txPSSyncPtr);
 }
 
 void ClockMasterSyncSend::ProcessState()

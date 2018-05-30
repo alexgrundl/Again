@@ -1,6 +1,7 @@
 #ifndef TIMEAWARESYSTEM_H
 #define TIMEAWARESYSTEM_H
 
+#define __STDC_LIMIT_MACROS
 #include <time.h>
 #include <vector>
 #include <string.h>

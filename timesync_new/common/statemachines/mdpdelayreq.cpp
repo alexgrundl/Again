@@ -89,6 +89,10 @@ UScaledNs MDPdelayReq::ComputePropTime()
     localDelta = t4 - t1;
     remoteDelta = t3 - t2;
 
+    //Convert the remote - delta to our time base if we have a valid neighbor rate ratio.
+    if(m_neighborRateRatioValid)
+        remoteDelta *= 1.0 / m_systemPort->GetNeighborRateRatio();
+
     if(localDelta >= remoteDelta)
         tsPropTime = (localDelta - remoteDelta) / 2;
     else
@@ -97,13 +101,13 @@ UScaledNs MDPdelayReq::ComputePropTime()
         tsPropTime.ns = 0;
     }
 
-    if(m_neighborRateRatioValid)
-        tsPropTime *= m_systemPort->GetNeighborRateRatio();
+//    if(m_neighborRateRatioValid)
+//        tsPropTime *= m_systemPort->GetNeighborRateRatio();
 
     propTime.ns = tsPropTime.sec * NS_PER_SEC + tsPropTime.ns;
     propTime.ns_frac = 0;
 
-    //printf("PropTime port %i: %lu\n", m_portGlobal->identity.portNumber, propTime.ns);
+    //printf("PropTime port %s: %lu\n", m_networkPort->GetInterfaceName().c_str(), propTime.ns);
 
     return propTime;
 }

@@ -16,7 +16,7 @@ void PortAnnounceTransmit::TxAnnounce()
 {
     PortIdentity portIdentity;
 
-    memcpy(portIdentity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH);
+    memcpy(portIdentity.clockIdentity, m_systemPort->GetIdentity().clockIdentity, CLOCK_ID_LENGTH);
     portIdentity.portNumber = m_systemPort->GetIdentity().portNumber;
     m_txAnnounceMessage->SetSourcePortIdentity(&portIdentity);
 
@@ -78,9 +78,11 @@ void PortAnnounceTransmit::ProcessState()
                     (m_timeAwareSystem->ReadCurrentTime() < m_announceSendTime) && m_systemPort->IsSelected() && !m_systemPort->GetUpdtInfo())
             {
                 m_systemPort->SetNewInfo(false);
-                //Only send the announce message if "time relay" feature is enabled or if we are the grandmaster,
+                //Only send the announce message if our system is grandmaster - capable (priority1 < 255)
+                //and if "time relay" feature is enabled or if we are the grandmaster,
                 //meaning the size of the path trace will be 1.
-                if(m_timeAwareSystem->IsTimeRelayEnabled() || m_timeAwareSystem->GetPathTrace().size() < 2)
+                if(m_timeAwareSystem->IsGmPresent() &&
+                        (m_timeAwareSystem->IsTimeRelayEnabled() || m_timeAwareSystem->GetPathTrace().size() < 2))
                 {
                     TxAnnounce();
                     m_sequenceID++;

@@ -54,17 +54,14 @@ void PtpClockLinux::SetTime(struct timespec* ts)
 
 void PtpClockLinux::AdjustPhase(int64_t nanoseconds)
 {
-//    struct timespec tsOld, tsNew;
     struct timex tx;
     tx.modes = ADJ_SETOFFSET | ADJ_NANO;
 
     tx.time.tv_sec = nanoseconds > 0 ? nanoseconds / NS_PER_SEC : nanoseconds / NS_PER_SEC - 1;
     tx.time.tv_usec = nanoseconds > 0 ? nanoseconds % NS_PER_SEC : (nanoseconds % NS_PER_SEC) + NS_PER_SEC;
 
-//    GetTime(&tsOld);
-    clock_adjtime(FD_TO_CLOCKID(m_clockFD), &tx);
-//    GetTime(&tsNew);
-//    GetTime(&tsNew);
+    syscall(__NR_clock_adjtime, FD_TO_CLOCKID(m_clockFD), &tx);
+    //clock_adjtime(FD_TO_CLOCKID(m_clockFD), &tx);
 }
 
 void PtpClockLinux::AdjustFrequency(double ppm)
@@ -74,7 +71,8 @@ void PtpClockLinux::AdjustFrequency(double ppm)
     tx.freq = long(ppm) << 16;
     tx.freq += long(fmodf(ppm, 1.0) * 65536.0);
 
-    clock_adjtime(FD_TO_CLOCKID(m_clockFD), &tx);
+    syscall(__NR_clock_adjtime, FD_TO_CLOCKID(m_clockFD), &tx);
+    //clock_adjtime(FD_TO_CLOCKID(m_clockFD), &tx);
 }
 
 bool PtpClockLinux::GetSystemAndDeviceTime(struct timespec* tsSystem, struct timespec* tsDevice)

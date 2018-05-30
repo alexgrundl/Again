@@ -47,8 +47,13 @@ void TimeSyncDaemonLinux::InitalizePorts()
 
                         lognotice("Sending on interface: %s", next->ifa_name);
 
+#ifdef __arm__
+                        memcpy(ifnameLicense, next->ifa_name, IFNAMSIZ);
+#endif
+
                         if(strcmp(ifnameLicense, next->ifa_name) == 0)
                         {
+                            lognotice("Main ethernet interface: %s", next->ifa_name);
                             uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
                             PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
                             m_timeAwareSystems[i]->SetClockIdentity(clockIdentityFromMAC);

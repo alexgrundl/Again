@@ -86,7 +86,7 @@ void SiteSyncSync::ProcessState()
     }
     else
     {
-        if(m_rcvdPSSync &&  m_timeAwareSystem->IsGmPresent())
+        if(m_rcvdPSSync)// &&  m_timeAwareSystem->IsGmPresent())
         {
             while(m_rcvdPSSyncPtrs.size() > 0)
             {
