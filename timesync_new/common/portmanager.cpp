@@ -35,23 +35,28 @@ uint32_t PortManager::Receive(bool_t* pbIsRunning, pal::EventHandle_t pWaitHandl
 
     while(*pbIsRunning)
     {
-        dwWaitResult = pal::EventWait(pWaitHandle, 20);
-        if(dwWaitResult == pal::EventWaitTimeout)
+        if(m_networkPort->IsUpAndConnected())
         {
-            ReceivePackage package(128);
-            m_networkPort->ReceiveMessage(&package);
-            if(package.IsValid())
+            dwWaitResult = pal::EventWait(pWaitHandle, 20);
+            if(dwWaitResult == pal::EventWaitTimeout)
             {
-                for (std::vector<StateMachineManager*>::size_type i = 0; i < m_stateMachineManagers.size(); ++i)
+                ReceivePackage package(128);
+                m_networkPort->ReceiveMessage(&package);
+                if(package.IsValid())
                 {
-                    m_stateMachineManagers[i]->ProcessPackage(m_portIndex, &package);
+                    for (std::vector<StateMachineManager*>::size_type i = 0; i < m_stateMachineManagers.size(); ++i)
+                    {
+                        m_stateMachineManagers[i]->ProcessPackage(m_portIndex, &package);
+                    }
                 }
+            }
+            else
+            {
+                pal::ms_sleep(10);
             }
         }
         else
-        {
-            pal::ms_sleep(10);
-        }
+            pal::ms_sleep(1000);
     }
 
     return 0;

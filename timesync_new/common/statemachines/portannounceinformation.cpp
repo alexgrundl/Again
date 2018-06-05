@@ -32,6 +32,8 @@ PortAnnounceInformation::MasterInfo PortAnnounceInformation::RcvInfo(PtpMessageA
     m_messagePriority.stepsRemoved = rcvdAnnouncePtr->GetStepsRemoved();
     m_messagePriority.sourcePortIdentity = rcvdAnnouncePtr->GetSourcePortIdentity();
 
+    m_messagePriority.portNumber = m_systemPort->GetIdentity().portNumber;
+
     /* if the received message conveys the port role MasterPort.....?????????????????????? */
 //    if(m_timeAwareSystem->selectedRole[m_portGlobal->thisPort] == PORT_ROLE_MASTER)
 //    {

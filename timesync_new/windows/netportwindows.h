@@ -37,6 +37,7 @@ public:
     NetworkCardType GetNetworkCardType() {return NETWORK_CARD_TYPE_UNKNOWN;}
     bool IsWireless() {return false;}
     std::string GetInterfaceName() {return std::string("");}
+    bool IsUpAndConnected() {return true;}
 //    int GetSpeed() {return -1;}
 
 private:

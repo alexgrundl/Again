@@ -103,10 +103,10 @@ void PortRoleSelection::UpdtRolesTree()
         PriorityVector portMasterPriority;
         portMasterPriority.identity = m_timeAwareSystem->GetGmPriority().identity;
         portMasterPriority.stepsRemoved = m_timeAwareSystem->GetGmPriority().stepsRemoved;
-        memcpy(portMasterPriority.sourcePortIdentity.clockIdentity, m_timeAwareSystem->GetSystemPriority().sourcePortIdentity.clockIdentity,
+        memcpy(portMasterPriority.sourcePortIdentity.clockIdentity, m_timeAwareSystem->GetClockIdentity(),
                CLOCK_ID_LENGTH);
         portMasterPriority.sourcePortIdentity.portNumber = port->GetIdentity().portNumber;
-        portMasterPriority.portNumber = port->GetMasterPriority().portNumber;
+        portMasterPriority.portNumber = port->GetIdentity().portNumber;
         port->SetMasterPriority(portMasterPriority);
     }
 

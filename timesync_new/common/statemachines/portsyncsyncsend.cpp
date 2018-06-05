@@ -37,7 +37,22 @@ PortSyncSyncSend::~PortSyncSyncSend()
 
 void PortSyncSyncSend::SetMDSync()
 {
-    if(memcmp(m_lastSourcePortIdentity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH) == 0)
+    /*  The standard says:
+        "sourcePortIdentity is set to the portIdentity of this port if the clockIdentity member of
+        lastSourcePortIdentity (see 10.2.11.1.3) is equal to thisClock (see 10.2.3.22); otherwise, it is set to
+        lastSourcePortIdentity"
+        But if we do that and are forwarding a Sync message received from another system we'd have the source port identity of
+        the port who received this Sync message. We do not want this because:
+
+        - If another system, where our daemon is running, is connected to this port the "PortSyncSyncReceive" state machine
+        of this system won't forward this message to the "SiteSyncSync" state machine because the port number of the messages
+        source port identity wouldn't equal the port identity of the grandmaster port priority (set in "PortRoleSelection").
+        Thus, no synchronization would be done.
+
+        - The current GPTP - Windows - Daemon doesn't do this, too. So, as there haven't been any complaints about this
+        we want the same behavior.
+    */
+    if(true)//memcmp(m_lastSourcePortIdentity.clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH) == 0)
     {
         m_txMDSyncSendPtr->sourcePortIdentity = m_systemPort->GetIdentity();
     }
@@ -146,6 +161,8 @@ void PortSyncSyncSend::ExecuteSendMDSyncState()
         m_lastGmTimeBaseIndicator = m_rcvdPSSyncPtr->gmTimeBaseIndicator;
         m_lastGmPhaseChange = m_rcvdPSSyncPtr->lastGmPhaseChange;
         m_lastGmFreqChange = m_rcvdPSSyncPtr->lastGmFreqChange;
+
+        //missing in the standard...
         m_lastSourcePortIdentity = m_rcvdPSSyncPtr->sourcePortIdentity;
         m_lastDomain = m_rcvdPSSyncPtr->domain;
     }

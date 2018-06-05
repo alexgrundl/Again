@@ -37,6 +37,7 @@ class INetPort
     virtual NetworkCardType GetNetworkCardType() = 0;
     virtual bool IsWireless() = 0;
     virtual std::string GetInterfaceName() = 0;
+    virtual bool IsUpAndConnected() = 0;
 //    virtual int GetSpeed() = 0;
     virtual ~INetPort(){}
   protected:

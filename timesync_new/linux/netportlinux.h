@@ -65,6 +65,9 @@ class NetPortLinux : public INetPort
 
         bool IsWireless();
 
+
+        bool IsUpAndConnected();
+
 //        int GetSpeed();
 
         virtual uint8_t const* GetMAC();

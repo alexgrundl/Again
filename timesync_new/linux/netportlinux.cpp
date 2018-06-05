@@ -522,6 +522,11 @@ bool NetPortLinux::IsWireless()
     return false;
 }
 
+bool NetPortLinux::IsUpAndConnected()
+{
+    return IsCarrierSet();
+}
+
 //int LinuxNetPort::GetSpeed()
 //{
 //    struct ifreq ifr;
