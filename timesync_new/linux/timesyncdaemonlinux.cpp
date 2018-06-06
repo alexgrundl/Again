@@ -16,7 +16,8 @@ TimeSyncDaemonLinux::~TimeSyncDaemonLinux()
 
 void TimeSyncDaemonLinux::InitalizePorts()
 {
-    char macLicense[ETH_ALEN], ifnameLicense[IFNAMSIZ];
+    uint8_t macLicense[ETH_ALEN];
+    char ifnameLicense[IFNAMSIZ];
     struct ifaddrs *addrs,*next;
 
     DeleteNetworkPorts();
@@ -41,7 +42,7 @@ void TimeSyncDaemonLinux::InitalizePorts()
                     for (std::vector<TimeAwareSystem*>::size_type i = 0; i < m_timeAwareSystems.size(); ++i)
                     {
                         PortIdentity portIdentity;
-                        PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), portIdentity.clockIdentity);
+                        PtpMessageBase::GetClockIdentity(macLicense, portIdentity.clockIdentity, m_timeAwareSystems[i]->GetDomain());
                         portIdentity.portNumber = m_networkPorts.size();
                         m_timeAwareSystems[i]->AddSystemPort(portIdentity);
 
@@ -55,7 +56,7 @@ void TimeSyncDaemonLinux::InitalizePorts()
                         {
                             lognotice("Domain %u - Main ethernet interface: %s", m_timeAwareSystems[i]->GetDomain(), next->ifa_name);
                             uint8_t clockIdentityFromMAC[CLOCK_ID_LENGTH];
-                            PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
+                            PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC, m_timeAwareSystems[i]->GetDomain());
                             m_timeAwareSystems[i]->SetClockIdentity(clockIdentityFromMAC);
                             m_timeAwareSystems[i]->InitLocalClock(networkPort->GetPtpClock(), ((NetPortLinux*)networkPort)->GetPtpClockIndex());
                         }

@@ -32,9 +32,8 @@ MDPdelayReq::~MDPdelayReq()
 void MDPdelayReq::SetPdelayReq()
 {
     PortIdentity identity;
-    identity.portNumber = m_systemPort->GetIdentity().portNumber;
 
-    PtpMessageBase::GetClockIdentity(m_networkPort->GetMAC(), identity.clockIdentity);
+    identity = m_systemPort->GetIdentity();
     m_txPdelayReqPtr->SetSourcePortIdentity(&identity);
     /* 1) sourcePortIdentity is set equal to the port identity of the port corresponding to this MD entity
         (see 8.5.2),
@@ -159,10 +158,8 @@ void MDPdelayReq::ProcessState()
             break;
 
         case STATE_WAITING_FOR_PDELAY_RESP:
-            uint8_t portClockIdentity[CLOCK_ID_LENGTH];
-            PtpMessageBase::GetClockIdentity(m_networkPort->GetMAC(), portClockIdentity);
             if(m_rcvdPdelayResp && (m_rcvdPdelayRespPtr->GetSequenceID() == m_txPdelayReqPtr->GetSequenceID())
-                    && memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, CLOCK_ID_LENGTH) == 0 &&
+                    && memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, m_systemPort->GetIdentity().clockIdentity, CLOCK_ID_LENGTH) == 0 &&
                     (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber == m_systemPort->GetIdentity().portNumber))
             {
                 m_rcvdPdelayResp = false;
@@ -170,7 +167,7 @@ void MDPdelayReq::ProcessState()
             }
             else if((m_timeAwareSystem->ReadCurrentTime() - m_pdelayIntervalTimer >= m_systemPort->GetPdelayReqInterval()) ||
                     (m_rcvdPdelayResp &&
-                    (memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, portClockIdentity, CLOCK_ID_LENGTH) != 0 ||
+                    (memcmp(m_rcvdPdelayRespPtr->GetRequestingPortIdentity().clockIdentity, m_systemPort->GetIdentity().clockIdentity, CLOCK_ID_LENGTH) != 0 ||
                     (m_rcvdPdelayRespPtr->GetRequestingPortIdentity().portNumber != m_systemPort->GetIdentity().portNumber) ||
                     (m_rcvdPdelayRespPtr->GetSequenceID() != m_txPdelayReqPtr->GetSequenceID()))))
             {

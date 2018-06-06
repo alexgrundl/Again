@@ -84,6 +84,8 @@ void MDPdelayResp::ProcessState()
 
         case STATE_INITIAL_WAITING_FOR_PDELAY_REQ:
         case STATE_WAITING_FOR_PDELAY_REQ:
+            /* Let's fall through to "pdelay follow up" if "m_rcvdPdelayReq" is set so that these two
+             * messages are always sent consecutively. */
             if(m_rcvdPdelayReq)
             {
                 m_rcvdPdelayReq = false;
@@ -92,7 +94,8 @@ void MDPdelayResp::ProcessState()
 
                 m_state = STATE_SENT_PDELAY_RESP_WAITING_FOR_TIMESTAMP;
             }
-            break;
+            else
+                break;
 
         case STATE_SENT_PDELAY_RESP_WAITING_FOR_TIMESTAMP:
             if(m_rcvdMDTimestampReceive)

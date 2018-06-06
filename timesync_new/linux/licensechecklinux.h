@@ -41,7 +41,7 @@ public:
     void SetMacWithLicense(std::string mac);
 
 
-    bool GetMacAndInterfaceWithLicense(char* mac, char* ifname);
+    bool GetMacAndInterfaceWithLicense(uint8_t* mac, char* ifname);
 
 private:
 

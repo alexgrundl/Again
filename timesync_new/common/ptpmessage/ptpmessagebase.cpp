@@ -178,18 +178,17 @@ void PtpMessageBase::SetSendTime(UScaledNs value)
     m_sendTime = value;
 }
 
-void PtpMessageBase::GetClockIdentity(const uint8_t* portMac, uint8_t* clockIdentity)
+void PtpMessageBase::GetClockIdentity(const uint8_t* portMac, uint8_t* clockIdentity, uint8_t domain)
 {
     clockIdentity[0] = portMac[0];
     clockIdentity[1] = portMac[1];
     clockIdentity[2] = portMac[2];
+    clockIdentity[3] = portMac[3];
+    clockIdentity[4] = portMac[4];
+    clockIdentity[5] = portMac[5];
 
-    clockIdentity[3] = 0xFF;
-    clockIdentity[4] = 0xFE;
-
-    clockIdentity[5] = portMac[3];
-    clockIdentity[6] = portMac[4];
-    clockIdentity[7] = portMac[5];
+    clockIdentity[6] = 0;
+    clockIdentity[7] = domain;
 }
 
 bool PtpMessageBase::IsPortIdentityEqual(PortIdentity* identity1, PortIdentity* identity2)

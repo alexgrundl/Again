@@ -119,7 +119,7 @@ public:
     static uint8_t ParseDomain(const uint8_t* bytes);
 
 
-    static void GetClockIdentity(const uint8_t* portMac, uint8_t* clockIdentity);
+    static void GetClockIdentity(const uint8_t* portMac, uint8_t* clockIdentity, uint8_t domain);
 
 
     static bool IsPortIdentityEqual(PortIdentity* identity1, PortIdentity* identity2);
