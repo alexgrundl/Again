@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <ifaddrs.h>
+#include <string>
 
 #include "sha3.h"
 
@@ -37,7 +38,10 @@ public:
     bool IsTimeRelayEnabled();
 
 
-    bool GetMacOfInterfaceWithLicense(char* mac, char* ifname);
+    void SetMacWithLicense(std::string mac);
+
+
+    bool GetMacAndInterfaceWithLicense(char* mac, char* ifname);
 
 private:
 
@@ -52,6 +56,12 @@ private:
 
 
     bool m_timeRelayEnabled;
+
+
+    uint8_t m_licenseMac[ETH_ALEN];
+
+
+    bool m_licenseMacSet;
 
 
     bool GetMacFromInterfaceName(char* name, uint8_t* mac);

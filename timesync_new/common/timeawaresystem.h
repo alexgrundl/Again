@@ -330,6 +330,9 @@ public:
     SystemPort* GetSystemPort(int portIndex);
 
 
+    int GetNSystemPorts();
+
+
     void SetSystemPriority1(uint8_t priority1);
 
 

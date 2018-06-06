@@ -15,6 +15,7 @@ void PtpConfig::PrintUsage( char *arg0 )
             "[-P0 <priority>] "
             "[-P1 <priority>] "
             "[-D1]"
+            "[-ML <mac address>]"
 //            "[-D <10g_tx_delay,10g_rx_delay,gb_tx_delay,gb_rx_delay,mb_tx_delay,mb_rx_delay>] "
             "\n",
             arg0 );
@@ -24,6 +25,7 @@ void PtpConfig::PrintUsage( char *arg0 )
           "\t-P0 <priority> priority value for domain 0\n"
           "\t-P1 <priority> priority value for domain 1 (if enabled)\n"
           "\t-D1 enable domain 1\n"
+          "\t-ML <mac address> Mac address of NIC containing the license\n"
 //          "\t-D Phy Delay <10g_tx_delay,10g_rx_delay,gb_tx_delay,gb_rx_delay,mb_tx_delay,mb_rx_delay>\n"
         );
 }
@@ -76,6 +78,15 @@ bool PtpConfig::ParseArgs(int argc, char** argv)
                 PrintUsage( argv[0] );
                 argsOk = false;
             }
+            else if( strcmp(argv[i] + 1,  "ML") == 0 )
+            {
+                m_macLicense = std::string(argv[i+1]);
+                if(m_macLicense.size() != 17)
+                {
+                    printf( "Mac address has to be 17 characters (XX:XX:XX:XX:XX:XX)\n" );
+                    argsOk = false;
+                }
+            }
         }
     }
 
@@ -95,4 +106,9 @@ uint8_t PtpConfig::GetPriority1Domain0()
 uint8_t PtpConfig::GetPriority1Domain1()
 {
     return m_priority1Domain1;
+}
+
+std::string PtpConfig::GetLicenseMac()
+{
+    return m_macLicense;
 }

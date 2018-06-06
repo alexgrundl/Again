@@ -55,6 +55,9 @@ protected:
     LicenseCheck* m_licenseCheck;
 
 
+    PtpConfig* m_config;
+
+
     void DeleteManagers();
 
 

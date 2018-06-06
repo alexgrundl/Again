@@ -1,6 +1,8 @@
 #ifndef PTPCONFIG_H
 #define PTPCONFIG_H
 
+#include <string>
+
 #include "types.h"
 
 class PtpConfig
@@ -22,6 +24,9 @@ public:
 
     uint8_t GetPriority1Domain1();
 
+
+    std::string GetLicenseMac();
+
 private:
 
 
@@ -32,6 +37,9 @@ private:
 
 
     uint8_t m_priority1Domain1;
+
+
+    std::string m_macLicense;
 
 
     void PrintUsage(char *arg0);

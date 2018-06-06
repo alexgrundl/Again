@@ -3,6 +3,7 @@
 TimeSyncDaemon::TimeSyncDaemon(PtpConfig* config)
 {
     m_licenseCheck = NULL;
+    m_config = config;
 
     int nDomains = config->IsDomain1Enabled() ? 2 : 1;
     for (int i = 0; i < nDomains; ++i)
@@ -54,6 +55,9 @@ bool TimeSyncDaemon::LicenseValid()
 #if defined(NO_LICENSE_CHECK) || defined(__arm__)
     checkLicense = false;
 #endif
+
+    if(m_config->GetLicenseMac().size() > 0)
+        m_licenseCheck->SetMacWithLicense(m_config->GetLicenseMac());
 
     return !checkLicense || m_licenseCheck->LicenseValid();
 }

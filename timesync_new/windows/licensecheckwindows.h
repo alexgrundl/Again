@@ -26,6 +26,8 @@ public:
     bool IsTimeRelayEnabled();
 
 
+    void SetMacWithLicense(std::string mac) {}
+
 private:
 
     bool m_ctssEnabled;

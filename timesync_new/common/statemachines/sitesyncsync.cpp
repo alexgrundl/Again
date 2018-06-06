@@ -44,14 +44,9 @@ void SiteSyncSync::TxPSSync()
 {
     m_clockSlaveSync->SetPortSyncSync(m_txPSSyncPtr);
 
-    //Give this message to the state machines responsible for sending the sync frame only if
-    //"time relay" feature is enabled or if  it's the clock master who wants to send the sync message.
-    if(m_timeAwareSystem->IsTimeRelayEnabled() || m_txPSSyncPtr->localPortNumber == 0)
+    for (std::vector<PortSyncSyncSend*>::size_type j = 0; j < m_portSyncSyncSends.size(); ++j)
     {
-        for (std::vector<PortSyncSyncSend*>::size_type j = 0; j < m_portSyncSyncSends.size(); ++j)
-        {
-            m_portSyncSyncSends[j]->ProcessSync(m_txPSSyncPtr);
-        }
+        m_portSyncSyncSends[j]->ProcessSync(m_txPSSyncPtr);
     }
 }
 

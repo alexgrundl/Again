@@ -26,7 +26,7 @@ void TimeSyncDaemonLinux::InitalizePorts()
 
     if(m_licenseCheck != NULL)
     {
-        ((LicenseCheckLinux*)m_licenseCheck)->GetMacOfInterfaceWithLicense(macLicense, ifnameLicense);
+        ((LicenseCheckLinux*)m_licenseCheck)->GetMacAndInterfaceWithLicense(macLicense, ifnameLicense);
         while (next)
         {
             if (next->ifa_addr && next->ifa_addr->sa_family == AF_PACKET &&
@@ -58,6 +58,12 @@ void TimeSyncDaemonLinux::InitalizePorts()
                             PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC);
                             m_timeAwareSystems[i]->SetClockIdentity(clockIdentityFromMAC);
                             m_timeAwareSystems[i]->InitLocalClock(networkPort->GetPtpClock(), ((NetPortLinux*)networkPort)->GetPtpClockIndex());
+                        }
+                        else
+                        {
+                            /* If it's not the "main" port and "time relay" isn't enabled don't send any time sync frames at this port. */
+                            if(m_timeAwareSystems[i]->GetNSystemPorts() > 0 && !m_licenseCheck->IsTimeRelayEnabled())
+                                m_timeAwareSystems[i]->GetSystemPort(m_timeAwareSystems[i]->GetNSystemPorts() - 1)->DisablePttPort();
                         }
                     }
                 }

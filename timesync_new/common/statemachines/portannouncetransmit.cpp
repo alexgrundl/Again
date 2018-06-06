@@ -78,11 +78,8 @@ void PortAnnounceTransmit::ProcessState()
                     (m_timeAwareSystem->ReadCurrentTime() < m_announceSendTime) && m_systemPort->IsSelected() && !m_systemPort->GetUpdtInfo())
             {
                 m_systemPort->SetNewInfo(false);
-                //Only send the announce message if our system is grandmaster - capable (priority1 < 255)
-                //and if "time relay" feature is enabled or if we are the grandmaster,
-                //meaning the size of the path trace will be 1.
-                if(m_timeAwareSystem->IsGmPresent() &&
-                        (m_timeAwareSystem->IsTimeRelayEnabled() || m_timeAwareSystem->GetPathTrace().size() < 2))
+                //Only send the announce message if our system is grandmaster - capable (priority1 < 255).
+                if(m_timeAwareSystem->IsGmPresent())
                 {
                     TxAnnounce();
                     m_sequenceID++;
