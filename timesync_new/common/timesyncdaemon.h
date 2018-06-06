@@ -7,12 +7,13 @@
 #include "licensecheck.h"
 #include "statemachinemanager.h"
 #include "portmanager.h"
+#include "ptpconfig.h"
 
 class TimeSyncDaemon
 {
 public:
 
-    TimeSyncDaemon(int nDomains);
+    TimeSyncDaemon(PtpConfig *config);
 
 
     virtual ~TimeSyncDaemon();

@@ -1,8 +1,10 @@
 #include "ptpconfig.h"
 
-PtpConfig::PtpConfig(TimeSyncDaemon* timeSyncDaemon)
+PtpConfig::PtpConfig()
 {
-    m_timeSyncDaemon = timeSyncDaemon;
+    m_domain1Enabled = false;
+    m_priority1Domain0 = 254;
+    m_priority1Domain1 = 254;
 }
 
 void PtpConfig::PrintUsage( char *arg0 )
@@ -12,6 +14,7 @@ void PtpConfig::PrintUsage( char *arg0 )
             "[-P <priority>] "
             "[-P0 <priority>] "
             "[-P1 <priority>] "
+            "[-D1]"
 //            "[-D <10g_tx_delay,10g_rx_delay,gb_tx_delay,gb_rx_delay,mb_tx_delay,mb_rx_delay>] "
             "\n",
             arg0 );
@@ -19,7 +22,8 @@ void PtpConfig::PrintUsage( char *arg0 )
         ( stderr,
           "\t-P <priority> priority value for all domains\n"
           "\t-P0 <priority> priority value for domain 0\n"
-          "\t-P1 <priority> priority value for domain 1\n"
+          "\t-P1 <priority> priority value for domain 1 (if enabled)\n"
+          "\t-D1 enable domain 1\n"
 //          "\t-D Phy Delay <10g_tx_delay,10g_rx_delay,gb_tx_delay,gb_rx_delay,mb_tx_delay,mb_rx_delay>\n"
         );
 }
@@ -57,11 +61,15 @@ bool PtpConfig::ParseArgs(int argc, char** argv)
                     else
                     {
                         if(setPriority0)
-                            m_timeSyncDaemon->GetTimeAwareSystem(0)->SetSystemPriority1(tmp);
+                            m_priority1Domain0 = tmp;
                         if(setPriority1)
-                            m_timeSyncDaemon->GetTimeAwareSystem(1)->SetSystemPriority1(tmp);
+                            m_priority1Domain1 = tmp;
                     }
                 }
+            }
+            else if( strcmp(argv[i] + 1,  "D1") == 0 )
+            {
+                m_domain1Enabled = true;
             }
             else if( strcmp(argv[i] + 1,  "H") == 0 )
             {
@@ -72,4 +80,19 @@ bool PtpConfig::ParseArgs(int argc, char** argv)
     }
 
     return argsOk;
+}
+
+bool PtpConfig::IsDomain1Enabled()
+{
+    return m_domain1Enabled;
+}
+
+uint8_t PtpConfig::GetPriority1Domain0()
+{
+    return m_priority1Domain0;
+}
+
+uint8_t PtpConfig::GetPriority1Domain1()
+{
+    return m_priority1Domain1;
 }

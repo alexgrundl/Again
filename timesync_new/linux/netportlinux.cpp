@@ -347,11 +347,11 @@ uint8_t const* NetPortLinux::GetMAC()
 
 uint32_t NetPortLinux::GetRxLinkDelay_ns()
 {
-    return m_cardType == NETWORK_CARD_TYPE_I210 ? 0 : 750;
+    return m_cardType == NETWORK_CARD_TYPE_I210 ? 0/*428*/ : 750;
 }
 uint32_t NetPortLinux::GetTxLinkDelay_ns()
 {
-    return m_cardType == NETWORK_CARD_TYPE_I210 ? 0 : 750;
+    return m_cardType == NETWORK_CARD_TYPE_I210 ? 0/*158*/ : 750;
 }
 
 PtpClock* NetPortLinux::GetPtpClock()

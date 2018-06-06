@@ -2,7 +2,7 @@
 
 #ifndef __linux__
 
-TimeSyncDaemonWindows::TimeSyncDaemonWindows(int nDomains) : TimeSyncDaemon(nDomains)
+TimeSyncDaemonWindows::TimeSyncDaemonWindows(PtpConfig* config) : TimeSyncDaemon(config)
 {
     m_licenseCheck = new LicenseCheckWindows();
 }

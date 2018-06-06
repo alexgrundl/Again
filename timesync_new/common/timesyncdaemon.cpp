@@ -1,12 +1,15 @@
 #include "timesyncdaemon.h"
 
-TimeSyncDaemon::TimeSyncDaemon(int nDomains)
+TimeSyncDaemon::TimeSyncDaemon(PtpConfig* config)
 {
     m_licenseCheck = NULL;
+
+    int nDomains = config->IsDomain1Enabled() ? 2 : 1;
     for (int i = 0; i < nDomains; ++i)
     {
         m_timeAwareSystems.push_back(new TimeAwareSystem());
         m_timeAwareSystems[i]->SetDomain(i);
+        m_timeAwareSystems[i]->SetSystemPriority1(i == 0 ? config->GetPriority1Domain0() : config->GetPriority1Domain1());
     }
 }
 

@@ -99,6 +99,7 @@ void PortAnnounceReceive::SetAnnounce(ReceivePackage *package)
     newAnnouncePtr->ParsePackage(package->GetBuffer());
     newAnnouncePtr->SetReceiveTime(package->GetTimestamp());
     m_systemPort->SetRcvdAnnouncePtr(newAnnouncePtr);
+    m_systemPort->SetMessageStepsRemoved(newAnnouncePtr->GetStepsRemoved());
 
     m_rcvdAnnounce = true;
 }

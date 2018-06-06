@@ -109,10 +109,8 @@ void StateMachineManager::Initialize(TimeAwareSystem* timeAwareSystem, std::vect
         m_stateMachines.push_back(m_portSyncSyncSends[i]);
         m_stateMachines.push_back(m_mdSyncSendSM[i]);
 
-        m_stateMachines.push_back(m_portAnnounceInformation[i]);
         m_stateMachines.push_back(m_portAnnounceReceive[i]);
-        m_stateMachines.push_back(m_mdPortAnnounceTransmit[i]);
-        m_stateMachines.push_back(m_portAnnounceTransmit[i]);
+        m_stateMachines.push_back(m_portAnnounceInformation[i]);
 
         m_stateMachines.push_back(m_linkDelaySyncIntervalSetting[i]);
 #ifdef __linux__
@@ -120,6 +118,12 @@ void StateMachineManager::Initialize(TimeAwareSystem* timeAwareSystem, std::vect
 #endif
     }
     m_stateMachines.push_back(m_portRoleSelection);
+
+    for (std::vector<INetPort*>::size_type i = 0; i < networkPorts.size(); ++i)
+    {
+        m_stateMachines.push_back(m_mdPortAnnounceTransmit[i]);
+        m_stateMachines.push_back(m_portAnnounceTransmit[i]);
+    }
 
     m_stateThread = new CThreadWrapper<StateMachineManager>(this, &StateMachineManager::Process, std::string("State machine thread"));
 }

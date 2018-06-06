@@ -3,22 +3,35 @@
 
 #include "types.h"
 
-#include "timesyncdaemon.h"
-
 class PtpConfig
 {
 
 public:
 
-    PtpConfig(TimeSyncDaemon* timeSyncDaemon);
+    PtpConfig();
 
 
     bool ParseArgs(int argc, char** argv);
 
+
+    bool IsDomain1Enabled();
+
+
+    uint8_t GetPriority1Domain0();
+
+
+    uint8_t GetPriority1Domain1();
+
 private:
 
 
-    TimeSyncDaemon* m_timeSyncDaemon;
+    bool m_domain1Enabled;
+
+
+    uint8_t m_priority1Domain0;
+
+
+    uint8_t m_priority1Domain1;
 
 
     void PrintUsage(char *arg0);

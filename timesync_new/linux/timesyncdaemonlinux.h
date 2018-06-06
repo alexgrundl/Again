@@ -16,7 +16,7 @@ class TimeSyncDaemonLinux : public TimeSyncDaemon
 {
 public:
 
-    TimeSyncDaemonLinux(int nDomains);
+    TimeSyncDaemonLinux(PtpConfig* config);
 
 
     virtual ~TimeSyncDaemonLinux();

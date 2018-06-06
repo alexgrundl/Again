@@ -114,7 +114,7 @@ void PortRoleSelection::UpdtRolesTree()
      * 1) messageStepsRemoved (see 10.3.9.7) for the port associated with the gmPriorityVector, incremented by 1, if the gmPriorityVector is not
      * the systemPriorityVector, or
      * 2) 0 if the gmPriorityVector is the systemPriorityVector */
-     m_timeAwareSystem->SetMasterStepsRemoved(bestPort != NULL ? bestPort->GetMessageStepsRemoved() : 0);
+     m_timeAwareSystem->SetMasterStepsRemoved(bestPort != NULL ? bestPort->GetMessageStepsRemoved() + 1 : 0);
 
      /* assigns the port role for port j and sets selectedRole[j] equal to this port role, as follows, for j = 1, 2, numberPorts:
       * 3) If the port is disabled (infoIs == Disabled), selectedRole[j] is set to DisabledPort.

@@ -49,17 +49,18 @@ void waitForSignals()
 
 int main(int argc, char **argv)
 {
-    TimeSyncDaemon* timeSyncDaemon;
+    TimeSyncDaemon* timeSyncDaemon = NULL;
+    PtpConfig config;
 
-#ifdef __linux__
-    timeSyncDaemon = new TimeSyncDaemonLinux(2);
-#else
-    timeSyncDaemon = new TimeSyncDaemonWindows(2);
-#endif
-
-    PtpConfig config(timeSyncDaemon);
     if(config.ParseArgs(argc, argv))
     {
+
+#ifdef __linux__
+        timeSyncDaemon = new TimeSyncDaemonLinux(&config);
+#else
+        timeSyncDaemon = new TimeSyncDaemonWindows(&config);
+#endif
+
         if(timeSyncDaemon->LicenseValid())
         {
             timeSyncDaemon->InitalizePorts();

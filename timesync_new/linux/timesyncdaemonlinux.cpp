@@ -2,7 +2,7 @@
 
 #include "timesyncdaemonlinux.h"
 
-TimeSyncDaemonLinux::TimeSyncDaemonLinux(int nDomains) : TimeSyncDaemon(nDomains)
+TimeSyncDaemonLinux::TimeSyncDaemonLinux(PtpConfig *config) : TimeSyncDaemon(config)
 {
     m_licenseCheck = new LicenseCheckLinux();
 }
