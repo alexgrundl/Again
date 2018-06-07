@@ -595,7 +595,11 @@ NetPortLinux::KernelVersion NetPortLinux::GetKernelVersion()
             strRelease = strRelease.substr(posNext + 1, strRelease.length());
 
             posNext = strRelease.find("-");
-            if(posNext > 0 && posNext + 1 < (int)strRelease.length())
+            /* Include the possibility that the version string doesn't have an "-" sign and ends
+             * after the third number (e.g. "4.4.59"). */
+            if(posNext == -1)
+                posNext = strRelease.length();
+            if(posNext > 0)
             {
                 kernelVersion.minor = atoi(strRelease.substr(0, posNext).c_str());
             }
