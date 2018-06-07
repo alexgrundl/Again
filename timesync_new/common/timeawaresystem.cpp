@@ -205,6 +205,8 @@ UScaledNs TimeAwareSystem::ReadCurrentTime()
     clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
 #else
     //Windows get time function
+    ts.tv_sec = 0;
+    ts.tv_nsec = 0;
 #endif
 
     uscaled.ns = (uint64_t)ts.tv_sec * 1000000000 + ts.tv_nsec;

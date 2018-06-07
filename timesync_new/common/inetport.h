@@ -25,8 +25,10 @@ class INetPort
     virtual UScaledNs SendEventMessage(PtpMessageBase* Msg) = 0;
     virtual void ReceiveMessage(ReceivePackage* package) = 0;
     virtual uint8_t const* GetMAC() = 0;
-    virtual uint32_t GetRxLinkDelay_ns() = 0;
-    virtual uint32_t GetTxLinkDelay_ns() = 0;
+    virtual uint32_t GetRxPhyDelay() = 0;
+    virtual void SetRxPhyDelay(uint32_t delay) = 0;
+    virtual uint32_t GetTxPhyDelay() = 0;
+    virtual void SetTxPhyDelay(uint32_t delay) = 0;
     virtual uint64_t GetPDelay() = 0;
     virtual void SetPDelay(uint64_t pDelay) = 0;
     virtual double GetNeighborRatio() = 0;

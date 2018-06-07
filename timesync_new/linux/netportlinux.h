@@ -14,6 +14,7 @@
 #ifndef __arm__
 #include <linux/wireless.h>
 #endif
+#include <sys/utsname.h>
 
 #include "types.h"
 #include "platform.h"
@@ -70,11 +71,15 @@ class NetPortLinux : public INetPort
 
 //        int GetSpeed();
 
-        virtual uint8_t const* GetMAC();
+        uint8_t const* GetMAC();
 
-        virtual uint32_t GetRxLinkDelay_ns();
+        uint32_t GetRxPhyDelay();
 
-        virtual uint32_t GetTxLinkDelay_ns();
+        void SetRxPhyDelay(uint32_t delay);
+
+        uint32_t GetTxPhyDelay();
+
+        void SetTxPhyDelay(uint32_t delay);
 
 protected:
 
@@ -87,6 +92,13 @@ protected:
     pal::SectionLock_t m_EventLock;
 
 private:
+
+    struct KernelVersion
+    {
+        int kernel;
+        int major;
+        int minor;
+    };
 
     const char* intelVendorID = "0x8086";
 
@@ -118,6 +130,10 @@ private:
 
     NetworkCardType m_cardType;
 
+    uint32_t m_rxPhyDelay;
+
+    uint32_t m_txPhyDelay;
+
 
     /**
      * @brief IsCarrierSet Checks if the parameter "/sys/class/net/<m_IfcName>/carrier" is set.
@@ -128,6 +144,12 @@ private:
 
 
     NetworkCardType ReadNetworkCardTypeFromSysFs();
+
+
+    void SetDefaultPhyDelays();
+
+
+    KernelVersion GetKernelVersion();
 };
 
 #endif

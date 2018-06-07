@@ -14,7 +14,7 @@ class TimeSyncDaemonWindows : public TimeSyncDaemon
 {
 public:
 
-    TimeSyncDaemonWindows(int nDomains);
+    TimeSyncDaemonWindows(PtpConfig* config);
 
 
     virtual ~TimeSyncDaemonWindows();

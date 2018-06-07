@@ -25,8 +25,10 @@ public:
     UScaledNs SendEventMessage(PtpMessageBase* Msg) {return {0, 0};}
     void ReceiveMessage(ReceivePackage* package) {}
     uint8_t const* GetMAC() {return 0;}
-    uint32_t GetRxLinkDelay_ns(){return 0;}
-    uint32_t GetTxLinkDelay_ns() {return 0;}
+    uint32_t GetRxPhyDelay(){return 0;}
+    void SetRxPhyDelay(uint32_t delay) {}
+    uint32_t GetTxPhyDelay() {return 0;}
+    void SetTxPhyDelay(uint32_t delay) {}
     uint64_t GetPDelay() {return 0;}
     void SetPDelay(uint64_t pDelay) {}
     double GetNeighborRatio() {return 1.0;}

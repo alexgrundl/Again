@@ -15,6 +15,7 @@ NetPortLinux::NetPortLinux(char const* const devname)
     m_GeneralSock = pal::SocketCreate(PF_PACKET, SOCK_DGRAM, 0);
     m_ptpClock = new PtpClockLinux();
     m_cardType = ReadNetworkCardTypeFromSysFs();
+    SetDefaultPhyDelays();
 }
 
 NetPortLinux::~NetPortLinux()
@@ -311,7 +312,7 @@ void NetPortLinux::ReceiveMessage(ReceivePackage* pRet)
                         pPackage->SetRealSize(icnt);
                         UScaledNs timestamp;
                         timestamp.ns = (uint64_t)ts_device->tv_sec * NS_PER_SEC + ts_device->tv_nsec;
-                        timestamp.ns -= GetRxLinkDelay_ns();
+                        timestamp.ns -= GetRxPhyDelay();
                         timestamp.ns_frac = 0;
                         pPackage->SetTimestamp(timestamp);
                         //pRet->GetTimestamp(false)->Correct(-(int32_t)GetRxLinkDelay_ns());
@@ -345,14 +346,26 @@ uint8_t const* NetPortLinux::GetMAC()
     return (uint8_t*)m_MAC;
 }
 
-uint32_t NetPortLinux::GetRxLinkDelay_ns()
+uint32_t NetPortLinux::GetRxPhyDelay()
 {
-    return m_cardType == NETWORK_CARD_TYPE_I210 ? 0/*428*/ : 750;
+    return m_rxPhyDelay;
 }
-uint32_t NetPortLinux::GetTxLinkDelay_ns()
+
+void NetPortLinux::SetRxPhyDelay(uint32_t delay)
 {
-    return m_cardType == NETWORK_CARD_TYPE_I210 ? 0/*158*/ : 750;
+    m_rxPhyDelay = delay;
 }
+
+uint32_t NetPortLinux::GetTxPhyDelay()
+{
+    return m_txPhyDelay;
+}
+
+void NetPortLinux::SetTxPhyDelay(uint32_t delay)
+{
+    m_txPhyDelay = delay;
+}
+
 
 PtpClock* NetPortLinux::GetPtpClock()
 {
@@ -408,7 +421,7 @@ UScaledNs NetPortLinux::GetLastTxMessage(int timeout_ms)
                         struct timespec* ts_device = ts_system + 1;
 
                         timestamp.ns = (uint64_t)ts_device->tv_sec * NS_PER_SEC + ts_device->tv_nsec;
-                        timestamp.ns += GetTxLinkDelay_ns();
+                        timestamp.ns += GetTxPhyDelay();
                         tsGotten = true;
                         //pRet->Correct(GetTxLinkDelay_ns());
                         break;
@@ -525,6 +538,70 @@ bool NetPortLinux::IsWireless()
 bool NetPortLinux::IsUpAndConnected()
 {
     return IsCarrierSet();
+}
+
+void NetPortLinux::SetDefaultPhyDelays()
+{
+    KernelVersion kernelVersion;
+
+
+    switch(m_cardType)
+    {
+    case NETWORK_CARD_TYPE_I210:
+        /* Beginning with linux kernel version 4.7 the PHY delay of i210 chips is compensated within the igb - driver (Rx: 448 ns, Tx: 178 ns)! */
+        kernelVersion = GetKernelVersion();
+        if(kernelVersion.kernel > 4 || (kernelVersion.kernel == 4 && kernelVersion.major >= 7))
+        {
+            m_rxPhyDelay = 0;
+            m_txPhyDelay = 0;
+        }
+        else
+        {
+            m_rxPhyDelay = 418;
+            m_txPhyDelay = 148;
+        }
+        break;
+    case NETWORK_CARD_TYPE_X540:
+    case NETWORK_CARD_TYPE_AXI_10G:
+        m_rxPhyDelay = 750;
+        m_txPhyDelay = 750;
+        break;
+    default:
+        m_rxPhyDelay = 0;
+        m_txPhyDelay = 0;
+        break;
+    }
+}
+
+NetPortLinux::KernelVersion NetPortLinux::GetKernelVersion()
+{
+    std::string strRelease;
+    KernelVersion kernelVersion = {0, 0, 0};
+    struct utsname sysDescription;
+    int posNext;
+
+    uname(&sysDescription);
+    strRelease = std::string(sysDescription.release);
+    posNext = strRelease.find(".");
+    if(posNext > 0 && posNext + 1 < (int)strRelease.length())
+    {
+        kernelVersion.kernel = atoi(strRelease.substr(0, posNext).c_str());
+        strRelease = strRelease.substr(posNext + 1, strRelease.length());
+
+        posNext = strRelease.find(".");
+        if(posNext > 0 && posNext + 1 < (int)strRelease.length())
+        {
+            kernelVersion.major = atoi(strRelease.substr(0, posNext).c_str());
+            strRelease = strRelease.substr(posNext + 1, strRelease.length());
+
+            posNext = strRelease.find("-");
+            if(posNext > 0 && posNext + 1 < (int)strRelease.length())
+            {
+                kernelVersion.minor = atoi(strRelease.substr(0, posNext).c_str());
+            }
+        }
+    }
+    return kernelVersion;
 }
 
 //int LinuxNetPort::GetSpeed()
