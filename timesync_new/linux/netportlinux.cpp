@@ -595,7 +595,7 @@ NetPortLinux::KernelVersion NetPortLinux::GetKernelVersion()
             strRelease = strRelease.substr(posNext + 1, strRelease.length());
 
             posNext = strRelease.find("-");
-            /* Include the possibility that the version string doesn't have an "-" sign and ends
+            /* Include the possibility that the version string doesn't have a "-" sign and ends
              * after the third number (e.g. "4.4.59"). */
             if(posNext == -1)
                 posNext = strRelease.length();

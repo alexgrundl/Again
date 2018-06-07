@@ -150,5 +150,7 @@ HEADERS += \
     windows/netportwindows.h \
     common/ptpconfig.h
 
-DISTFILES +=
+DISTFILES += \
+    ixgbe_4.4.59.patch \
+    ixgbe_4.12.14.patch
 

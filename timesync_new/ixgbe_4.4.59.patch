@@ -1,0 +1,401 @@
+diff -u ixgbe_orig_4.4.59/Makefile ixgbe_mod_4.4.59/Makefile
+--- ixgbe_orig_4.4.59/Makefile	2018-05-24 13:21:10.572054426 +0000
++++ ixgbe_mod_4.4.59/Makefile	2018-05-28 08:09:45.252269174 +0000
+@@ -1,44 +1,18 @@
+-################################################################################
+-#
+-# Intel 10 Gigabit PCI Express Linux driver
+-# Copyright(c) 1999 - 2013 Intel Corporation.
+-#
+-# This program is free software; you can redistribute it and/or modify it
+-# under the terms and conditions of the GNU General Public License,
+-# version 2, as published by the Free Software Foundation.
+-#
+-# This program is distributed in the hope it will be useful, but WITHOUT
+-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+-# more details.
+-#
+-# You should have received a copy of the GNU General Public License along with
+-# this program; if not, write to the Free Software Foundation, Inc.,
+-# 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+-#
+-# The full GNU General Public License is included in this distribution in
+-# the file called "COPYING".
+-#
+-# Contact Information:
+-# Linux NICS <linux.nics@intel.com>
+-# e1000-devel Mailing List <e1000-devel@lists.sourceforge.net>
+-# Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
+-#
+-################################################################################
++TARGET = ixgbe
+ 
+-#
+-# Makefile for the Intel(R) 10GbE PCI Express ethernet driver
+-#
++KDIR = /lib/modules/$(shell uname -r)/build
++PWD := $(shell pwd)
+ 
+-obj-$(CONFIG_IXGBE) += ixgbe.o
++obj-m += $(TARGET).o
+ 
+ ixgbe-objs := ixgbe_main.o ixgbe_common.o ixgbe_ethtool.o \
+-              ixgbe_82599.o ixgbe_82598.o ixgbe_phy.o ixgbe_sriov.o \
+-              ixgbe_mbx.o ixgbe_x540.o ixgbe_x550.o ixgbe_lib.o ixgbe_ptp.o
++ixgbe_82599.o ixgbe_82598.o ixgbe_phy.o ixgbe_sriov.o \
++ixgbe_mbx.o ixgbe_x540.o ixgbe_x550.o ixgbe_lib.o ixgbe_ptp.o \
++ixgbe_dcb.o ixgbe_dcb_82598.o ixgbe_dcb_82599.o ixgbe_dcb_nl.o \
++ixgbe_sysfs.o ixgbe_debugfs.o ixgbe_fcoe.o
+ 
+-ixgbe-$(CONFIG_IXGBE_DCB) +=  ixgbe_dcb.o ixgbe_dcb_82598.o \
+-                              ixgbe_dcb_82599.o ixgbe_dcb_nl.o
++default:
++	make -C $(KDIR) M=$(PWD) modules
+ 
+-ixgbe-$(CONFIG_IXGBE_HWMON) += ixgbe_sysfs.o
+-ixgbe-$(CONFIG_DEBUG_FS) += ixgbe_debugfs.o
+-ixgbe-$(CONFIG_FCOE:m=y) += ixgbe_fcoe.o
++clean:
++	make -C $(KDIR) M=$(PWD) clean
+diff -u ixgbe_orig_4.4.59/ixgbe.h ixgbe_mod_4.4.59/ixgbe.h
+--- ixgbe_orig_4.4.59/ixgbe.h	2018-05-25 10:05:38.677320424 +0000
++++ ixgbe_mod_4.4.59/ixgbe.h	2018-05-24 13:27:00.008400504 +0000
+@@ -604,6 +604,9 @@
+ #define IXGBE_TRY_LINK_TIMEOUT (4 * HZ)
+ #define IXGBE_SFP_POLL_JIFFIES (2 * HZ)	/* SFP poll every 2 seconds */
+ 
++#define IXGBE_N_EXTTS 1
++#define IXGBE_N_SDP   4
++
+ /* board specific private data structure */
+ struct ixgbe_adapter {
+ 	unsigned long active_vlans[BITS_TO_LONGS(VLAN_N_VID)];
+@@ -792,6 +795,9 @@
+ 
+ #define IXGBE_RSS_KEY_SIZE     40  /* size of RSS Hash Key in bytes */
+ 	u32 rss_key[IXGBE_RSS_KEY_SIZE / sizeof(u32)];
++
++	struct ptp_pin_desc sdp_config[IXGBE_N_SDP];
++	bool ext_ts_sdp2_enable;
+ };
+ 
+ static inline u8 ixgbe_max_rss_indices(struct ixgbe_adapter *adapter)
+@@ -974,6 +980,7 @@
+ void ixgbe_ptp_start_cyclecounter(struct ixgbe_adapter *adapter);
+ void ixgbe_ptp_reset(struct ixgbe_adapter *adapter);
+ void ixgbe_ptp_check_pps_event(struct ixgbe_adapter *adapter, u32 eicr);
++void ixgbe_ptp_check_extts_event(struct ixgbe_adapter *adapter, u64 ns, int index);
+ #ifdef CONFIG_PCI_IOV
+ void ixgbe_sriov_reinit(struct ixgbe_adapter *adapter);
+ #endif
+diff -u ixgbe_orig_4.4.59/ixgbe_main.c ixgbe_mod_4.4.59/ixgbe_main.c
+--- ixgbe_orig_4.4.59/ixgbe_main.c	2018-05-25 10:05:38.725319928 +0000
++++ ixgbe_mod_4.4.59/ixgbe_main.c	2018-05-25 10:04:46.009864530 +0000
+@@ -2649,6 +2649,9 @@
+ 			mask |= IXGBE_EICR_GPI_SDP0_X540;
+ 		mask |= IXGBE_EIMS_ECC;
+ 		mask |= IXGBE_EIMS_MAILBOX;
++
++		/* Enable interrupt of SDP2 level transition. */
++		mask |= IXGBE_EICR_GPI_SDP2_X540;
+ 		break;
+ 	default:
+ 		break;
+@@ -2733,6 +2736,22 @@
+ 		}
+ 		ixgbe_check_sfp_event(adapter, eicr);
+ 		ixgbe_check_overtemp_event(adapter, eicr);
++
++		if(eicr & IXGBE_EICR_GPI_SDP2_X540)
++		{
++			int index = 2;
++			u64 ns, stamp;
++			unsigned long flags;
++
++			stamp = (u64)IXGBE_READ_REG(&adapter->hw, IXGBE_AUXSTMPL0);
++			stamp |= (u64)IXGBE_READ_REG(&adapter->hw, IXGBE_AUXSTMPH0) << 32;
++
++			spin_lock_irqsave(&adapter->tmreg_lock, flags);
++			ns = timecounter_cyc2time(&adapter->tc, stamp);
++			spin_unlock_irqrestore(&adapter->tmreg_lock, flags);
++
++			ixgbe_ptp_check_extts_event(adapter, ns, index);
++		}
+ 		break;
+ 	default:
+ 		break;
+@@ -4947,6 +4966,12 @@
+ 		break;
+ 	}
+ 
++	if(hw->mac.type == ixgbe_mac_X540)
++	{
++		/* If SDP2 is configured as input this bit enables use for GPI interrupt detection. */
++		gpie |= IXGBE_SDP2_GPIEN_X540;
++	}
++
+ 	IXGBE_WRITE_REG(hw, IXGBE_GPIE, gpie);
+ }
+ 
+diff -u ixgbe_orig_4.4.59/ixgbe_ptp.c ixgbe_mod_4.4.59/ixgbe_ptp.c
+--- ixgbe_orig_4.4.59/ixgbe_ptp.c	2018-05-25 10:05:38.733319846 +0000
++++ ixgbe_mod_4.4.59/ixgbe_ptp.c	2018-05-24 13:18:45.025579437 +0000
+@@ -104,6 +104,14 @@
+  */
+ #define IXGBE_PTP_PPS_HALF_SECOND 500000000ULL
+ 
++#define IXGBE_TSAUXC_EN_TS0     0x00000100
++//#define IXGBE_TSAUXC_EN_TS1     0x00000400
++
++#define IXGBE_TSAUXC_SDP2_INT   0x00000010
++
++#define IXGBE_ESDP_SDP2_DIR     0x00000400 /* SDP2 IO direction */
++#define IXGBE_ESDP_SDP2_NATIVE  0x00040000 /* SDP2 native mode */
++
+ /**
+  * ixgbe_ptp_setup_sdp
+  * @hw: the hardware private structure
+@@ -123,54 +131,74 @@
+ 	u32 esdp, tsauxc, clktiml, clktimh, trgttiml, trgttimh, rem;
+ 	u64 ns = 0, clock_edge = 0;
+ 
+-	if ((adapter->flags2 & IXGBE_FLAG2_PTP_PPS_ENABLED) &&
+-	    (hw->mac.type == ixgbe_mac_X540)) {
+-
++	if ((hw->mac.type == ixgbe_mac_X540)) {
++		bool enable_pps = adapter->flags2 & IXGBE_FLAG2_PTP_PPS_ENABLED;
+ 		/* disable the pin first */
+-		IXGBE_WRITE_REG(hw, IXGBE_TSAUXC, 0x0);
+-		IXGBE_WRITE_FLUSH(hw);
++//		IXGBE_WRITE_REG(hw, IXGBE_TSAUXC, 0x0);
++//		IXGBE_WRITE_FLUSH(hw);
+ 
++		tsauxc = IXGBE_READ_REG(hw, IXGBE_TSAUXC);
+ 		esdp = IXGBE_READ_REG(hw, IXGBE_ESDP);
+ 
+ 		/*
+ 		 * enable the SDP0 pin as output, and connected to the
+ 		 * native function for Timesync (ClockOut)
+ 		 */
+-		esdp |= (IXGBE_ESDP_SDP0_DIR |
+-			 IXGBE_ESDP_SDP0_NATIVE);
+-
+-		/*
+-		 * enable the Clock Out feature on SDP0, and allow
+-		 * interrupts to occur when the pin changes
+-		 */
+-		tsauxc = (IXGBE_TSAUXC_EN_CLK |
+-			  IXGBE_TSAUXC_SYNCLK |
+-			  IXGBE_TSAUXC_SDP0_INT);
+-
+-		/* clock period (or pulse length) */
+-		clktiml = (u32)(IXGBE_PTP_PPS_HALF_SECOND << shift);
+-		clktimh = (u32)((IXGBE_PTP_PPS_HALF_SECOND << shift) >> 32);
++		if(enable_pps) {
++			esdp |= (IXGBE_ESDP_SDP0_DIR |
++				 IXGBE_ESDP_SDP0_NATIVE);
++
++			/*
++			 * enable the Clock Out feature on SDP0, and allow
++			 * interrupts to occur when the pin changes
++			 */
++			tsauxc |= (IXGBE_TSAUXC_EN_CLK |
++				  IXGBE_TSAUXC_SYNCLK |
++				  IXGBE_TSAUXC_SDP0_INT);
++
++			/* clock period (or pulse length) */
++			clktiml = (u32)(IXGBE_PTP_PPS_HALF_SECOND << shift);
++			clktimh = (u32)((IXGBE_PTP_PPS_HALF_SECOND << shift) >> 32);
++
++			/*
++			 * Account for the cyclecounter wrap-around value by
++			 * using the converted ns value of the current time to
++			 * check for when the next aligned second would occur.
++			 */
++			clock_edge |= (u64)IXGBE_READ_REG(hw, IXGBE_SYSTIML);
++			clock_edge |= (u64)IXGBE_READ_REG(hw, IXGBE_SYSTIMH) << 32;
++			ns = timecounter_cyc2time(&adapter->tc, clock_edge);
++
++			div_u64_rem(ns, IXGBE_PTP_PPS_HALF_SECOND, &rem);
++			clock_edge += ((IXGBE_PTP_PPS_HALF_SECOND - (u64)rem) << shift);
++
++			/* specify the initial clock start time */
++			trgttiml = (u32)clock_edge;
++			trgttimh = (u32)(clock_edge >> 32);
++
++			IXGBE_WRITE_REG(hw, IXGBE_CLKTIML, clktiml);
++			IXGBE_WRITE_REG(hw, IXGBE_CLKTIMH, clktimh);
++			IXGBE_WRITE_REG(hw, IXGBE_TRGTTIML0, trgttiml);
++			IXGBE_WRITE_REG(hw, IXGBE_TRGTTIMH0, trgttimh);
++		} else {
++			esdp &= ~(IXGBE_ESDP_SDP0_DIR |
++					  IXGBE_ESDP_SDP0_NATIVE);
++			tsauxc &= ~(IXGBE_TSAUXC_EN_CLK |
++				  IXGBE_TSAUXC_SYNCLK |
++				  IXGBE_TSAUXC_SDP0_INT);
++		}
+ 
+-		/*
+-		 * Account for the cyclecounter wrap-around value by
+-		 * using the converted ns value of the current time to
+-		 * check for when the next aligned second would occur.
+-		 */
+-		clock_edge |= (u64)IXGBE_READ_REG(hw, IXGBE_SYSTIML);
+-		clock_edge |= (u64)IXGBE_READ_REG(hw, IXGBE_SYSTIMH) << 32;
+-		ns = timecounter_cyc2time(&adapter->tc, clock_edge);
+-
+-		div_u64_rem(ns, IXGBE_PTP_PPS_HALF_SECOND, &rem);
+-		clock_edge += ((IXGBE_PTP_PPS_HALF_SECOND - (u64)rem) << shift);
+-
+-		/* specify the initial clock start time */
+-		trgttiml = (u32)clock_edge;
+-		trgttimh = (u32)(clock_edge >> 32);
+-
+-		IXGBE_WRITE_REG(hw, IXGBE_CLKTIML, clktiml);
+-		IXGBE_WRITE_REG(hw, IXGBE_CLKTIMH, clktimh);
+-		IXGBE_WRITE_REG(hw, IXGBE_TRGTTIML0, trgttiml);
+-		IXGBE_WRITE_REG(hw, IXGBE_TRGTTIMH0, trgttimh);
++		if (adapter->ext_ts_sdp2_enable) {
++			//Configure SDP2 as input.
++			esdp &= ~IXGBE_ESDP_SDP2_DIR;
++			//Native mode operation of SDP2. If enabled the PTP time is sampled by the Auxiliary Time Stamp 0 register.
++			esdp |= IXGBE_ESDP_SDP2_NATIVE;
++			tsauxc |= (IXGBE_TSAUXC_EN_TS0 | IXGBE_TSAUXC_SDP2_INT);
++		} else {
++			esdp &= ~(IXGBE_ESDP_SDP2_DIR |
++					  IXGBE_ESDP_SDP2_NATIVE);
++			tsauxc &= ~(IXGBE_TSAUXC_EN_TS0 | IXGBE_TSAUXC_SDP2_INT);
++		}
+ 
+ 		IXGBE_WRITE_REG(hw, IXGBE_ESDP, esdp);
+ 		IXGBE_WRITE_REG(hw, IXGBE_TSAUXC, tsauxc);
+@@ -336,6 +364,7 @@
+ {
+ 	struct ixgbe_adapter *adapter =
+ 		container_of(ptp, struct ixgbe_adapter, ptp_caps);
++	int pin;
+ 
+ 	/**
+ 	 * When PPS is enabled, unmask the interrupt for the ClockOut
+@@ -358,9 +387,77 @@
+ 		}
+ 	}
+ 
++	else if(rq->type == PTP_CLK_REQ_EXTTS) {
++		if (on) {
++			pin = ptp_find_pin(adapter->ptp_clock, PTP_PF_EXTTS,
++					   rq->extts.index);
++			if (pin < 0)
++				return -EBUSY;
++		}
++		if (rq->extts.index == 1) {
++//			tsauxc_mask = IXGBE_TSAUXC_EN_TS1;
++//			tsim_mask = TSINTR_AUTT1;
++			return -ENOTSUPP;
++        } else {
++			adapter->ext_ts_sdp2_enable = on;//tsauxc_mask = IXGBE_TSAUXC_EN_TS0 | IXGBE_TSAUXC_SDP2_INT;
++        }
++		ixgbe_ptp_setup_sdp(adapter);
++        return 0;
++	}
++
+ 	return -ENOTSUPP;
+ }
+ 
++static int ixgbe_ptp_verify_pin(struct ptp_clock_info *ptp, unsigned int pin,
++				  enum ptp_pin_function func, unsigned int chan)
++{
++	switch (func) {
++	case PTP_PF_NONE:
++		break;
++	case PTP_PF_EXTTS:
++		if(pin != 2 || chan != 0)
++			return -1;
++		break;
++	case PTP_PF_PEROUT:
++	case PTP_PF_PHYSYNC:
++		return -1;
++	}
++	return 0;
++}
++
++/**
++ * ixgbe_ptp_check_extts_event
++ * @adapter: the private adapter structure
++ * @ns: the timestamp the event occured.
++ *
++ * This function is called by the interrupt routine when checking for
++ * interrupts. It will check and handle an external timestamp event.
++ */
++void ixgbe_ptp_check_extts_event(struct ixgbe_adapter *adapter, u64 ns, int index)
++{
++	struct ixgbe_hw *hw = &adapter->hw;
++	struct ptp_clock_event event;
++
++	event.type = PTP_CLOCK_EXTTS;
++	event.timestamp = ns;
++	event.index = index;
++
++	/* this check is necessary in case the interrupt was enabled via some
++	 * alternative means (ex. debug_fs). Better to check here than
++	 * everywhere that calls this function.
++	 */
++	if (!adapter->ptp_clock)
++		return;
++
++	switch (hw->mac.type) {
++	case ixgbe_mac_X540:
++		ptp_clock_event(adapter->ptp_clock, &event);
++		break;
++	default:
++		break;
++	}
++}
++
+ /**
+  * ixgbe_ptp_check_pps_event
+  * @adapter: the private adapter structure
+@@ -853,6 +950,7 @@
+ {
+ 	struct net_device *netdev = adapter->netdev;
+ 	long err;
++	int i = 0;
+ 
+ 	/* do nothing if we already have a clock device */
+ 	if (!IS_ERR_OR_NULL(adapter->ptp_clock))
+@@ -860,13 +958,25 @@
+ 
+ 	switch (adapter->hw.mac.type) {
+ 	case ixgbe_mac_X540:
++		for (i = 0; i < IXGBE_N_SDP; i++) {
++			struct ptp_pin_desc *ppd = &adapter->sdp_config[i];
++
++			snprintf(ppd->name, sizeof(ppd->name), "SDP%d", i);
++			ppd->index = i;
++			ppd->func = PTP_PF_NONE;
++		}
++
+ 		snprintf(adapter->ptp_caps.name,
+ 			 sizeof(adapter->ptp_caps.name),
+ 			 "%s", netdev->name);
+ 		adapter->ptp_caps.owner = THIS_MODULE;
+ 		adapter->ptp_caps.max_adj = 250000000;
+ 		adapter->ptp_caps.n_alarm = 0;
+-		adapter->ptp_caps.n_ext_ts = 0;
++
++		adapter->ptp_caps.n_ext_ts = 1;
++		adapter->ptp_caps.n_pins = IXGBE_N_SDP;
++		adapter->ptp_caps.pin_config = adapter->sdp_config;
++
+ 		adapter->ptp_caps.n_per_out = 0;
+ 		adapter->ptp_caps.pps = 1;
+ 		adapter->ptp_caps.adjfreq = ixgbe_ptp_adjfreq;
+@@ -874,6 +984,7 @@
+ 		adapter->ptp_caps.gettime64 = ixgbe_ptp_gettime;
+ 		adapter->ptp_caps.settime64 = ixgbe_ptp_settime;
+ 		adapter->ptp_caps.enable = ixgbe_ptp_feature_enable;
++		adapter->ptp_caps.verify = ixgbe_ptp_verify_pin;
+ 		break;
+ 	case ixgbe_mac_82599EB:
+ 		snprintf(adapter->ptp_caps.name,
