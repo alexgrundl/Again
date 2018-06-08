@@ -48,12 +48,19 @@ void PortIPC::ProcessState()
         {
             //Values are inverted because "xtss-monitor" interpretation of "masterLocalPhaseOffset" is "local - master time"
             //and "masterLocalFrequencyOffset" is "local / master frequency"...
-            masterLocalPhaseOffset = -m_timeAwareSystem->GetClockSourcePhaseOffset().ns;
+            if(m_networkPort->GetPtpClock()->GetPtssType() == PtpClock::PTSS_TYPE_ROOT)
+                masterLocalPhaseOffset = -m_timeAwareSystem->GetClockSourcePhaseOffset().ns;
+            else
+                masterLocalPhaseOffset = m_networkPort->GetPtpClock()->GetPtssOffset();
             masterLocalFrequencyOffset = m_timeAwareSystem->GetClockSourceFreqOffset();// != 0 ? 1.0 / m_timeAwareSystem->GetClockSourceFreqOffset() : 1.0;
         }
         else
         {
-            masterLocalPhaseOffset = 0;
+            if(m_networkPort->GetPtpClock()->GetPtssType() == PtpClock::PTSS_TYPE_ROOT)
+                masterLocalPhaseOffset = 0;
+            else
+                masterLocalPhaseOffset = m_networkPort->GetPtpClock()->GetPtssOffset();
+
             masterLocalFrequencyOffset = 1.0;
         }
 

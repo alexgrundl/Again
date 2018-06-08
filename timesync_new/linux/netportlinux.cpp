@@ -15,6 +15,8 @@ NetPortLinux::NetPortLinux(char const* const devname)
     m_GeneralSock = pal::SocketCreate(PF_PACKET, SOCK_DGRAM, 0);
     m_ptpClock = new PtpClockLinux();
     m_cardType = ReadNetworkCardTypeFromSysFs();
+
+    m_ptpClock->SetExternalTimestampPin(m_cardType == NETWORK_CARD_TYPE_I210 ? 1 : 2);
     SetDefaultPhyDelays();
 }
 

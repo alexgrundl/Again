@@ -34,7 +34,7 @@ void PlatformSync::ProcessState()
         case STATE_INITIALIZING:
             if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_SLAVE)
             {
-                m_ptpClock->EnableExternalTimestamp(m_networkPort->GetNetworkCardType() == NETWORK_CARD_TYPE_I210 ? 1 : 2);
+                m_ptpClock->EnableExternalTimestamp();
                 m_portThread->Start();
                 m_state = STATE_PLATFORM_SYNC;
             }
@@ -47,7 +47,7 @@ void PlatformSync::ProcessState()
                 {
                     if(m_syntonize)
                     {
-                        int64_t nsOffset = m_timeControl.Syntonize(m_timeAwareSystem->GetLocalClock(), m_tsExtEvent, m_tsSystem);
+                        m_networkPort->GetPtpClock()->SetPtssOffset(m_timeControl.Syntonize(m_timeAwareSystem->GetLocalClock(), m_tsExtEvent, m_tsSystem));
                         //printf("Port %s - offset: %li ns\n", m_networkPort->GetInterfaceName().c_str(), nsOffset);
                     }
                     m_syntonize = !m_syntonize || m_networkPort->GetNetworkCardType() == NETWORK_CARD_TYPE_X540;
@@ -58,7 +58,7 @@ void PlatformSync::ProcessState()
             else
             {
                 m_portThread->Stop();
-                m_ptpClock->DisableExternalTimestamp(m_networkPort->GetNetworkCardType() == NETWORK_CARD_TYPE_I210 ? 1 : 2);
+                m_ptpClock->DisableExternalTimestamp();
                 m_state = STATE_INITIALIZING;
             }
             break;

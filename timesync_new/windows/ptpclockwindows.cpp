@@ -22,4 +22,14 @@ void PtpClockWindows::SetPtssType(PtssType type)
     m_ptssType = type;
 }
 
+int64_t PtpClockWindows::GetPtssOffset()
+{
+    return m_ptssOffset;
+}
+
+void PtpClockWindows::SetPtssOffset(int64_t offset)
+{
+    m_ptssOffset = offset;
+}
+
 #endif //__linux__

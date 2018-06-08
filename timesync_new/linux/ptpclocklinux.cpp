@@ -7,7 +7,9 @@ PtpClockLinux::PtpClockLinux()
     ptpClockRootPath = "/dev/ptp";
     m_clockFD = -1;
     m_ptssType = PTSS_TYPE_SLAVE;
+    m_ptssOffset = INT64_MAX;
     m_systemClock = SYSTEM_CLOCK_UNKNOWN;
+    m_externalTimestampPin = -1;
     m_lock = pal::LockedRegionCreate();
 }
 
@@ -240,9 +242,24 @@ bool PtpClockLinux::StopPPS()
     return success;
 }
 
+void PtpClockLinux::SetExternalTimestampPin(int pin)
+{
+    m_externalTimestampPin = pin;
+}
+
+bool PtpClockLinux::EnableExternalTimestamp()
+{
+    return EnableExternalTimestamp(m_externalTimestampPin);
+}
+
 bool PtpClockLinux::EnableExternalTimestamp(int pinIndex)
 {
     return SetExternalTimestamp(pinIndex, true);
+}
+
+bool PtpClockLinux::DisableExternalTimestamp()
+{
+    return DisableExternalTimestamp(m_externalTimestampPin);
 }
 
 bool PtpClockLinux::DisableExternalTimestamp(int pinIndex)
@@ -326,6 +343,16 @@ bool PtpClockLinux::ReadExternalTimestamp(struct timespec& tsExtEvent, struct ti
 PtpClockLinux::SystemClock PtpClockLinux::GetSystemClock()
 {
     return m_systemClock;
+}
+
+int64_t PtpClockLinux::GetPtssOffset()
+{
+    return m_ptssOffset;
+}
+
+void PtpClockLinux::SetPtssOffset(int64_t offset)
+{
+    m_ptssOffset = offset;
 }
 
 #endif //__linux__

@@ -29,11 +29,13 @@ void TimeControl::Syntonize(ScaledNs masterLocalOffset, double remoteLocalRate, 
 {
     if(m_ptpClock != NULL)
     {
-        if(abs(masterLocalOffset.ns) >= NS_PER_SEC / 100)
+        if(abs(masterLocalOffset.ns) >= k_timeJumpLimit)
         {
+#ifndef __arm__
+            if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_ROOT)
+                m_ptpClock->StopPPS();
+#endif
             m_ptpClock->AdjustPhase(masterLocalOffset.ns);
-
-            //m_ptpClock->StopPPS();
 #ifndef __arm__
             if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_ROOT)
                 m_ptpClock->StartPPS();

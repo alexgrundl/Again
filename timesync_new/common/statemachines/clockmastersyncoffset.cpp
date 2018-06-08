@@ -36,7 +36,10 @@ double ClockMasterSyncOffset::ComputeClockSourceFreqOffset()
         {
             lognotice("Time jump detected");
 #ifndef __arm__
-            m_timeAwareSystem->GetLocalClock()->StartPPS();
+            /* Only restart PPS if our system is the master. Otherwise, PPS will be restarted by the "TimeControl"
+             * instance when adjusting the time phase. */
+            if(m_timeAwareSystem->GetSelectedRole(0) == PORT_ROLE_SLAVE)
+                m_timeAwareSystem->GetLocalClock()->StartPPS();
 #endif
         }
     }

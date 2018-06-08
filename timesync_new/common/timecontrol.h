@@ -9,6 +9,9 @@ class TimeControl
 {
 public:
 
+    static const int k_timeJumpLimit = NS_PER_SEC / 10;
+
+
     TimeControl();
 
 
@@ -22,7 +25,9 @@ public:
 
 private:
 
+
     float m_ppm;
+
 
     double m_integral;
 

@@ -53,18 +53,30 @@ public:
     void SetPtssType(PtssType type);
 
 
-    bool EnableExternalTimestamp(int pinIndex) {return true;}
+    bool EnableExternalTimestamp() {return true;}
 
 
-    bool DisableExternalTimestamp(int pinIndex) {return true;}
+    bool DisableExternalTimestamp() {return true;}
+
+
+    void SetExternalTimestampPin(int pin) {}
 
 
     bool ReadExternalTimestamp(struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent) {return true;}
 
 
+    int64_t GetPtssOffset();
+
+
+    void SetPtssOffset(int64_t offset);
+
+
 private:
 
     PtssType m_ptssType;
+
+
+    int64_t m_ptssOffset;
 };
 
 #endif //__linux__

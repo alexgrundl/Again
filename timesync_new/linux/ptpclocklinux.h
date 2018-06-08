@@ -86,10 +86,13 @@ public:
     bool StopPPS();
 
 
-    bool EnableExternalTimestamp(int pinIndex);
+    bool EnableExternalTimestamp();
 
 
-    bool DisableExternalTimestamp(int pinIndex);
+    bool DisableExternalTimestamp();
+
+
+    void SetExternalTimestampPin(int pin);
 
 
     bool ReadExternalTimestamp(struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent);
@@ -102,6 +105,12 @@ public:
 
 
     SystemClock GetSystemClock();
+
+
+    int64_t GetPtssOffset();
+
+
+    void SetPtssOffset(int64_t offset);
 
 
 private:
@@ -122,6 +131,18 @@ private:
 
 
     SystemClock m_systemClock;
+
+
+    int64_t m_ptssOffset;
+
+
+    int m_externalTimestampPin;
+
+
+    bool EnableExternalTimestamp(int pinIndex);
+
+
+    bool DisableExternalTimestamp(int pinIndex);
 
 
     bool SetExternalTimestamp(int pinIndex, bool enable);
