@@ -29,7 +29,7 @@ void TimeControl::Syntonize(ScaledNs masterLocalOffset, double remoteLocalRate, 
 {
     if(m_ptpClock != NULL)
     {
-        if(abs(masterLocalOffset.ns) >= k_timeJumpLimit)
+        if(masterLocalOffset.ns >= k_timeJumpLimit || masterLocalOffset.ns <= -k_timeJumpLimit)
         {
 #ifndef __arm__
             if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_ROOT)
