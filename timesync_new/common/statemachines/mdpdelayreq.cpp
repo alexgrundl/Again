@@ -204,8 +204,14 @@ void MDPdelayReq::ProcessState()
                 }
                 else
                 {
-                    m_systemPort->SetAsCapable(false);
-                    m_networkPort->SetASCapable(false);
+                    /* If... else added so that a temporary wrong pdelay measurement doesn't lead to "asCapable = false". */
+                    if (m_lostResponses <= m_systemPort->GetAllowedLostResponses())
+                        m_lostResponses += 1;
+                    else
+                    {
+                        m_systemPort->SetAsCapable(false);
+                        m_networkPort->SetASCapable(false);
+                    }
                 }
                 m_state = STATE_WAITING_FOR_PDELAY_INTERVAL_TIMER;
             }
@@ -229,7 +235,6 @@ void MDPdelayReq::ProcessState()
             ExecuteSendPDelayReqState();
             m_state = STATE_SEND_PDELAY_REQ;
             break;
-            m_systemPort->SetAsCapable(false);
 
         default:
             fprintf(stderr, "State not allowed: %i, File: %s\n", m_state, __FILE__);
