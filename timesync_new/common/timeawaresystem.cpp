@@ -88,6 +88,9 @@ TimeAwareSystem::TimeAwareSystem()
     m_ctssEnabled = false;
     m_ptssEnabled = false;
     m_timeRelayEnabled = false;
+
+    m_lastGpsData = {0, 0, 0};
+    m_lastGpsFallbackData = {0, 0, 0};
 }
 
 TimeAwareSystem::~TimeAwareSystem()
@@ -650,4 +653,24 @@ bool TimeAwareSystem::IsTimeRelayEnabled()
 void TimeAwareSystem::SetTimeRelayEnabled(bool enable)
 {
     m_timeRelayEnabled = enable;
+}
+
+GPSSyncData TimeAwareSystem::GetLastGpsData()
+{
+    return m_lastGpsData;
+}
+
+void TimeAwareSystem::SetLastGpsData(GPSSyncData gpsData)
+{
+    m_lastGpsData = gpsData;
+}
+
+GPSSyncData TimeAwareSystem::GetLastFallbackGpsData()
+{
+    return m_lastGpsFallbackData;
+}
+
+void TimeAwareSystem::SetLastFallbackGpsData(GPSSyncData gpsData)
+{
+    m_lastGpsFallbackData = gpsData;
 }

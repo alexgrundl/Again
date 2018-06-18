@@ -9,6 +9,7 @@
 #include "ptpclock.h"
 #include "types.h"
 #include "systemport.h"
+#include "GPSdef.h"
 #include "sharedmemoryipclinux.h"
 
 #ifdef __linux__
@@ -336,6 +337,18 @@ public:
     void SetSystemPriority1(uint8_t priority1);
 
 
+    GPSSyncData GetLastGpsData();
+
+
+    void SetLastGpsData(GPSSyncData gpsData);
+
+
+    GPSSyncData GetLastFallbackGpsData();
+
+
+    void SetLastFallbackGpsData(GPSSyncData gpsData);
+
+
     static uint8_t GetDomainToSyntonize();
 
 
@@ -594,6 +607,12 @@ private:
 
 
     bool m_timeRelayEnabled;
+
+
+    GPSSyncData m_lastGpsData;
+
+
+    GPSSyncData m_lastGpsFallbackData;
 
 
     static uint8_t s_domainToSyntonize;

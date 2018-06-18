@@ -5,6 +5,9 @@
 TimeSyncDaemonLinux::TimeSyncDaemonLinux(PtpConfig *config) : TimeSyncDaemon(config)
 {
     m_licenseCheck = new LicenseCheckLinux();
+    m_serial.Open("/dev/ttyACM0");
+    m_gpsSync = new GPSSync(&m_serial, m_timeAwareSystems[0]);
+    m_gpsSync->StartSync();
 }
 
 TimeSyncDaemonLinux::~TimeSyncDaemonLinux()
@@ -12,6 +15,9 @@ TimeSyncDaemonLinux::~TimeSyncDaemonLinux()
     delete m_licenseCheck;
     DeleteManagers();
     DeleteNetworkPorts();
+    m_gpsSync->StopSync();
+    m_serial.Close();
+    delete m_gpsSync;
 }
 
 void TimeSyncDaemonLinux::InitalizePorts()

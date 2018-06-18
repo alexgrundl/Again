@@ -8,6 +8,7 @@
 #include "statemachinemanager.h"
 #include "portmanager.h"
 #include "ptpconfig.h"
+#include "gpssync.h"
 
 class TimeSyncDaemon
 {
@@ -56,6 +57,9 @@ protected:
 
 
     PtpConfig* m_config;
+
+
+    GPSSync* m_gpsSync;
 
 
     void DeleteManagers();

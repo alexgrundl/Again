@@ -77,8 +77,7 @@ void StateMachineManager::Initialize(TimeAwareSystem* timeAwareSystem, std::vect
 
         m_linkDelaySyncIntervalSetting.push_back(new LinkDelaySyncIntervalSetting(timeAwareSystem, timeAwareSystem->GetSystemPort(i), networkPorts[i]));
         if(m_timeAwareSystem->IsPTSSEnabled() && m_timeAwareSystem->GetDomain() == 0 &&
-                (networkPorts[i]->GetNetworkCardType() == NETWORK_CARD_TYPE_X540 || networkPorts[i]->GetNetworkCardType() == NETWORK_CARD_TYPE_I210) &&
-                networkPorts[i]->GetPtpClock()->GetPtssType() == PtpClock::PTSS_TYPE_SLAVE)
+                (networkPorts[i]->GetNetworkCardType() == NETWORK_CARD_TYPE_X540 || networkPorts[i]->GetNetworkCardType() == NETWORK_CARD_TYPE_I210))
             m_platformSync.push_back(new PlatformSync(m_timeAwareSystem, timeAwareSystem->GetSystemPort(i), networkPorts[i]));
 #ifdef __linux__
         m_portIPC.push_back(new PortIPC(m_timeAwareSystem, timeAwareSystem->GetSystemPort(i), networkPorts[i], m_timeAwareSystem->GetDomain()));

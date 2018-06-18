@@ -18,7 +18,7 @@ SystemPort::SystemPort()
     m_currentLogPdelayReqInterval = 0;
     m_initialLogPdelayReqInterval = 0;
     m_pdelayReqInterval = {NS_PER_SEC, 0};
-    m_allowedLostResponses = 3;
+    m_allowedLostResponses = 5;
     m_isMeasuringDelay = false;
     m_neighborPropDelayThresh = {9000, 0};
     m_syncSequenceId = 0;

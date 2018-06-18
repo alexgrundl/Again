@@ -76,7 +76,9 @@ SOURCES += main.cpp \
     windows/ptpclockwindows.cpp \
     windows/timesyncdaemonwindows.cpp \
     windows/netportwindows.cpp \
-    common/ptpconfig.cpp
+    common/ptpconfig.cpp \
+    linux/seriallinux.cpp \
+    common/gpssync.cpp
 
 HEADERS += \
     common/types/types.h \
@@ -148,7 +150,11 @@ HEADERS += \
     windows/licensecheckwindows.h \
     windows/timesyncdaemonwindows.h \
     windows/netportwindows.h \
-    common/ptpconfig.h
+    common/ptpconfig.h \
+    common/serial.h \
+    linux/seriallinux.h \
+    common/GPSdef.h \
+    common/gpssync.h
 
 DISTFILES += \
     ixgbe_4.4.59.patch \

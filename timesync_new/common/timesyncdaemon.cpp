@@ -4,6 +4,7 @@ TimeSyncDaemon::TimeSyncDaemon(PtpConfig* config)
 {
     m_licenseCheck = NULL;
     m_config = config;
+    m_gpsSync = NULL;
 
     int nDomains = config->IsDomain1Enabled() ? 2 : 1;
     for (int i = 0; i < nDomains; ++i)

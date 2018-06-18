@@ -32,34 +32,25 @@ void PlatformSync::ProcessState()
         switch(m_state)
         {
         case STATE_INITIALIZING:
-            if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_SLAVE)
-            {
-                m_ptpClock->EnableExternalTimestamp();
-                m_portThread->Start();
-                m_state = STATE_PLATFORM_SYNC;
-            }
+            m_ptpClock->EnableExternalTimestamp();
+            m_portThread->Start();
+            m_state = STATE_PLATFORM_SYNC;
             break;
 
         case STATE_PLATFORM_SYNC:
-            if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_SLAVE)
+            if(m_externalTimestampRead)
             {
-                if(m_externalTimestampRead)
+                if(m_syntonize)
                 {
-                    if(m_syntonize)
+                    if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_SLAVE)
                     {
                         m_networkPort->GetPtpClock()->SetPtssOffset(m_timeControl.Syntonize(m_timeAwareSystem->GetLocalClock(), m_tsExtEvent, m_tsSystem));
                         //printf("Port %s - offset: %li ns\n", m_networkPort->GetInterfaceName().c_str(), nsOffset);
                     }
-                    m_syntonize = !m_syntonize || m_networkPort->GetNetworkCardType() == NETWORK_CARD_TYPE_X540;
-
-                    m_externalTimestampRead = false;
                 }
-            }
-            else
-            {
-                m_portThread->Stop();
-                m_ptpClock->DisableExternalTimestamp();
-                m_state = STATE_INITIALIZING;
+                m_syntonize = !m_syntonize || m_networkPort->GetNetworkCardType() == NETWORK_CARD_TYPE_X540;
+
+                m_externalTimestampRead = false;
             }
             break;
 
@@ -78,6 +69,8 @@ uint32_t PlatformSync::ReadTimestamp(bool_t* pbIsRunning, pal::EventHandle_t /*p
         if(m_ptpClock->ReadExternalTimestamp(m_tsExtEvent, m_tsSystem))
         {
             m_externalTimestampRead = true;
+//            if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_ROOT)
+//                printf("%s: tsExtEvent.tv_sec: %lu, tsExtEvent.tv_nsec: %lu\n", m_networkPort->GetInterfaceName().c_str(), m_tsExtEvent.tv_sec, m_tsExtEvent.tv_nsec);
         }
     }
 

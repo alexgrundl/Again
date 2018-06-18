@@ -8,6 +8,7 @@
 #include <sys/ioctl.h>
 #include "ptpclocklinux.h"
 #include "netportlinux.h"
+#include "seriallinux.h"
 
 #include "timesyncdaemon.h"
 
@@ -26,6 +27,8 @@ public:
 
 private:
 
+
+    SerialLinux m_serial;
 
     void DeleteNetworkPorts();
 
