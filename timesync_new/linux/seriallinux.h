@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #ifndef SERIALLINUX_H
 #define SERIALLINUX_H
 
@@ -45,3 +47,5 @@ private:
 };
 
 #endif // SERIALLINUX_H
+
+#endif // __linux__
