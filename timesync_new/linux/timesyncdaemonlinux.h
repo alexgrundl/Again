@@ -23,7 +23,7 @@ public:
     virtual ~TimeSyncDaemonLinux();
 
 
-    void InitalizePorts();
+    void InitalizePorts(PtpConfig* config);
 
 private:
 

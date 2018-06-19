@@ -69,7 +69,7 @@ class NetPortLinux : public INetPort
 
         bool IsUpAndConnected();
 
-//        int GetSpeed();
+        int GetMaxSpeed();
 
         uint8_t const* GetMAC();
 

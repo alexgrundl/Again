@@ -10,7 +10,6 @@ TimeSyncDaemonLinux::TimeSyncDaemonLinux(PtpConfig *config) : TimeSyncDaemon(con
         m_serial.Open("/dev/ttyACM0");
         m_serial.SetAttributes(B115200, 0, false);
         m_gpsSync = new GPSSync(&m_serial, m_timeAwareSystems[0]);
-        m_gpsSync->StartSync();
     }
 }
 
@@ -27,7 +26,7 @@ TimeSyncDaemonLinux::~TimeSyncDaemonLinux()
     }
 }
 
-void TimeSyncDaemonLinux::InitalizePorts()
+void TimeSyncDaemonLinux::InitalizePorts(PtpConfig* config)
 {
     uint8_t macLicense[ETH_ALEN];
     char ifnameLicense[IFNAMSIZ];
@@ -50,6 +49,11 @@ void TimeSyncDaemonLinux::InitalizePorts()
                 if(networkPort->GetNetworkCardType() != NETWORK_CARD_TYPE_UNKNOWN)
                 {
                     networkPort->Initialize();
+                    if(config->GetRxDelay(networkPort->GetMaxSpeed()) >= 0)
+                        networkPort->SetRxPhyDelay(config->GetRxDelay(networkPort->GetMaxSpeed()));
+                    if(config->GetTxDelay(networkPort->GetMaxSpeed()) >= 0)
+                        networkPort->SetTxPhyDelay(config->GetTxDelay(networkPort->GetMaxSpeed()));
+
                     m_networkPorts.push_back(networkPort);
 
                     for (std::vector<TimeAwareSystem*>::size_type i = 0; i < m_timeAwareSystems.size(); ++i)
@@ -88,6 +92,10 @@ void TimeSyncDaemonLinux::InitalizePorts()
         }
     }
     freeifaddrs(addrs);
+
+    /* After all ports have been initialized start GPS synchronization. */
+    if(m_gpsSync != NULL)
+        m_gpsSync->StartSync();
 }
 
 void TimeSyncDaemonLinux::DeleteNetworkPorts()

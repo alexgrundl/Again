@@ -94,7 +94,7 @@ bool GPSClock::GetGPSTime(uint64_t deviceTime, uint64_t* gpsTime)
     {
         uint64_t diffDeviceTime = deviceTime > m_GpsData.ppsDeviceTime ? deviceTime - m_GpsData.ppsDeviceTime : m_GpsData.ppsDeviceTime - deviceTime;
         *gpsTime = deviceTime > m_GpsData.ppsDeviceTime ? m_GpsData.gpsTime + m_gpsToDeviceRate * diffDeviceTime : m_GpsData.gpsTime - m_gpsToDeviceRate * diffDeviceTime;
-        timeValid = deviceTime - m_GpsData.ppsDeviceTime < maxDeviceTimeDiff * NS_PER_SEC;
+        timeValid = diffDeviceTime < maxDeviceTimeDiff * NS_PER_SEC;
 
         //printf("deviceTime: %lu\tgpsTime: %lu\tdiffDeviceTime: %lu\tm_gpsToDeviceRate: %f\n", deviceTime, *gpsTime, diffDeviceTime, m_gpsToDeviceRate);
     }

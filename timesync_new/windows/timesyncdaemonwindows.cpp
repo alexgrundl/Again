@@ -14,7 +14,7 @@ TimeSyncDaemonWindows::~TimeSyncDaemonWindows()
     DeleteNetworkPorts();
 }
 
-void TimeSyncDaemonWindows::InitalizePorts()
+void TimeSyncDaemonWindows::InitalizePorts(PtpConfig* config)
 {
 }
 

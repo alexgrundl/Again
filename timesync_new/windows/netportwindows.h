@@ -40,7 +40,7 @@ public:
     bool IsWireless() {return false;}
     std::string GetInterfaceName() {return std::string("");}
     bool IsUpAndConnected() {return true;}
-//    int GetSpeed() {return -1;}
+    int GetMaxSpeed() {return -1;}
 
 private:
 

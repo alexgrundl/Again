@@ -610,26 +610,23 @@ NetPortLinux::KernelVersion NetPortLinux::GetKernelVersion()
     return kernelVersion;
 }
 
-//int LinuxNetPort::GetSpeed()
-//{
-//    struct ifreq ifr;
-//    struct ethtool_cmd edata;
-//    int rc;
+int NetPortLinux::GetMaxSpeed()
+{
+    int speed = -1;
 
-//    strncpy(ifr.ifr_name, m_IfcName.c_str(), sizeof(ifr.ifr_name));
-//    ifr.ifr_data = (char*)&edata;
+    switch (m_cardType)
+    {
+    case NETWORK_CARD_TYPE_I210:
+        speed = 1000;
+        break;
+    case NETWORK_CARD_TYPE_X540:
+    case NETWORK_CARD_TYPE_AXI_10G:
+        speed = 10000;
+    default:
+        break;
+    }
 
-//    edata.cmd = ETHTOOL_GSET;
-
-//    // issue ioctl
-//    rc = ioctl(pal::GetRawSocket(m_GeneralSock), SIOCETHTOOL, &ifr);
-//    if (rc < 0)
-//    {
-//        logerror("Get speed of interface %s failed.", ifr.ifr_name);
-//        return 0;
-//    }
-
-//    return edata.speed;
-//}
+    return speed;
+}
 
 #endif

@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 
         if(timeSyncDaemon->LicenseValid())
         {
-            timeSyncDaemon->InitalizePorts();
+            timeSyncDaemon->InitalizePorts(&config);
             timeSyncDaemon->InitializeManagers();
             timeSyncDaemon->Start();
 

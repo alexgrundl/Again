@@ -35,7 +35,7 @@ public:
     TimeAwareSystem* GetTimeAwareSystem(int index);
 
 
-    virtual void InitalizePorts() = 0;
+    virtual void InitalizePorts(PtpConfig* config) = 0;
 
 
 protected:

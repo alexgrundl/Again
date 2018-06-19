@@ -30,6 +30,12 @@ public:
 
     ClockTimeSource GetClockTimeSource();
 
+
+    int32_t GetTxDelay(int speed);
+
+
+    int32_t GetRxDelay(int speed);
+
 private:
 
 
@@ -46,6 +52,12 @@ private:
 
 
     ClockTimeSource m_clockTimeSource;
+
+
+    int32_t m_rxDelays[3];
+
+
+    int32_t m_txDelays[3];
 
 
     void PrintUsage(char *arg0);

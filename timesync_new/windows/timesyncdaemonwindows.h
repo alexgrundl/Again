@@ -20,7 +20,7 @@ public:
     virtual ~TimeSyncDaemonWindows();
 
 
-    void InitalizePorts();
+    void InitalizePorts(PtpConfig* config);
 
 private:
 
