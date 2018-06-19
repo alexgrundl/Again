@@ -36,7 +36,7 @@ private:
      * @brief maxGPSTimeDelay The max. difference between current and last device time when requesting the GPS time.
      * If the difference is higher than that value "GetGPSTime" will return false signaling that GPS data is too old.
      */
-    static const uint maxDeviceTimeDiff = 20;
+    static const uint32_t maxDeviceTimeDiff = 20;
 
     GPSSyncData m_GpsData;
 

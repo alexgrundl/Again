@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #include "seriallinux.h"
 
 SerialLinux::SerialLinux()
@@ -101,3 +103,5 @@ bool SerialLinux::Write(const uint8_t* buffer, uint32_t bytesToWrite)
 
     return bytesWritten == bytesToWrite;
 }
+
+#endif __linux__
