@@ -32,15 +32,39 @@ void MDSyncSendSM::SetSync()
 void MDSyncSendSM::SetFollowUp()
 {
     ScaledNs correctionScaled;
+    Timestamp preciseOriginTimestamp = m_rcvdMDSyncPtr->preciseOriginTimestamp;
+    UScaledNs sendTime = m_txSyncPtr->GetSendTime();
+    UScaledNs upstreamTxTime = m_rcvdMDSyncPtr->upstreamTxTime;
+
+    /* If we are master (Port Role 0 == Slave) calculate the GPS time from the device time. */
+    if(m_timeAwareSystem->GetSelectedRole(0) == PORT_ROLE_SLAVE && m_timeAwareSystem->GetTimeSource() == CLOCK_TIME_SOURCE_GPS)
+    {
+        uint64_t gpsTime;
+
+        if(m_timeAwareSystem->GetGPSTime(preciseOriginTimestamp.sec * NS_PER_SEC + preciseOriginTimestamp.ns, &gpsTime))
+        {
+            preciseOriginTimestamp.sec = gpsTime / NS_PER_SEC;
+            preciseOriginTimestamp.ns = gpsTime % NS_PER_SEC;
+
+            m_timeAwareSystem->GetGPSTime(sendTime.ns, &gpsTime);
+            sendTime.ns = gpsTime;
+            m_timeAwareSystem->GetGPSTime(upstreamTxTime.ns, &gpsTime);
+            upstreamTxTime.ns = gpsTime;
+        }
+        else
+            m_timeAwareSystem->SetTimeSource(CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR);
+
+        //printf("preciseOriginTimestamp: %lu\n", preciseOriginTimestamp.sec * NS_PER_SEC + preciseOriginTimestamp.ns);
+    }
 
     //printf("m_rcvdMDSyncPtr->followUpCorrectionField: %lu\n", m_rcvdMDSyncPtr->followUpCorrectionField.ns);
-    correctionScaled = m_rcvdMDSyncPtr->followUpCorrectionField + (m_txSyncPtr->GetSendTime() - m_rcvdMDSyncPtr->upstreamTxTime) * m_rcvdMDSyncPtr->rateRatio;
+    correctionScaled = m_rcvdMDSyncPtr->followUpCorrectionField + (sendTime - upstreamTxTime) * m_rcvdMDSyncPtr->rateRatio;
 
     m_txFollowUpPtr->SetCorrectionField((correctionScaled.ns << 16) + correctionScaled.ns_frac);
     m_txFollowUpPtr->SetSourcePortIdentity(&m_rcvdMDSyncPtr->sourcePortIdentity);
     m_txFollowUpPtr->SetSequenceID(m_txSyncPtr->GetSequenceID());
     m_txFollowUpPtr->SetLogMessageInterval(m_rcvdMDSyncPtr->logMessageInterval);
-    m_txFollowUpPtr->SetPreciseOriginTimestamp(m_rcvdMDSyncPtr->preciseOriginTimestamp);
+    m_txFollowUpPtr->SetPreciseOriginTimestamp(preciseOriginTimestamp);
 
     m_txFollowUpPtr->SetCumulativeScaledRateOffset((m_rcvdMDSyncPtr->rateRatio - 1.0) * pow(2, 41));
     m_txFollowUpPtr->SetGmTimeBaseIndicator(m_rcvdMDSyncPtr->gmTimeBaseIndicator);

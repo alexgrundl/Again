@@ -814,7 +814,7 @@ void GPSSync::HandleFallbackPPS(uint64_t gps_time, uint64_t tsc_time)
 {
   //lognotice("GPS: Set new Fbk Time: %lu: %lu: %u", gps_time, tsc_time, m_CurrentUtcOffset);
 
-  m_timeAwareSystem->SetLastFallbackGpsData(GPSSyncData({gps_time, tsc_time, m_CurrentUtcOffset}));
+  m_timeAwareSystem->UpdateFallbackGpsData(gps_time, tsc_time, m_CurrentUtcOffset);
   //TimeControl->SetLastGpsFallbackData(gps_time, tsc_time, current_utc_offset);
 }
 
@@ -957,7 +957,7 @@ void GPSSync::HandlePPS(uint8_t const * pData, uint16_t length)
 
         //lognotice("GPS: Set new GPS Time: %lu: %lu: %u", tains, current_ts, m_CurrentUtcOffset);
 
-        m_timeAwareSystem->SetLastGpsData(GPSSyncData({tains, current_ts, m_CurrentUtcOffset}));
+        m_timeAwareSystem->UpdateGpsData(tains, current_ts, m_CurrentUtcOffset);
         //TimeControl->SetLastGpsData(tains, tsctime.GetTime(), current_utc_offset);
     }
     else

@@ -350,9 +350,31 @@ typedef struct  GPS_GPRMC
 
 struct GPSSyncData
 {
+    /**
+     * @brief gpsTime The GPS time read from the serial interface.
+     */
     uint64_t gpsTime;
-    uint64_t systemTime;
+    /**
+     * @brief deviceTime The time of the hardware clock of the network chip when the PPS signal triggered.
+     */
+    uint64_t ppsDeviceTime;
+    /**
+     * @brief gpsSystemTime The system time when the GPS time was read from the serial interface.
+     */
+    uint64_t gpsSystemTime;
+    /**
+     * @brief ppsSystemTime The system time when the PPS signal of the hardware clock of the network chip triggered.
+     */
+    uint64_t ppsSystemTime;
+    /**
+     * @brief utcOffset The UTC offset read from the GPS data.
+     */
     uint16_t utcOffset;
+    /**
+     * @brief Should indicate that a new GPS time was read from the serial interface. Should be reset when processed after
+     * a PPS signal has triggered.
+     */
+    bool gpsTimeUpdated;
 };
 
 #endif // GPSDEF_H

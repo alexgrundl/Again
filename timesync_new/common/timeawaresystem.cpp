@@ -88,9 +88,6 @@ TimeAwareSystem::TimeAwareSystem()
     m_ctssEnabled = false;
     m_ptssEnabled = false;
     m_timeRelayEnabled = false;
-
-    m_lastGpsData = {0, 0, 0};
-    m_lastGpsFallbackData = {0, 0, 0};
 }
 
 TimeAwareSystem::~TimeAwareSystem()
@@ -203,9 +200,9 @@ UScaledNs TimeAwareSystem::ReadCurrentTime()
     UScaledNs uscaled;
 
 #ifdef __linux__
-//    PtpClockLinux* clockLinux = (PtpClockLinux*)m_clockLocal;
-//    clock_gettime(clockLinux->GetSystemClock() == PtpClockLinux::SYSTEM_CLOCK_MONOTONIC_RAW ? CLOCK_MONOTONIC_RAW : CLOCK_REALTIME, &ts);
-    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+    PtpClockLinux* clockLinux = (PtpClockLinux*)m_clockLocal;
+    clock_gettime(clockLinux->GetSystemClock() == PtpClockLinux::SYSTEM_CLOCK_MONOTONIC_RAW ? CLOCK_MONOTONIC_RAW : CLOCK_REALTIME, &ts);
+//    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
 #else
     //Windows get time function
     ts.tv_sec = 0;
@@ -498,7 +495,13 @@ ClockTimeSource TimeAwareSystem::GetTimeSource()
 
 void TimeAwareSystem::SetTimeSource(ClockTimeSource timeSource)
 {
-    this->m_timeSource = timeSource;
+    if(m_timeSource != timeSource)
+    {
+        lognotice("Domain %u: Clock time source changed: %s --> %s", m_domain,
+                  m_timeSource == CLOCK_TIME_SOURCE_GPS ? "GPS" : "Local Oscillator",
+                  timeSource == CLOCK_TIME_SOURCE_GPS ? "GPS" : "Local Oscillator");
+    }
+    m_timeSource = timeSource;
 }
 
 bool TimeAwareSystem::GetSysLeap61()
@@ -655,22 +658,28 @@ void TimeAwareSystem::SetTimeRelayEnabled(bool enable)
     m_timeRelayEnabled = enable;
 }
 
-GPSSyncData TimeAwareSystem::GetLastGpsData()
+void TimeAwareSystem::UpdateGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset)
 {
-    return m_lastGpsData;
+    m_gpsClock.UpdateGpsData(gpsTime, gpsSystemTime, utcOffset);
 }
 
-void TimeAwareSystem::SetLastGpsData(GPSSyncData gpsData)
+void TimeAwareSystem::UpdateFallbackGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset)
 {
-    m_lastGpsData = gpsData;
+    m_gpsClock.UpdateFallbackGpsData(gpsTime, gpsSystemTime, utcOffset);
 }
 
-GPSSyncData TimeAwareSystem::GetLastFallbackGpsData()
+bool TimeAwareSystem::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTime)
 {
-    return m_lastGpsFallbackData;
+    bool gpsAvailable = false;
+
+    gpsAvailable = m_gpsClock.UpdateGPSDataFromPPS(ppsDeviceTime, ppsSystemTime);
+    if(gpsAvailable)
+        SetTimeSource(CLOCK_TIME_SOURCE_GPS);
+
+    return gpsAvailable;
 }
 
-void TimeAwareSystem::SetLastFallbackGpsData(GPSSyncData gpsData)
+bool TimeAwareSystem::GetGPSTime(uint64_t deviceTime, uint64_t* gpsTime)
 {
-    m_lastGpsFallbackData = gpsData;
+    return m_gpsClock.GetGPSTime(deviceTime, gpsTime);
 }

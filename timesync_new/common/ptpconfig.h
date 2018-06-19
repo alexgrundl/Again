@@ -27,6 +27,9 @@ public:
 
     std::string GetLicenseMac();
 
+
+    ClockTimeSource GetClockTimeSource();
+
 private:
 
 
@@ -40,6 +43,9 @@ private:
 
 
     std::string m_macLicense;
+
+
+    ClockTimeSource m_clockTimeSource;
 
 
     void PrintUsage(char *arg0);

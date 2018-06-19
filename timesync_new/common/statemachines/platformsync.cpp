@@ -47,8 +47,15 @@ void PlatformSync::ProcessState()
                         m_networkPort->GetPtpClock()->SetPtssOffset(m_timeControl.Syntonize(m_timeAwareSystem->GetLocalClock(), m_tsExtEvent, m_tsSystem));
                         //printf("Port %s - offset: %li ns\n", m_networkPort->GetInterfaceName().c_str(), nsOffset);
                     }
+                    else
+                    {
+                        uint64_t deviceTime = m_tsExtEvent.tv_sec * NS_PER_SEC + m_tsExtEvent.tv_nsec;
+                        uint64_t systemTime = m_tsSystem.tv_sec * NS_PER_SEC + m_tsSystem.tv_nsec;
+                        m_timeAwareSystem->UpdateGPSDataFromPPS(deviceTime, systemTime);
+                    }
                 }
-                m_syntonize = !m_syntonize || m_networkPort->GetNetworkCardType() == NETWORK_CARD_TYPE_X540;
+                m_syntonize = !m_syntonize || m_networkPort->GetNetworkCardType() == NETWORK_CARD_TYPE_X540 ||
+                        m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_ROOT;
 
                 m_externalTimestampRead = false;
             }

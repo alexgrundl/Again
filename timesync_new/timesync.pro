@@ -78,7 +78,8 @@ SOURCES += main.cpp \
     windows/netportwindows.cpp \
     common/ptpconfig.cpp \
     linux/seriallinux.cpp \
-    common/gpssync.cpp
+    common/gpssync.cpp \
+    common/gpsclock.cpp
 
 HEADERS += \
     common/types/types.h \
@@ -154,7 +155,8 @@ HEADERS += \
     common/serial.h \
     linux/seriallinux.h \
     common/GPSdef.h \
-    common/gpssync.h
+    common/gpssync.h \
+    common/gpsclock.h
 
 DISTFILES += \
     ixgbe_4.4.59.patch \

@@ -5,6 +5,7 @@ PtpConfig::PtpConfig()
     m_domain1Enabled = false;
     m_priority1Domain0 = 254;
     m_priority1Domain1 = 254;
+    m_clockTimeSource = CLOCK_TIME_SOURCE_GPS;
 }
 
 void PtpConfig::PrintUsage( char *arg0 )
@@ -111,4 +112,9 @@ uint8_t PtpConfig::GetPriority1Domain1()
 std::string PtpConfig::GetLicenseMac()
 {
     return m_macLicense;
+}
+
+ClockTimeSource PtpConfig::GetClockTimeSource()
+{
+    return m_clockTimeSource;
 }
