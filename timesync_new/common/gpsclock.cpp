@@ -103,3 +103,8 @@ bool GPSClock::GetGPSTime(uint64_t deviceTime, uint64_t* gpsTime)
 
     return timeValid;
 }
+
+uint16_t GPSClock::GetUtcOffset()
+{
+    return m_GpsData.utcOffset;
+}

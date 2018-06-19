@@ -674,7 +674,11 @@ bool TimeAwareSystem::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsS
 
     gpsAvailable = m_gpsClock.UpdateGPSDataFromPPS(ppsDeviceTime, ppsSystemTime);
     if(gpsAvailable)
+    {
         SetTimeSource(CLOCK_TIME_SOURCE_GPS);
+        m_currentUtcOffset = m_gpsClock.GetUtcOffset();
+        m_currentUtcOffsetValid = true;
+    }
 
     return gpsAvailable;
 }

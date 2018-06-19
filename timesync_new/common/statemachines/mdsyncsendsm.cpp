@@ -52,7 +52,10 @@ void MDSyncSendSM::SetFollowUp()
             upstreamTxTime.ns = gpsTime;
         }
         else
+        {
             m_timeAwareSystem->SetTimeSource(CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR);
+            m_timeAwareSystem->SetCurrentUtcOffsetValid(false);
+        }
 
         //printf("preciseOriginTimestamp: %lu\n", preciseOriginTimestamp.sec * NS_PER_SEC + preciseOriginTimestamp.ns);
     }

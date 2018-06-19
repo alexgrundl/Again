@@ -27,6 +27,9 @@ public:
 
     bool GetGPSTime(uint64_t deviceTime, uint64_t *gpsTime);
 
+
+    uint16_t GetUtcOffset();
+
 private:
 
     /**
