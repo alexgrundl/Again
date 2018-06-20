@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include "types.h"
+#include "GPSdef.h"
 #include "ipcdef.hpp"
 
 #define SHM_NAME_DEFAULT  "/ptp"    /*!< Start of every shared memory name*/
@@ -138,7 +139,9 @@ public:
         int8_t   log_sync_interval,
         int8_t   log_announce_interval,
         int8_t   log_pdelay_interval,
-        uint16_t port_number );
+        uint16_t port_number,
+        ClockTimeSource clock_time_source,
+        GpsClockState gps_clock_state);
 
     /**
      * @brief unmaps and unlink shared memory

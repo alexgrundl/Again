@@ -3,9 +3,12 @@
 GPSClock::GPSClock()
 {
     m_gpsLock = pal::LockedRegionCreate();
-    m_GpsData = {0, 0, 0, 0, 0, false};
-    m_GpsDataPrevious = {0, 0, 0, 0, 0, false};
-    m_GpsFallbackData = {0, 0, 0, 0, 0, false};
+    m_gpsData = {0, 0, 0, 0, 0, 0};
+    m_gpsData.ppsErrors = k_maxGpsErrors;
+    m_gpsDataPrevious = {0, 0, 0, 0, 0, 0};
+    m_gpsFallbackData = {0, 0, 0, 0, 0, 0};
+    m_gpsFallbackData.ppsErrors = k_maxGpsFallbackErrors;
+    m_gpsFallbackDataPrevious = {0, 0, 0, 0, 0, 0};
     m_gpsToDeviceRate = 0.0;
 }
 
@@ -14,38 +17,32 @@ GPSClock::~GPSClock()
     pal::LockedRegionDelete(m_gpsLock);
 }
 
-void GPSClock::UpdateGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset)
+void GPSClock::UpdateGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset, bool fallback)
 {
     pal::LockedRegionEnter(m_gpsLock);
-    m_GpsDataPrevious.gpsTime = m_GpsData.gpsTime;
-    m_GpsDataPrevious.gpsSystemTime = m_GpsData.gpsSystemTime;
-    m_GpsDataPrevious.utcOffset = m_GpsData.utcOffset;
 
-    m_GpsData.gpsTime = gpsTime;
-    m_GpsData.gpsSystemTime = gpsSystemTime;
-    m_GpsData.utcOffset = utcOffset;
+    GPSSyncData* gpsData = fallback ? &m_gpsFallbackData : &m_gpsData;
+    GPSSyncData* gpsDataPrevious = fallback ? &m_gpsFallbackDataPrevious : &m_gpsDataPrevious;
 
-    m_GpsData.gpsTimeUpdated = true;
+    gpsDataPrevious->gpsTime = gpsData->gpsTime;
+    gpsDataPrevious->gpsSystemTime = gpsData->gpsSystemTime;
+    gpsDataPrevious->utcOffset = gpsData->utcOffset;
+
+    gpsData->gpsTime = gpsTime;
+    gpsData->gpsSystemTime = gpsSystemTime;
+    gpsData->utcOffset = utcOffset;
+    gpsData->ppsErrors = 0;
+
     pal::LockedRegionLeave(m_gpsLock);
 }
 
-void GPSClock::UpdateFallbackGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset)
-{
-    pal::LockedRegionEnter(m_gpsLock);
-    m_GpsFallbackData.gpsTime = gpsTime;
-    m_GpsFallbackData.gpsSystemTime = gpsSystemTime;
-    m_GpsFallbackData.utcOffset = utcOffset;
-    pal::LockedRegionLeave(m_gpsLock);
-}
-
-bool GPSClock::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTime)
+GpsClockState GPSClock::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTime)
 {
     int nWaits = 0;
     int maxWaits = 5;
-    uint64_t sysTimeOffset;
-    bool timeAndFrequencySet = false;
+    GpsClockState clockState;
 
-    while(!m_GpsData.gpsTimeUpdated)
+    while(m_gpsData.gpsSystemTime == m_gpsDataPrevious.gpsSystemTime)
     {
         pal::ms_sleep(20);
         nWaits++;
@@ -54,47 +51,82 @@ bool GPSClock::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTi
     }
 
     pal::LockedRegionEnter(m_gpsLock);
-    if(m_GpsData.gpsTimeUpdated)
-    {
-        m_GpsData.gpsTimeUpdated = false;
-        sysTimeOffset = ppsSystemTime > m_GpsData.gpsSystemTime ?  ppsSystemTime - m_GpsData.gpsSystemTime :
-                                                                       m_GpsData.gpsSystemTime - ppsSystemTime;
-
-        if(sysTimeOffset <= NS_PER_SEC * 0.1)
-        {
-            m_GpsData.ppsDeviceTime = ppsDeviceTime;
-            m_GpsData.ppsSystemTime = ppsSystemTime;
-
-            if(m_GpsDataPrevious.gpsTime > 0 && m_GpsDataPrevious.ppsDeviceTime > 0 && m_GpsData.ppsDeviceTime - m_GpsDataPrevious.ppsDeviceTime > 0)
-            {
-                m_gpsToDeviceRate = (double)(m_GpsData.gpsTime - m_GpsDataPrevious.gpsTime) / (double)(m_GpsData.ppsDeviceTime - m_GpsDataPrevious.ppsDeviceTime);
-                timeAndFrequencySet = true;
-            }
-
-            m_GpsDataPrevious.ppsDeviceTime = m_GpsData.ppsDeviceTime;
-            m_GpsDataPrevious.ppsSystemTime = m_GpsData.ppsSystemTime;
-        }
-        else
-        {
-            logerror("UpdateGPSDataFromPPS: Wrong sysTimeOffset: %lu", sysTimeOffset);
-        }
-    }
+    clockState = UpdateGPSDataFromPPS(ppsDeviceTime, ppsSystemTime, false, k_maxGpsErrors);
+    if(clockState == GPS_CLOCK_STATE_UNKNOWN)
+        clockState = UpdateGPSDataFromPPS(ppsDeviceTime, ppsSystemTime, true, k_maxGpsFallbackErrors);
     pal::LockedRegionLeave(m_gpsLock);
 
-    return timeAndFrequencySet;
+    return clockState;
 }
 
-bool GPSClock::GetGPSTime(uint64_t deviceTime, uint64_t* gpsTime)
+GpsClockState GPSClock::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTime, bool fallback, uint32_t maxErrors)
 {
+    GpsClockState clockState = GPS_CLOCK_STATE_UNKNOWN;
+    GPSSyncData* gpsData = fallback ? &m_gpsFallbackData : &m_gpsData;
+    GPSSyncData* gpsDataPrevious = fallback ? &m_gpsFallbackDataPrevious : &m_gpsDataPrevious;
+
+    if(gpsData->gpsSystemTime != gpsDataPrevious->gpsSystemTime)
+    {
+        SetPPSTimes(ppsDeviceTime, ppsSystemTime, false, fallback);
+        clockState = CalculateGpsToDeviceRate(fallback);
+        SetPPSTimes(ppsDeviceTime, ppsSystemTime, true, fallback);
+    }
+    if(clockState == GPS_CLOCK_STATE_UNKNOWN)
+    {
+        /* As the GPS pulse triggers two times per second (because (in Linux) the interrupt triggers when the signal changes from high
+         * to low and from low to high and we cannot seperate the two) we use "m_gpsUpdated" so that the GPS state only changes if there
+         * wasn't any new GPS U-blox message after two pulses. */
+        if(gpsData->ppsErrors < maxErrors)
+        {
+            gpsData->ppsErrors++;
+            clockState = fallback ? GPS_CLOCK_STATE_INTERNAL : GPS_CLOCK_STATE_AVAILABLE;
+        }
+    }
+
+    return clockState;
+}
+
+GpsClockState GPSClock::CalculateGpsToDeviceRate(bool fallback)
+{
+    uint64_t sysTimeOffset;
+    GpsClockState clockState = GPS_CLOCK_STATE_UNKNOWN;
+    GPSSyncData* gpsData = fallback ? &m_gpsFallbackData : &m_gpsData;
+    GPSSyncData* gpsDataPrevious = fallback ? &m_gpsFallbackDataPrevious : &m_gpsDataPrevious;
+
+    sysTimeOffset = gpsData->ppsSystemTime > gpsData->gpsSystemTime ?  gpsData->ppsSystemTime - gpsData->gpsSystemTime :
+                                                                   gpsData->gpsSystemTime - gpsData->ppsSystemTime;
+
+    if(gpsDataPrevious->gpsTime > 0 && gpsDataPrevious->ppsDeviceTime > 0)
+    {
+        if(sysTimeOffset <= NS_PER_SEC * 0.1)
+        {
+            if(gpsData->ppsDeviceTime - gpsDataPrevious->ppsDeviceTime > 0)
+            {
+                m_gpsToDeviceRate = (double)(gpsData->gpsTime - gpsDataPrevious->gpsTime) / (double)(gpsData->ppsDeviceTime - gpsDataPrevious->ppsDeviceTime);
+                clockState = fallback ? GPS_CLOCK_STATE_INTERNAL : GPS_CLOCK_STATE_AVAILABLE;
+            }
+        }
+    }
+
+    gpsDataPrevious->gpsTime = gpsData->gpsTime;
+    gpsDataPrevious->gpsSystemTime = gpsData->gpsSystemTime;
+    gpsDataPrevious->utcOffset = gpsData->utcOffset;
+
+    return clockState;
+}
+
+bool GPSClock::GetGPSTime(uint64_t deviceTime, uint64_t* gpsTime, bool fallback)
+{
+    GPSSyncData* gpsData = fallback ? &m_gpsFallbackData : &m_gpsData;
     bool timeValid = false;
 
     pal::LockedRegionEnter(m_gpsLock);
 
     if(m_gpsToDeviceRate > 0)
     {
-        uint64_t diffDeviceTime = deviceTime > m_GpsData.ppsDeviceTime ? deviceTime - m_GpsData.ppsDeviceTime : m_GpsData.ppsDeviceTime - deviceTime;
-        *gpsTime = deviceTime > m_GpsData.ppsDeviceTime ? m_GpsData.gpsTime + m_gpsToDeviceRate * diffDeviceTime : m_GpsData.gpsTime - m_gpsToDeviceRate * diffDeviceTime;
-        timeValid = diffDeviceTime < maxDeviceTimeDiff * NS_PER_SEC;
+        uint64_t diffDeviceTime = deviceTime > gpsData->ppsDeviceTime ? deviceTime - gpsData->ppsDeviceTime : gpsData->ppsDeviceTime - deviceTime;
+        *gpsTime = deviceTime > gpsData->ppsDeviceTime ? gpsData->gpsTime + m_gpsToDeviceRate * diffDeviceTime : gpsData->gpsTime - m_gpsToDeviceRate * diffDeviceTime;
+        timeValid = true;//diffDeviceTime < maxDeviceTimeDiff * NS_PER_SEC;
 
         //printf("deviceTime: %lu\tgpsTime: %lu\tdiffDeviceTime: %lu\tm_gpsToDeviceRate: %f\n", deviceTime, *gpsTime, diffDeviceTime, m_gpsToDeviceRate);
     }
@@ -106,5 +138,32 @@ bool GPSClock::GetGPSTime(uint64_t deviceTime, uint64_t* gpsTime)
 
 uint16_t GPSClock::GetUtcOffset()
 {
-    return m_GpsData.utcOffset;
+    return m_gpsData.utcOffset;
+}
+
+uint16_t GPSClock::GetFallbackUtcOffset()
+{
+    return m_gpsFallbackData.utcOffset;
+}
+
+double GPSClock::GetGpsToDeviceRate()
+{
+    return m_gpsToDeviceRate;
+}
+
+void GPSClock::SetPPSTimes(uint64_t ppsDeviceTime, uint64_t ppsSystemTime, bool previous, bool fallback)
+{
+    GPSSyncData* gpsData = previous ? &m_gpsDataPrevious : &m_gpsData;
+    GPSSyncData* gpsFallbackData = previous ? &m_gpsFallbackDataPrevious : &m_gpsFallbackData;
+
+    if(!fallback)
+    {
+        gpsData->ppsDeviceTime = ppsDeviceTime;
+        gpsData->ppsSystemTime = ppsSystemTime;
+    }
+
+    /* Always update the fallback times (NMEA messages) as these need to be up to date if
+     * GPS is not available. */
+    gpsFallbackData->ppsDeviceTime = ppsDeviceTime;
+    gpsFallbackData->ppsSystemTime = ppsSystemTime;
 }

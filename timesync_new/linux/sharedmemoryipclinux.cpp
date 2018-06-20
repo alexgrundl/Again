@@ -181,7 +181,9 @@ bool SharedMemoryIPCLinux::update_network_interface(
     int8_t   log_sync_interval,
     int8_t   log_announce_interval,
     int8_t   log_pdelay_interval,
-    uint16_t port_number )
+    uint16_t port_number,
+    ClockTimeSource clock_time_source,
+    GpsClockState gps_clock_state)
 {
     int buf_offset = 0;
     char *shm_buffer = master_offset_buffer;
@@ -202,6 +204,8 @@ bool SharedMemoryIPCLinux::update_network_interface(
         ptimedata->log_announce_interval = log_announce_interval;
         ptimedata->log_pdelay_interval = log_pdelay_interval;
         ptimedata->port_number   = port_number;
+        ptimedata->grandmaster_clock_time_source = clock_time_source;
+        ptimedata->gps_status = gps_clock_state;
         /* unlock */
         pthread_mutex_unlock((pthread_mutex_t *) shm_buffer);
     }

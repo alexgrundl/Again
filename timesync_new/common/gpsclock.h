@@ -16,21 +16,28 @@ public:
     virtual ~GPSClock();
 
 
-    void UpdateGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset);
+    void UpdateGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset, bool fallback);
 
 
-    void UpdateFallbackGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset);
+    GpsClockState UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTime);
 
 
-    bool UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTime);
-
-
-    bool GetGPSTime(uint64_t deviceTime, uint64_t *gpsTime);
+    bool GetGPSTime(uint64_t deviceTime, uint64_t *gpsTime, bool fallback);
 
 
     uint16_t GetUtcOffset();
 
+
+    uint16_t GetFallbackUtcOffset();
+
+
+    double GetGpsToDeviceRate();
+
 private:
+
+    static const int k_maxGpsErrors = 2;
+
+    static const int k_maxGpsFallbackErrors = 10;
 
     /**
      * @brief maxGPSTimeDelay The max. difference between current and last device time when requesting the GPS time.
@@ -38,19 +45,31 @@ private:
      */
     static const uint32_t maxDeviceTimeDiff = 20;
 
-    GPSSyncData m_GpsData;
+    GPSSyncData m_gpsData;
 
 
-    GPSSyncData m_GpsDataPrevious;
+    GPSSyncData m_gpsDataPrevious;
 
 
-    GPSSyncData m_GpsFallbackData;
+    GPSSyncData m_gpsFallbackData;
+
+
+    GPSSyncData m_gpsFallbackDataPrevious;
 
 
     double m_gpsToDeviceRate;
 
 
     pal::SectionLock_t m_gpsLock;
+
+
+    GpsClockState UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTime, bool fallback, uint32_t maxErrors);
+
+
+    GpsClockState CalculateGpsToDeviceRate(bool fallback);
+
+
+    void SetPPSTimes(uint64_t ppsDeviceTime, uint64_t ppsSystemTime, bool previous, bool fallback);
 };
 
 #endif // GPSCLOCK_H

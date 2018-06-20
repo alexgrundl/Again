@@ -41,7 +41,8 @@ void MDSyncSendSM::SetFollowUp()
     {
         uint64_t gpsTime;
 
-        if(m_timeAwareSystem->GetGPSTime(preciseOriginTimestamp.sec * NS_PER_SEC + preciseOriginTimestamp.ns, &gpsTime))
+        if(m_timeAwareSystem->GetGpsClockState() != GPS_CLOCK_STATE_UNKNOWN &&
+                m_timeAwareSystem->GetGPSTime(preciseOriginTimestamp.sec * NS_PER_SEC + preciseOriginTimestamp.ns, &gpsTime))
         {
             preciseOriginTimestamp.sec = gpsTime / NS_PER_SEC;
             preciseOriginTimestamp.ns = gpsTime % NS_PER_SEC;
@@ -50,11 +51,6 @@ void MDSyncSendSM::SetFollowUp()
             sendTime.ns = gpsTime;
             m_timeAwareSystem->GetGPSTime(upstreamTxTime.ns, &gpsTime);
             upstreamTxTime.ns = gpsTime;
-        }
-        else
-        {
-            m_timeAwareSystem->SetTimeSource(CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR);
-            m_timeAwareSystem->SetCurrentUtcOffsetValid(false);
         }
 
         //printf("preciseOriginTimestamp: %lu\n", preciseOriginTimestamp.sec * NS_PER_SEC + preciseOriginTimestamp.ns);

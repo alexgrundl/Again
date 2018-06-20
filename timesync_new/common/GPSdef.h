@@ -371,10 +371,17 @@ struct GPSSyncData
      */
     uint16_t utcOffset;
     /**
-     * @brief Should indicate that a new GPS time was read from the serial interface. Should be reset when processed after
-     * a PPS signal has triggered.
+     * @brief Should indicate the number of times a PPS trigger was received but the GPS times read from the serial interface
+     * haven't been updated, yet. Should be reset as soon as GPS times are read from the serial interface.
      */
-    bool gpsTimeUpdated;
+    uint32_t ppsErrors;
+};
+
+enum GpsClockState
+{
+    GPS_CLOCK_STATE_UNKNOWN = 0,
+    GPS_CLOCK_STATE_INTERNAL = 1,
+    GPS_CLOCK_STATE_AVAILABLE = 2
 };
 
 #endif // GPSDEF_H

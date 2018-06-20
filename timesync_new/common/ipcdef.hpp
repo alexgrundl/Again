@@ -134,6 +134,8 @@ typedef struct {
     char ifname[16];                 //!< name of used network interface (like. eth0, enp15s0, etc.)
     int  phc_index;                  //!< phc index of used network interface (ptp clock index) (e.g. /dev/ptp4)
     int64_t pdelay;
+    uint8_t grandmaster_clock_time_source;
+    uint8_t gps_status;
 } gPtpTimeData;
 
 /*

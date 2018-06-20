@@ -203,11 +203,11 @@ void PortRoleSelection::UpdtRolesTree()
         {
             if(i > 0)
             {
-                lognotice("Domain %u\tPort %s: %s", m_timeAwareSystem->GetDomain(), m_ports[i - 1]->GetInterfaceName().c_str(), GetStrPortRole(portRole));
+                lognotice("Domain %u: Port %s: %s", m_timeAwareSystem->GetDomain(), m_ports[i - 1]->GetInterfaceName().c_str(), GetStrPortRole(portRole));
             }
             else
             {
-                lognotice("Domain %u\tPort %lu: %s", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
+                lognotice("Domain %u: Port %lu: %s", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
             }
         }
     }

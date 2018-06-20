@@ -193,7 +193,7 @@ bool PtpClockLinux::StartPPS(int pinIndex, int channel, struct ptp_clock_time* p
         }
         else
         {
-            lognotice("Periodic output SDP%i enabled.", pinIndex);
+            logdebug("Periodic output SDP%i enabled.", pinIndex);
             success = true;
         }
     }
@@ -210,7 +210,7 @@ bool PtpClockLinux::StopPPS(int pinIndex, int channel)
     desc.index = pinIndex;
     desc.chan = channel;
 
-    lognotice("Periodic output SDP%i disabled.", pinIndex);
+    logdebug("Periodic output SDP%i disabled.", pinIndex);
     return ioctl(m_clockFD, PTP_PIN_SETFUNC, &desc) != -1;
 }
 
@@ -294,7 +294,7 @@ bool PtpClockLinux::SetExternalTimestamp(int pinIndex, bool enable)
         else
         {
             success = true;
-            lognotice("%s: External timestamping of SDP%i %s.", m_clockPath.c_str(), pinIndex, enable ? "enabled" : "disabled");
+            logdebug("%s: External timestamping of SDP%i %s.", m_clockPath.c_str(), pinIndex, enable ? "enabled" : "disabled");
         }
     }
 

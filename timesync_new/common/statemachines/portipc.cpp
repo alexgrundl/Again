@@ -56,12 +56,20 @@ void PortIPC::ProcessState()
         }
         else
         {
-            if(m_networkPort->GetPtpClock()->GetPtssType() == PtpClock::PTSS_TYPE_ROOT)
-                masterLocalPhaseOffset = 0;
+            if(m_timeAwareSystem->GetGpsClockState() != GPS_CLOCK_STATE_UNKNOWN)
+            {
+                uint64_t gpsTime = 0;
+                int64_t ptssOffset = m_networkPort->GetPtpClock()->GetPtssType() == PtpClock::PTSS_TYPE_ROOT ? 0 : m_networkPort->GetPtpClock()->GetPtssOffset();
+                m_timeAwareSystem->GetGPSTime(deviceTime + ptssOffset, &gpsTime);
+                //gpsTime -= (uint64_t)NS_PER_SEC * m_timeAwareSystem->GetCurrentUtcOffset();
+                masterLocalPhaseOffset = (int64_t)deviceTime - (int64_t)gpsTime;
+                masterLocalFrequencyOffset = m_timeAwareSystem->GetGpsToDeviceRate();
+            }
             else
-                masterLocalPhaseOffset = m_networkPort->GetPtpClock()->GetPtssOffset();
-
-            masterLocalFrequencyOffset = 1.0;
+            {
+                masterLocalPhaseOffset = m_networkPort->GetPtpClock()->GetPtssType() == PtpClock::PTSS_TYPE_ROOT ? 0 : m_networkPort->GetPtpClock()->GetPtssOffset();
+                masterLocalFrequencyOffset = 1.0;
+            }
         }
 
         localSystemPhaseOffset = systemTime - deviceTime;
@@ -103,7 +111,7 @@ void PortIPC::ProcessState()
                                        m_timeAwareSystem->GetSystemPriority().identity.clockQuality.offsetScaledLogVariance,
                                        m_timeAwareSystem->GetSystemPriority().identity.clockQuality.clockAccuracy,
                                        m_timeAwareSystem->GetSystemPriority().identity.priority2, 0,
-                                       0, 0, 0, systemPortNumber);
+                                       0, 0, 0, systemPortNumber, m_timeAwareSystem->GetTimeSource(), m_timeAwareSystem->GetGpsClockState());
 
         m_ipcUpdateTime.ns += NS_PER_SEC / 10;
     }

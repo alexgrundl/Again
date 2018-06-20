@@ -343,10 +343,16 @@ public:
     void UpdateFallbackGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset);
 
 
-    bool UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTime);
+    GpsClockState UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTime);
 
 
     bool GetGPSTime(uint64_t deviceTime, uint64_t* gpsTime);
+
+
+    double GetGpsToDeviceRate();
+
+
+    GpsClockState GetGpsClockState();
 
 
     static uint8_t GetDomainToSyntonize();
@@ -610,6 +616,9 @@ private:
 
 
     GPSClock m_gpsClock;
+
+
+    GpsClockState m_gpsClockState;
 
 
     static uint8_t s_domainToSyntonize;
