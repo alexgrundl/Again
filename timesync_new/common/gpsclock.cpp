@@ -31,7 +31,6 @@ void GPSClock::UpdateGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t 
     gpsData->gpsTime = gpsTime;
     gpsData->gpsSystemTime = gpsSystemTime;
     gpsData->utcOffset = utcOffset;
-    gpsData->ppsErrors = 0;
 
     pal::LockedRegionLeave(m_gpsLock);
 }
@@ -54,6 +53,8 @@ GpsClockState GPSClock::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t pp
     clockState = UpdateGPSDataFromPPS(ppsDeviceTime, ppsSystemTime, false, k_maxGpsErrors);
     if(clockState == GPS_CLOCK_STATE_UNKNOWN)
         clockState = UpdateGPSDataFromPPS(ppsDeviceTime, ppsSystemTime, true, k_maxGpsFallbackErrors);
+    else
+        m_gpsFallbackData.ppsErrors = 0;
     pal::LockedRegionLeave(m_gpsLock);
 
     return clockState;
@@ -82,6 +83,8 @@ GpsClockState GPSClock::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t pp
             clockState = fallback ? GPS_CLOCK_STATE_INTERNAL : GPS_CLOCK_STATE_AVAILABLE;
         }
     }
+    else
+        gpsData->ppsErrors = 0;
 
     return clockState;
 }
@@ -106,6 +109,8 @@ GpsClockState GPSClock::CalculateGpsToDeviceRate(bool fallback)
                 clockState = fallback ? GPS_CLOCK_STATE_INTERNAL : GPS_CLOCK_STATE_AVAILABLE;
             }
         }
+        else
+            ;//printf("ppsSystemTime: %lu; gpsSystemTime: %lu\n", gpsData->ppsSystemTime, gpsData->gpsSystemTime);
     }
 
     gpsDataPrevious->gpsTime = gpsData->gpsTime;

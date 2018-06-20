@@ -9,7 +9,7 @@ class TimeControl
 {
 public:
 
-    static const int k_timeJumpLimit = NS_PER_SEC / 10;
+    static const int k_timeJumpLimit = NS_PER_SEC / 100;
 
 
     TimeControl();
