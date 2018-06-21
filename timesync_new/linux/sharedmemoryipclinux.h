@@ -97,7 +97,9 @@ public:
         PortState port_state,
         bool asCapable,
         SystemTimeBase system_time_base,
-        int64_t pdelay);
+        int64_t pdelay,
+        ClockTimeSource clock_time_source,
+        GpsClockState gps_clock_state);
 
     /**
      * @brief Updates grandmaster IPC values
@@ -139,9 +141,7 @@ public:
         int8_t   log_sync_interval,
         int8_t   log_announce_interval,
         int8_t   log_pdelay_interval,
-        uint16_t port_number,
-        ClockTimeSource clock_time_source,
-        GpsClockState gps_clock_state);
+        uint16_t port_number);
 
     /**
      * @brief unmaps and unlink shared memory

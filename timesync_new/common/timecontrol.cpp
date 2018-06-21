@@ -58,13 +58,12 @@ void TimeControl::Syntonize(ScaledNs masterLocalOffset, double remoteLocalRate, 
     }
 }
 
-int64_t TimeControl::Syntonize(PtpClock *localClock, struct timespec& tsExtEvent, struct timespec& tsSystemOfEvent)
+int64_t TimeControl::Syntonize(PtpClock *localClock, struct timespec& tsExtEvent, struct timespec& tsSystemOfEvent, float periodInSec)
 {
     struct timespec tsSystem, tsDevice;
     uint64_t nsExtEvent, nsDevice, nsOffsetSystem;
     int64_t nsOffset = -1;
     int64_t remainder;
-    float periodInSec = 0.125;
 
     localClock->GetSystemAndDeviceTime(&tsSystem, &tsDevice);
 
@@ -94,17 +93,16 @@ int64_t TimeControl::Syntonize(PtpClock *localClock, struct timespec& tsExtEvent
 
 //        printf("tsExtEvent: %lu\n", (uint64_t)tsExtEvent.tv_sec * NS_PER_SEC + tsExtEvent.tv_nsec);
 //        printf("tsDevice c: %lu\n", (uint64_t)tsDevice.tv_sec * NS_PER_SEC + tsDevice.tv_nsec);
-        ControlTimePPS(nsOffset, (uint64_t)tsDevice.tv_sec * NS_PER_SEC + tsDevice.tv_nsec, (uint64_t)tsExtEvent.tv_sec * NS_PER_SEC + tsExtEvent.tv_nsec);
+        ControlTimePPS(nsOffset, (uint64_t)tsDevice.tv_sec * NS_PER_SEC + tsDevice.tv_nsec, (uint64_t)tsExtEvent.tv_sec * NS_PER_SEC + tsExtEvent.tv_nsec, periodInSec * 2);
     }
 
     return nsOffset;
 }
 
-void TimeControl::ControlTimePPS(int64_t offset, uint64_t ppsSlaveTime, uint64_t ppsRootTime)
+void TimeControl::ControlTimePPS(int64_t offset, uint64_t ppsSlaveTime, uint64_t ppsRootTime, float periodInSec)
 {
     if(m_oldBestSource > 0 && ppsRootTime - m_oldBestSource != 0)
     {
-        float periodInSec = 0.25;
         float rate = periodInSec * NS_PER_SEC / (ppsRootTime - m_oldBestSource);
         Syntonize(ScaledNs({-offset, 0}), rate, log2(periodInSec));
     }

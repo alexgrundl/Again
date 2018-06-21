@@ -118,6 +118,7 @@ diff -u ixgbe_orig_4.4.59/ixgbe_main.c ixgbe_mod_4.4.59/ixgbe_main.c
 +
 +			spin_lock_irqsave(&adapter->tmreg_lock, flags);
 +			ns = timecounter_cyc2time(&adapter->tc, stamp);
++			ns += 125000000;
 +			spin_unlock_irqrestore(&adapter->tmreg_lock, flags);
 +
 +			ixgbe_ptp_check_extts_event(adapter, ns, index);

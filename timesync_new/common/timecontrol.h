@@ -21,7 +21,7 @@ public:
     void Syntonize(ScaledNs masterLocalOffset, double remoteLocalRate, int8_t logSyncPerSec);
 
 
-    int64_t Syntonize(PtpClock* localClock, struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent);
+    int64_t Syntonize(PtpClock* localClock, struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent, float periodInSec);
 
 private:
 
@@ -44,7 +44,7 @@ private:
     int64_t m_frequencyIntergral;
 
 
-    void ControlTimePPS(int64_t offset, uint64_t ppsSlaveTime, uint64_t ppsRootTime);
+    void ControlTimePPS(int64_t offset, uint64_t ppsSlaveTime, uint64_t ppsRootTime, float periodInSec);
 };
 
 #endif // TIMECONTROL_H

@@ -51,7 +51,7 @@ void PortIPC::ProcessState()
             if(m_networkPort->GetPtpClock()->GetPtssType() == PtpClock::PTSS_TYPE_ROOT)
                 masterLocalPhaseOffset = -m_timeAwareSystem->GetClockSourcePhaseOffset().ns;
             else
-                masterLocalPhaseOffset = m_networkPort->GetPtpClock()->GetPtssOffset();
+                masterLocalPhaseOffset = -m_timeAwareSystem->GetClockSourcePhaseOffset().ns - m_networkPort->GetPtpClock()->GetPtssOffset();
             masterLocalFrequencyOffset = m_timeAwareSystem->GetClockSourceFreqOffset();// != 0 ? 1.0 / m_timeAwareSystem->GetClockSourceFreqOffset() : 1.0;
         }
         else
@@ -103,7 +103,8 @@ void PortIPC::ProcessState()
         masterClockIdentity =  m_timeAwareSystem->GetGmPriority().identity.clockIdentity;
 
         m_ipc->update(masterLocalPhaseOffset, localSystemPhaseOffset, masterLocalFrequencyOffset, localSystemFrequencyOffset, deviceTime, 0,
-                     m_systemPort->GetPdelayCount(), portState, m_systemPort->GetAsCapable(), timeBase, m_systemPort->GetNeighborPropDelay().ns);
+                     m_systemPort->GetPdelayCount(), portState, m_systemPort->GetAsCapable(), timeBase, m_systemPort->GetNeighborPropDelay().ns,
+                     m_timeAwareSystem->GetTimeSource(), m_timeAwareSystem->GetGpsClockState());
 
         m_ipc->update_grandmaster(const_cast<uint8_t*>(masterClockIdentity), m_domain);
         m_ipc->update_network_interface(m_timeAwareSystem->GetClockIdentity(), m_timeAwareSystem->GetSystemPriority().identity.priority1,
@@ -111,7 +112,7 @@ void PortIPC::ProcessState()
                                        m_timeAwareSystem->GetSystemPriority().identity.clockQuality.offsetScaledLogVariance,
                                        m_timeAwareSystem->GetSystemPriority().identity.clockQuality.clockAccuracy,
                                        m_timeAwareSystem->GetSystemPriority().identity.priority2, 0,
-                                       0, 0, 0, systemPortNumber, m_timeAwareSystem->GetTimeSource(), m_timeAwareSystem->GetGpsClockState());
+                                       0, 0, 0, systemPortNumber);
 
         m_ipcUpdateTime.ns += NS_PER_SEC / 10;
     }

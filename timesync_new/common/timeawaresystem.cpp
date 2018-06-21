@@ -364,10 +364,13 @@ std::vector<uint8_t*> TimeAwareSystem::GetPathTrace()
 void TimeAwareSystem::InitLocalClock(PtpClock *clock, int clockIndex)
 {
     struct timespec ts_workingClock = {0, 0};
+    struct timespec tsSystem, tsDevice;
 
     m_clockLocal = clock;
     m_clockLocal->SetPtssType(PtpClock::PTSS_TYPE_ROOT);
     m_clockLocal->Open(clockIndex);
+    /* Call this method to set the system clock (CLOCK_REALTIME or CLOCK_MONOTONIC_RAW) in linux */
+    m_clockLocal->GetSystemAndDeviceTime(&tsSystem, &tsDevice);
 
 #ifdef __linux__
     clock_gettime(CLOCK_MONOTONIC_RAW, &ts_workingClock);

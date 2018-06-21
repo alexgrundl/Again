@@ -110,7 +110,9 @@ GpsClockState GPSClock::CalculateGpsToDeviceRate(bool fallback)
             }
         }
         else
+        {
             ;//printf("ppsSystemTime: %lu; gpsSystemTime: %lu\n", gpsData->ppsSystemTime, gpsData->gpsSystemTime);
+        }
     }
 
     gpsDataPrevious->gpsTime = gpsData->gpsTime;

@@ -44,10 +44,12 @@ void PlatformSync::ProcessState()
                 {
                     if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_SLAVE)
                     {
-                        m_networkPort->GetPtpClock()->SetPtssOffset(m_timeControl.Syntonize(m_timeAwareSystem->GetLocalClock(), m_tsExtEvent, m_tsSystem));
-                        //printf("Port %s - offset: %li ns\n", m_networkPort->GetInterfaceName().c_str(), m_networkPort->GetPtpClock()->GetPtssOffset());
+                        m_networkPort->GetPtpClock()->SetPtssOffset(m_timeControl.Syntonize(m_timeAwareSystem->GetLocalClock(), m_tsExtEvent, m_tsSystem, 0.125));
+//                        if(m_networkPort->GetInterfaceName() == "enp3s0f0")
+//                            printf("Port %s - offset: %li ns\n", m_networkPort->GetInterfaceName().c_str(), m_networkPort->GetPtpClock()->GetPtssOffset());
                     }
                 }
+
                 m_syntonize = !m_syntonize || m_networkPort->GetNetworkCardType() == NETWORK_CARD_TYPE_X540;
 
                 m_externalTimestampRead = false;
@@ -63,10 +65,19 @@ void PlatformSync::ProcessState()
 
 uint32_t PlatformSync::ReadTimestamp(bool_t* pbIsRunning, pal::EventHandle_t /*pWaitHandle*/)
 {
+    struct timeval timeout;
+
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 50000;
+
+    /* Empty the internal kernel queue with the buffered timestamps. */
+    while(m_ptpClock->ReadExternalTimestamp(m_tsExtEvent, m_tsSystem, timeout));
+
+    timeout.tv_usec = 500000;
     //m_portThread->ChangePriority(PrioTimeCritical);
     while(*pbIsRunning)
     {
-        if(m_ptpClock->ReadExternalTimestamp(m_tsExtEvent, m_tsSystem))
+        if(m_ptpClock->ReadExternalTimestamp(m_tsExtEvent, m_tsSystem, timeout))
         {
             if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_SLAVE)
                 m_externalTimestampRead = true;
@@ -75,12 +86,13 @@ uint32_t PlatformSync::ReadTimestamp(bool_t* pbIsRunning, pal::EventHandle_t /*p
                 /* The PPS synchronization of the main i210 has to be executed in a separate thread as
                  * some waiting is done, here (about 100 ms max.). Should really be made in another way as this
                    violates the logical constitution of the other state machines...*/
-                /* The idea has to be that this sync should be handled in another "GPS" state machine. Here, we'd
+                /* The idea has to be that this sync should be handled in the "ProcessState" method. Here, we'd
                  * only inform this state machine that a new GPS PPS signal has arrived. Handling should be done there, then. */
                 uint64_t deviceTime = m_tsExtEvent.tv_sec * NS_PER_SEC + m_tsExtEvent.tv_nsec;
                 uint64_t systemTime = m_tsSystem.tv_sec * NS_PER_SEC + m_tsSystem.tv_nsec;
                 m_timeAwareSystem->UpdateGPSDataFromPPS(deviceTime, systemTime);
             }
+
 //            if(m_ptpClock->GetPtssType() == PtpClock::PTSS_TYPE_ROOT)
 //                printf("%s: tsExtEvent.tv_sec: %lu, tsExtEvent.tv_nsec: %lu\n", m_networkPort->GetInterfaceName().c_str(), m_tsExtEvent.tv_sec, m_tsExtEvent.tv_nsec);
         }

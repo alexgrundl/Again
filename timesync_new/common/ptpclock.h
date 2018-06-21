@@ -69,7 +69,7 @@ public:
     virtual void SetExternalTimestampPin(int pin) = 0;
 
 
-    virtual bool ReadExternalTimestamp(struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent) = 0;
+    virtual bool ReadExternalTimestamp(struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent, struct timeval timeout) = 0;
 
 
     virtual int64_t GetPtssOffset() = 0;

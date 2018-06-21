@@ -62,7 +62,7 @@ public:
     void SetExternalTimestampPin(int pin) {}
 
 
-    bool ReadExternalTimestamp(struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent) {return true;}
+    bool ReadExternalTimestamp(struct timespec &tsExtEvent, struct timespec &tsSystemOfEvent, struct timeval timeout) {return true;}
 
 
     int64_t GetPtssOffset();

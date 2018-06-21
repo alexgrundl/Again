@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "ipcdef.hpp"
 #include "scaledns.h"
 #include "uscaledns.h"
 #include "timestamp.h"

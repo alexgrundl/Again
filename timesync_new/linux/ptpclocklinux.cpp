@@ -130,7 +130,7 @@ bool PtpClockLinux::GetSystemAndDeviceTime(struct ptp_sys_offset* offset)
     {
         // try to find out, whether b-plus specific ptp ioctl is available
         // do it once
-        if( ioctl( m_clockFD, PTP_SYS_OFFSET_MONO, offset ) == -1 )
+        if(ioctl( m_clockFD, PTP_SYS_OFFSET_MONO, offset ) == -1 )
         {
             // no such ioctl
             // errno.h: ENOTTY  25 // Inappropriate ioctl for device
@@ -301,24 +301,23 @@ bool PtpClockLinux::SetExternalTimestamp(int pinIndex, bool enable)
     return success;
 }
 
-bool PtpClockLinux::ReadExternalTimestamp(struct timespec& tsExtEvent, struct timespec& tsSystemOfEvent)
+bool PtpClockLinux::ReadExternalTimestamp(struct timespec& tsExtEvent, struct timespec& tsSystemOfEvent, struct timeval timeout)
 {
     bool success = false;
-    struct timeval timeout;
     fd_set set;
 
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 500000;
     FD_ZERO(&set);
     FD_SET(m_clockFD, &set);
     if(select(m_clockFD + 1, &set, NULL, NULL, &timeout) > 0)
     {
         struct ptp_extts_event event;
-        struct timespec ts;
+        struct timespec tsSystem, tsDevice;
         ssize_t cnt;
 
         cnt = read(m_clockFD, &event, sizeof(event));
-        clock_gettime(m_systemClock == SYSTEM_CLOCK_MONOTONIC_RAW ? CLOCK_MONOTONIC_RAW : CLOCK_REALTIME, &ts);
+
+        GetSystemAndDeviceTime(&tsSystem, &tsDevice);
+        //clock_gettime(m_systemClock == SYSTEM_CLOCK_MONOTONIC_RAW ? CLOCK_MONOTONIC_RAW : CLOCK_REALTIME, &ts);
         if (cnt != sizeof(event))
         {
             logerror("Read of external timestamp failed.");
@@ -328,8 +327,8 @@ bool PtpClockLinux::ReadExternalTimestamp(struct timespec& tsExtEvent, struct ti
             tsExtEvent.tv_sec = event.t.sec;
             tsExtEvent.tv_nsec = event.t.nsec;
 
-            tsSystemOfEvent.tv_sec = ts.tv_sec;
-            tsSystemOfEvent.tv_nsec = ts.tv_nsec;
+            tsSystemOfEvent.tv_sec = tsSystem.tv_sec;
+            tsSystemOfEvent.tv_nsec = tsSystem.tv_nsec;
 
             success = true;
 

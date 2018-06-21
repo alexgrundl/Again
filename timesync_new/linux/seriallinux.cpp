@@ -104,4 +104,4 @@ bool SerialLinux::Write(const uint8_t* buffer, uint32_t bytesToWrite)
     return bytesWritten == bytesToWrite;
 }
 
-#endif __linux__
+#endif //__linux__
