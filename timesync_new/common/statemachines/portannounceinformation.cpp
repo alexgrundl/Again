@@ -41,7 +41,13 @@ PortAnnounceInformation::MasterInfo PortAnnounceInformation::RcvInfo(PtpMessageA
         if(info == SystemIdentity::INFO_SUPERIOR)
             return MASTER_INFO_SUPERIOR;
         else if(info == SystemIdentity::INFO_EQUAL)
+        {
+            //Force update if the signaled "time source changes"
+            if(rcvdAnnouncePtr->GetTimeSource() != m_timeAwareSystem->GetTimeSource())
+                return MASTER_INFO_SUPERIOR;
+
             return MASTER_INFO_REPEATED;
+        }
         else
             return MASTER_INFO_INFERIOR;
 

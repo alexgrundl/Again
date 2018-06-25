@@ -81,8 +81,6 @@ TimeAwareSystem::TimeAwareSystem()
     m_lastGmPriority.sourcePortIdentity.portNumber = UINT16_MAX;
     m_lastGmPriority.portNumber = UINT16_MAX;
 
-    m_selectedRole.push_back(PORT_ROLE_SLAVE);
-
     m_clockLocal = NULL;
     m_domain = 0;
     m_ctssEnabled = false;
@@ -90,6 +88,8 @@ TimeAwareSystem::TimeAwareSystem()
     m_timeRelayEnabled = false;
 
     m_gpsClockState = GPS_CLOCK_STATE_UNKNOWN;
+
+    m_portRole0 = PORT_ROLE_DISABLED;
 }
 
 TimeAwareSystem::~TimeAwareSystem()
@@ -287,20 +287,14 @@ void TimeAwareSystem::SetLocalTime(UScaledNs time)
     m_localTime = time;
 }
 
-void TimeAwareSystem::AddSelectedRole(PortRole role)
+PortRole TimeAwareSystem::GetPortRole0()
 {
-    m_selectedRole.push_back(role);
+    return m_portRole0;
 }
 
-PortRole TimeAwareSystem::GetSelectedRole(int index)
+void TimeAwareSystem::SetPortRole0(PortRole portRole)
 {
-    return (std::vector<PortRole>::size_type)index < m_selectedRole.size() ? m_selectedRole[index] : PORT_ROLE_DISABLED;
-}
-
-void TimeAwareSystem::SetSelectedRole(int index, PortRole role)
-{
-    if((std::vector<PortRole>::size_type)index < m_selectedRole.size())
-            m_selectedRole[index] = role;
+    m_portRole0 = portRole;
 }
 
 ExtendedTimestamp TimeAwareSystem::GetMasterTime()
@@ -609,18 +603,30 @@ void TimeAwareSystem::SetLastGmPriority(PriorityVector priority)
     m_lastGmPriority = priority;
 }
 
-void TimeAwareSystem::AddSystemPort(PortIdentity portIdentity)
+SystemPort* TimeAwareSystem::AddSystemPort(PortIdentity portIdentity)
 {
     SystemPort* port = new SystemPort();
 
     port->SetIdentity(portIdentity);
     m_systemPorts.push_back(port);
-    AddSelectedRole(PORT_ROLE_SLAVE);
+
+    return port;
 }
 
-SystemPort* TimeAwareSystem::GetSystemPort(int portIndex)
+SystemPort* TimeAwareSystem::FindSystemPort(uint16_t portNumber)
 {
-    return portIndex >= 0 && portIndex < (int)m_systemPorts.size() ? m_systemPorts[portIndex] : NULL;
+    SystemPort* systemPort = NULL;
+
+    for (std::vector<SystemPort*>::size_type i = 0; i < m_systemPorts.size(); ++i)
+    {
+        if(m_systemPorts[i]->GetIdentity().portNumber == portNumber)
+        {
+            systemPort = m_systemPorts[i];
+            break;
+        }
+    }
+
+    return systemPort;
 }
 
 int TimeAwareSystem::GetNSystemPorts()
@@ -686,7 +692,7 @@ GpsClockState TimeAwareSystem::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint
     }
 
     SetSysTimeSource(m_gpsClockState == GPS_CLOCK_STATE_AVAILABLE ? CLOCK_TIME_SOURCE_GPS : CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR);
-    if(GetSelectedRole(0) == PORT_ROLE_SLAVE)
+    if(m_portRole0 == PORT_ROLE_SLAVE)
         SetTimeSource(m_gpsClockState == GPS_CLOCK_STATE_AVAILABLE ? CLOCK_TIME_SOURCE_GPS : CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR);
     if(m_gpsClockState == GPS_CLOCK_STATE_UNKNOWN)
         m_currentUtcOffset = 0;

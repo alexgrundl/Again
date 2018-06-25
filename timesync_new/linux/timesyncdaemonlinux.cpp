@@ -60,14 +60,16 @@ void TimeSyncDaemonLinux::InitalizePorts(PtpConfig* config)
                     {
                         PortIdentity portIdentity;
                         PtpMessageBase::GetClockIdentity(macLicense, portIdentity.clockIdentity, m_timeAwareSystems[i]->GetDomain());
-                        portIdentity.portNumber = m_networkPorts.size();
-                        m_timeAwareSystems[i]->AddSystemPort(portIdentity);
 
                         lognotice("Domain %u - Sending on interface: %s", m_timeAwareSystems[i]->GetDomain(), next->ifa_name);
 
 #ifdef __arm__
                         memcpy(ifnameLicense, next->ifa_name, IFNAMSIZ);
 #endif
+
+                        portIdentity.portNumber = strcmp(ifnameLicense, next->ifa_name) == 0 ? 1 : m_networkPorts.size() + 1;
+                        SystemPort* systemPort = m_timeAwareSystems[i]->AddSystemPort(portIdentity);
+                        networkPort->AddSystemPort(systemPort);
 
                         if(strcmp(ifnameLicense, next->ifa_name) == 0)
                         {
@@ -76,12 +78,13 @@ void TimeSyncDaemonLinux::InitalizePorts(PtpConfig* config)
                             PtpMessageBase::GetClockIdentity(networkPort->GetMAC(), clockIdentityFromMAC, m_timeAwareSystems[i]->GetDomain());
                             m_timeAwareSystems[i]->SetClockIdentity(clockIdentityFromMAC);
                             m_timeAwareSystems[i]->InitLocalClock(networkPort->GetPtpClock(), ((NetPortLinux*)networkPort)->GetPtpClockIndex());
+
                         }
                         else
                         {
                             /* If it's not the "main" port and "time relay" isn't enabled don't send any time sync frames at this port. */
-                            if(m_timeAwareSystems[i]->GetNSystemPorts() > 0 && !m_licenseCheck->IsTimeRelayEnabled())
-                                m_timeAwareSystems[i]->GetSystemPort(m_timeAwareSystems[i]->GetNSystemPorts() - 1)->DisablePttPort();
+                            if(!m_licenseCheck->IsTimeRelayEnabled())
+                                networkPort->GetSystemPort(m_timeAwareSystems[i]->GetDomain())->DisablePttPort();
                         }
                     }
                 }

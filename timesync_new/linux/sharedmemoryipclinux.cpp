@@ -2,7 +2,7 @@
 
 #include "sharedmemoryipclinux.h"
 
-SharedMemoryIPCLinux::SharedMemoryIPCLinux()
+IPCLinux::IPCLinux()
 {
     shm_fd = 0;
     err = 0;
@@ -10,14 +10,14 @@ SharedMemoryIPCLinux::SharedMemoryIPCLinux()
     domain = 0;
 }
 
-SharedMemoryIPCLinux::~SharedMemoryIPCLinux()
+IPCLinux::~IPCLinux()
 {
     munmap(master_offset_buffer, SHM_SIZE);
     if(shm_unlink(shm_name.c_str()) != 0)
         logerror("error shm_unlink: %s\n", strerror(errno));
 }
 
-bool SharedMemoryIPCLinux::init(std::string if_name, unsigned char domain)
+bool IPCLinux::init(std::string if_name, unsigned char domain)
 {
     this->if_name = if_name;
     this->domain = domain;
@@ -73,7 +73,7 @@ bool SharedMemoryIPCLinux::init(std::string if_name, unsigned char domain)
     return false;
 }
 
-bool SharedMemoryIPCLinux::update(int64_t ml_phoffset,
+bool IPCLinux::update(int64_t ml_phoffset,
     int64_t ls_phoffset,
     FrequencyRatio ml_freqoffset,
     FrequencyRatio ls_freqoffset,
@@ -115,7 +115,7 @@ bool SharedMemoryIPCLinux::update(int64_t ml_phoffset,
     }
     return true;
 }
-void SharedMemoryIPCLinux::setpid()
+void IPCLinux::setpid()
 {
     int buf_offset = 0;
     char *shm_buffer = master_offset_buffer;
@@ -129,7 +129,7 @@ void SharedMemoryIPCLinux::setpid()
     pthread_mutex_unlock((pthread_mutex_t *) shm_buffer);
 }
 
-void SharedMemoryIPCLinux::set_ifname(const char* ifname)
+void IPCLinux::set_ifname(const char* ifname)
 {
 
     int buf_offset = 0;
@@ -142,7 +142,7 @@ void SharedMemoryIPCLinux::set_ifname(const char* ifname)
     memcpy(ptimedata->ifname, ifname, ARRAY_SIZE(ptimedata->ifname)-1);
     pthread_mutex_unlock((pthread_mutex_t *) shm_buffer);
 }
-void SharedMemoryIPCLinux::set_if_phc_index(int phc_idx)
+void IPCLinux::set_if_phc_index(int phc_idx)
 {
     int buf_offset = 0;
     char *shm_buffer = master_offset_buffer;
@@ -155,9 +155,12 @@ void SharedMemoryIPCLinux::set_if_phc_index(int phc_idx)
 }
 
 
-bool SharedMemoryIPCLinux::update_grandmaster(
-    uint8_t gptp_grandmaster_id[],
-    uint8_t gptp_domain_number )
+bool IPCLinux::update_grandmaster(const uint8_t  clock_identity[],
+    uint8_t  priority1,
+    uint8_t  clock_class,
+    int16_t  offset_scaled_log_variance,
+    ClockAccuracy clock_accuracy,
+    uint8_t  priority2)
 {
     int buf_offset = 0;
     char *shm_buffer = master_offset_buffer;
@@ -167,20 +170,24 @@ bool SharedMemoryIPCLinux::update_grandmaster(
         pthread_mutex_lock((pthread_mutex_t *) shm_buffer);
         buf_offset += sizeof(pthread_mutex_t);
         ptimedata   = (gPtpTimeData *) (shm_buffer + buf_offset);
-        memcpy(ptimedata->gptp_grandmaster_id, gptp_grandmaster_id, PTP_CLOCK_IDENTITY_LENGTH);
-        ptimedata->gptp_domain_number = gptp_domain_number;
+        memcpy(ptimedata->grandmaster_id, clock_identity, CLOCK_ID_LENGTH);
+
+        ptimedata->grandmaster_priority1 = priority1;
+        ptimedata->grandmaster_clock_class = clock_class;
+        ptimedata->grandmaster_offset_scaled_log_variance = offset_scaled_log_variance;
+        ptimedata->grandmaster_clock_accuracy = clock_accuracy;
+        ptimedata->grandmaster_priority2 = priority2;
         /* unlock */
         pthread_mutex_unlock((pthread_mutex_t *) shm_buffer);
     }
     return true;
 }
 
-bool SharedMemoryIPCLinux::update_network_interface(
-    const uint8_t  clock_identity[],
+bool IPCLinux::update_network_interface(const uint8_t  clock_identity[],
     uint8_t  priority1,
     uint8_t  clock_class,
     int16_t  offset_scaled_log_variance,
-    uint8_t  clock_accuracy,
+    ClockAccuracy clock_accuracy,
     uint8_t  priority2,
     uint8_t  domain_number,
     int8_t   log_sync_interval,
@@ -196,7 +203,7 @@ bool SharedMemoryIPCLinux::update_network_interface(
         pthread_mutex_lock((pthread_mutex_t *) shm_buffer);
         buf_offset += sizeof(pthread_mutex_t);
         ptimedata   = (gPtpTimeData *) (shm_buffer + buf_offset);
-        memcpy(ptimedata->clock_identity, clock_identity, PTP_CLOCK_IDENTITY_LENGTH);
+        memcpy(ptimedata->clock_identity, clock_identity, CLOCK_ID_LENGTH);
         ptimedata->priority1 = priority1;
         ptimedata->clock_class = clock_class;
         ptimedata->offset_scaled_log_variance = offset_scaled_log_variance;
@@ -213,7 +220,7 @@ bool SharedMemoryIPCLinux::update_network_interface(
     return true;
 }
 
-void SharedMemoryIPCLinux::stop() {
+void IPCLinux::stop() {
     if( master_offset_buffer != NULL ) {
         munmap( master_offset_buffer, SHM_SIZE );
         shm_unlink( shm_name.c_str() );

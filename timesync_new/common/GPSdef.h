@@ -377,11 +377,4 @@ struct GPSSyncData
     uint32_t ppsErrors;
 };
 
-enum GpsClockState
-{
-    GPS_CLOCK_STATE_UNKNOWN = 0,
-    GPS_CLOCK_STATE_INTERNAL = 1,
-    GPS_CLOCK_STATE_AVAILABLE = 2
-};
-
 #endif // GPSDEF_H

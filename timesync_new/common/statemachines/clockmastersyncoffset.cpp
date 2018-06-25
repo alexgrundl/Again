@@ -38,7 +38,7 @@ double ClockMasterSyncOffset::ComputeClockSourceFreqOffset()
 #ifndef __arm__
             /* Only restart PPS if our system is the master. Otherwise, PPS will be restarted by the "TimeControl"
              * instance when adjusting the time phase. */
-            if(m_timeAwareSystem->GetSelectedRole(0) == PORT_ROLE_SLAVE)
+            if(m_timeAwareSystem->GetPortRole0() == PORT_ROLE_SLAVE)
                 m_timeAwareSystem->GetLocalClock()->StartPPS();
 #endif
         }
@@ -64,7 +64,7 @@ void ClockMasterSyncOffset::ProcessState()
         {
             m_state = STATE_SEND_SYNC_INDICATION;
             m_rcvdSyncReceiptTime = false;
-            if(m_timeAwareSystem->GetSelectedRole(0) == PORT_ROLE_PASSIVE)
+            if(m_timeAwareSystem->GetPortRole0() == PORT_ROLE_PASSIVE)
             {
                 /* Again for the local clock we have no offset to the master as the local clock is our master up until now... */
 //                m_timeAwareSystem->SetClockSourcePhaseOffset

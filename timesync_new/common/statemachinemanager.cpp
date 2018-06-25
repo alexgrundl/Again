@@ -49,11 +49,11 @@ void StateMachineManager::Initialize(TimeAwareSystem* timeAwareSystem, std::vect
 
     for (std::vector<INetPort*>::size_type i = 0; i < networkPorts.size(); ++i)
     {
-        m_mdPdelayReq.push_back(new MDPdelayReq(timeAwareSystem, timeAwareSystem->GetSystemPort(i), networkPorts[i]));
-        m_mdPdelayResp.push_back(new MDPdelayResp(timeAwareSystem, timeAwareSystem->GetSystemPort(i), networkPorts[i]));
+        m_mdPdelayReq.push_back(new MDPdelayReq(timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), networkPorts[i]));
+        m_mdPdelayResp.push_back(new MDPdelayResp(timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), networkPorts[i]));
 
-        m_mdSyncSendSM.push_back(new MDSyncSendSM(timeAwareSystem, timeAwareSystem->GetSystemPort(i), networkPorts[i]));
-        m_portSyncSyncSends.push_back(new PortSyncSyncSend(timeAwareSystem, timeAwareSystem->GetSystemPort(i), m_mdSyncSendSM[i]));
+        m_mdSyncSendSM.push_back(new MDSyncSendSM(timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), networkPorts[i]));
+        m_portSyncSyncSends.push_back(new PortSyncSyncSend(timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), m_mdSyncSendSM[i]));
     }
 
     m_clockMasterSyncReceive = new ClockMasterSyncReceive(m_timeAwareSystem);
@@ -64,23 +64,23 @@ void StateMachineManager::Initialize(TimeAwareSystem* timeAwareSystem, std::vect
 
     for (std::vector<INetPort*>::size_type i = 0; i < networkPorts.size(); ++i)
     {
-        m_portSyncSyncReceive.push_back(new PortSyncSyncReceive(timeAwareSystem, timeAwareSystem->GetSystemPort(i), m_siteSyncSync));
-        m_mdSyncReceiveSM.push_back(new MDSyncReceiveSM(timeAwareSystem, timeAwareSystem->GetSystemPort(i), m_portSyncSyncReceive[i], networkPorts[i]));
+        m_portSyncSyncReceive.push_back(new PortSyncSyncReceive(timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), m_siteSyncSync));
+        m_mdSyncReceiveSM.push_back(new MDSyncReceiveSM(timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), m_portSyncSyncReceive[i], networkPorts[i]));
     }
 
     for (std::vector<INetPort*>::size_type i = 0; i < networkPorts.size(); ++i)
     {
-        m_portAnnounceInformation.push_back(new PortAnnounceInformation(timeAwareSystem, timeAwareSystem->GetSystemPort(i)));
-        m_portAnnounceReceive.push_back(new PortAnnounceReceive(timeAwareSystem, timeAwareSystem->GetSystemPort(i), m_portAnnounceInformation[i]));
-        m_mdPortAnnounceTransmit.push_back(new MDPortAnnounceTransmit(m_timeAwareSystem, timeAwareSystem->GetSystemPort(i), networkPorts[i]));
-        m_portAnnounceTransmit.push_back(new PortAnnounceTransmit(m_timeAwareSystem, timeAwareSystem->GetSystemPort(i), m_mdPortAnnounceTransmit[i]));
+        m_portAnnounceInformation.push_back(new PortAnnounceInformation(timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain())));
+        m_portAnnounceReceive.push_back(new PortAnnounceReceive(timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), m_portAnnounceInformation[i]));
+        m_mdPortAnnounceTransmit.push_back(new MDPortAnnounceTransmit(m_timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), networkPorts[i]));
+        m_portAnnounceTransmit.push_back(new PortAnnounceTransmit(m_timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), m_mdPortAnnounceTransmit[i]));
 
-        m_linkDelaySyncIntervalSetting.push_back(new LinkDelaySyncIntervalSetting(timeAwareSystem, timeAwareSystem->GetSystemPort(i), networkPorts[i]));
+        m_linkDelaySyncIntervalSetting.push_back(new LinkDelaySyncIntervalSetting(timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), networkPorts[i]));
         if(m_timeAwareSystem->IsPTSSEnabled() && m_timeAwareSystem->GetDomain() == 0 &&
                 (networkPorts[i]->GetNetworkCardType() == NETWORK_CARD_TYPE_X540 || networkPorts[i]->GetNetworkCardType() == NETWORK_CARD_TYPE_I210))
-            m_platformSync.push_back(new PlatformSync(m_timeAwareSystem, timeAwareSystem->GetSystemPort(i), networkPorts[i]));
+            m_platformSync.push_back(new PlatformSync(m_timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), networkPorts[i]));
 #ifdef __linux__
-        m_portIPC.push_back(new PortIPC(m_timeAwareSystem, timeAwareSystem->GetSystemPort(i), networkPorts[i], m_timeAwareSystem->GetDomain()));
+        m_portIPC.push_back(new PortIPC(m_timeAwareSystem, networkPorts[i]->GetSystemPort(timeAwareSystem->GetDomain()), networkPorts[i]));
 #endif
     }
     m_portRoleSelection = new PortRoleSelection(m_timeAwareSystem, networkPorts);

@@ -41,6 +41,8 @@ public:
     std::string GetInterfaceName() {return std::string("");}
     bool IsUpAndConnected() {return true;}
     int GetMaxSpeed() {return -1;}
+    SystemPort* GetSystemPort(uint8_t domain) {return NULL;}
+    void AddSystemPort(SystemPort* port) {}
 
 private:
 

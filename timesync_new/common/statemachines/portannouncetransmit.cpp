@@ -71,10 +71,10 @@ void PortAnnounceTransmit::ProcessState()
         case STATE_IDLE:
             if(m_timeAwareSystem->ReadCurrentTime() >= m_announceSendTime && m_systemPort->IsSelected() && !m_systemPort->GetUpdtInfo())
             {
-                m_systemPort->SetNewInfo(m_systemPort->GetNewInfo() || m_timeAwareSystem->GetSelectedRole(m_systemPort->GetIdentity().portNumber) == PORT_ROLE_MASTER);
+                m_systemPort->SetNewInfo(m_systemPort->GetNewInfo() || m_systemPort->GetPortRole() == PORT_ROLE_MASTER);
                 m_state = STATE_TRANSMIT_PERIODIC;
             }
-            else if(m_systemPort->GetNewInfo() && (m_timeAwareSystem->GetSelectedRole(m_systemPort->GetIdentity().portNumber) == PORT_ROLE_MASTER) &&
+            else if(m_systemPort->GetNewInfo() && m_systemPort->GetPortRole() == PORT_ROLE_MASTER &&
                     (m_timeAwareSystem->ReadCurrentTime() < m_announceSendTime) && m_systemPort->IsSelected() && !m_systemPort->GetUpdtInfo())
             {
                 m_systemPort->SetNewInfo(false);

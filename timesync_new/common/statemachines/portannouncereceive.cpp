@@ -30,7 +30,7 @@ bool PortAnnounceReceive::QualifyAnnounce(PtpMessageAnnounce* rcvdAnnouncePtr)
      * and thisClock is appended to pathTrace (i.e., is added to the end of the array). */
     bool pathSequenceCopied = false;
 
-    if(m_timeAwareSystem->GetSelectedRole(m_systemPort->GetIdentity().portNumber) == PORT_ROLE_SLAVE)
+    if(m_systemPort->GetPortRole() == PORT_ROLE_SLAVE)
     {
         m_timeAwareSystem->ClearPathTrace();
         for (std::vector<uint8_t*>::size_type i = 0; i < tlv.pathSequence.size(); ++i)

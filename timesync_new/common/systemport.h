@@ -313,6 +313,12 @@ public:
     void IncreasePdelayCount();
 
 
+    PortRole GetPortRole();
+
+
+    void SetPortRole(PortRole portRole);
+
+
 private:
 
     /**
@@ -587,6 +593,9 @@ private:
 
 
     uint32_t pdelayCount;
+
+
+    PortRole m_portRole;
 };
 
 #endif // SYSTEMPORT_H

@@ -6,6 +6,7 @@
 #include "ptpmessagebase.h"
 #include "receivepackage.h"
 #include "ptpclock.h"
+#include "systemport.h"
 
 enum NetworkCardType
 {
@@ -41,6 +42,8 @@ class INetPort
     virtual std::string GetInterfaceName() = 0;
     virtual bool IsUpAndConnected() = 0;
     virtual int GetMaxSpeed() = 0;
+    virtual SystemPort* GetSystemPort(uint8_t domain) = 0;
+    virtual void AddSystemPort(SystemPort* port) = 0;
     virtual ~INetPort(){}
   protected:
     INetPort(){}

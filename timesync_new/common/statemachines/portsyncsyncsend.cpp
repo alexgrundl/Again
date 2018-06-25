@@ -110,7 +110,7 @@ void PortSyncSyncSend::ProcessState()
         case STATE_SYNC_RECEIPT_TIMEOUT:
             if(m_rcvdPSSync && (m_rcvdPSSyncPtr->localPortNumber != systemPortNumber) &&
                     m_systemPort->IsPortEnabled() &&  m_systemPort->IsPttPortEnabled() && m_systemPort->GetAsCapable() &&
-                    m_timeAwareSystem->GetSelectedRole(systemPortNumber) == PORT_ROLE_MASTER)
+                    m_systemPort->GetPortRole() == PORT_ROLE_MASTER)
             {
                 ExecuteSendMDSyncState();
                 m_state = STATE_SEND_MD_SYNC;
@@ -125,7 +125,7 @@ void PortSyncSyncSend::ProcessState()
                  m_rcvdPSSyncPtr->localPortNumber != systemPortNumber)) ||
                 ((m_timeAwareSystem->ReadCurrentTime() - m_lastSyncSentTime >= m_systemPort->GetSyncInterval()) &&
                    (m_lastRcvdPortNum != systemPortNumber))) && m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled() &&
-                    m_systemPort->GetAsCapable() && m_timeAwareSystem->GetSelectedRole(systemPortNumber) == PORT_ROLE_MASTER)
+                    m_systemPort->GetAsCapable() && m_systemPort->GetPortRole() == PORT_ROLE_MASTER)
             {
                 ExecuteSendMDSyncState();
                 m_state = STATE_SEND_MD_SYNC;
@@ -134,7 +134,7 @@ void PortSyncSyncSend::ProcessState()
                     (m_timeAwareSystem->ReadCurrentTime() - m_lastSyncSentTime < m_systemPort->GetSyncInterval() * 0.5) &&
                     (m_rcvdPSSyncPtr->localPortNumber != systemPortNumber)
                     && m_systemPort->IsPortEnabled() && m_systemPort->IsPttPortEnabled() && m_systemPort->GetAsCapable() &&
-                    m_timeAwareSystem->GetSelectedRole(systemPortNumber) == PORT_ROLE_MASTER)
+                    m_systemPort->GetPortRole() == PORT_ROLE_MASTER)
             {
                 m_syncReceiptTimeoutTime = m_rcvdPSSyncPtr->syncReceiptTimeoutTime;
             }

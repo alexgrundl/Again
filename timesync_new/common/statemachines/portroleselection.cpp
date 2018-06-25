@@ -14,9 +14,9 @@ PortRoleSelection::~PortRoleSelection()
 void PortRoleSelection::UpdtRoleDisabledTree()
 {
     PriorityVector lastGmPriority;
-    for (std::vector<PortRole>::size_type i = 0; i < m_ports.size(); ++i)
+    for (std::vector<INetPort>::size_type i = 0; i < m_ports.size(); ++i)
     {
-        m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_DISABLED);
+        m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->SetPortRole(PORT_ROLE_DISABLED);
 
         lastGmPriority.identity.priority1 = 255;
         lastGmPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
@@ -39,13 +39,13 @@ void PortRoleSelection::UpdtRoleDisabledTree()
 void PortRoleSelection::ClearReselectTree()
 {
     for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
-        m_timeAwareSystem->GetSystemPort(i)->SetReselect(false);
+        m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->SetReselect(false);
 }
 
 void PortRoleSelection::SetSelectedTree()
 {
     for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
-        m_timeAwareSystem->GetSystemPort(i)->SetSelected(true);
+        m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->SetSelected(true);
 }
 
 void PortRoleSelection::UpdtRolesTree()
@@ -64,7 +64,7 @@ void PortRoleSelection::UpdtRolesTree()
 
     for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
     {
-        SystemPort* port = m_timeAwareSystem->GetSystemPort(i);
+        SystemPort* port = m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain());
         PriorityVector gmPathPriortiy = port->GetPortPriority();
         gmPathPriortiy.stepsRemoved++;
 
@@ -99,7 +99,7 @@ void PortRoleSelection::UpdtRolesTree()
      * masterPriorityVector for each port (i.e., everything except the portNumber of the fourth component) */
     for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
     {
-        SystemPort* port = m_timeAwareSystem->GetSystemPort(i);
+        SystemPort* port = m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain());
         PriorityVector portMasterPriority;
         portMasterPriority.identity = m_timeAwareSystem->GetGmPriority().identity;
         portMasterPriority.stepsRemoved = m_timeAwareSystem->GetGmPriority().stepsRemoved;
@@ -137,19 +137,19 @@ void PortRoleSelection::UpdtRolesTree()
       * 9) If the portPriorityVector was received in an Announce message and announce receipt timeout, or sync receipt timeout with gmPresent TRUE, have not
       * occurred (infoIs == Received), the gmPriorityVector is not now derived from the portPriorityVector, and the masterPriorityVector is better than the
       * portPriorityVector, selectedRole[j] set to MasterPort and updtInfo is set to TRUE. */
-     for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
+     for (std::vector<INetPort*>::size_type i = 0; i < m_ports.size(); ++i)
      {
-         SystemPort* port = m_timeAwareSystem->GetSystemPort(i);
+         SystemPort* port = m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain());
          if(port->GetInfoIs() == SPANNING_TREE_PORT_STATE_DISABLED)
-             m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_DISABLED);
+              m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->SetPortRole(PORT_ROLE_DISABLED);
          else if(port->GetInfoIs() == SPANNING_TREE_PORT_STATE_AGED)
          {
-             m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_MASTER);
+             m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->SetPortRole(PORT_ROLE_MASTER);
              port->SetUpdtInfo(true);
          }
          else if(port->GetInfoIs() == SPANNING_TREE_PORT_STATE_MINE)
          {
-             m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_MASTER);
+             m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->SetPortRole(PORT_ROLE_MASTER);
              if(port->GetPortStepsRemoved() != m_timeAwareSystem->GetMasterStepsRemoved() || bestPort == NULL || port != bestPort)
                  port->SetUpdtInfo(true);
          }
@@ -158,7 +158,7 @@ void PortRoleSelection::UpdtRolesTree()
          {
              if(port == bestPort)
              {
-                 m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_SLAVE);
+                 m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->SetPortRole(PORT_ROLE_SLAVE);
                  port->SetUpdtInfo(false);
 
                  portIsSlave = true;
@@ -166,12 +166,12 @@ void PortRoleSelection::UpdtRolesTree()
              else if(port->GetMasterPriority().Compare(port->GetPortPriority()) != SystemIdentity::INFO_SUPERIOR)
              {
 
-                 m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_PASSIVE);
+                 m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->SetPortRole(PORT_ROLE_PASSIVE);
                  port->SetUpdtInfo(false);
              }
              else
              {
-                 m_timeAwareSystem->SetSelectedRole(i + 1, PORT_ROLE_MASTER);
+                 m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->SetPortRole(PORT_ROLE_MASTER);
                  port->SetUpdtInfo(true);
              }
          }
@@ -185,7 +185,7 @@ void PortRoleSelection::UpdtRolesTree()
      /* Assigns the port role for port 0, and sets selectedRole[0], as follows:
       * 12) if selectedRole[j] is set to SlavePort for any port with portNumber j, j = 1, 2, ..., numberPorts, selectedRole[0] is set to PassivePort.
       * 13) if selectedRole[j] is not set to SlavePort for any port with portNumber j, j = 1, 2, ..., numberPorts, selectereselectdRole[0] is set to SlavePort. */
-    m_timeAwareSystem->SetSelectedRole(0, portIsSlave ? PORT_ROLE_PASSIVE : PORT_ROLE_SLAVE);
+    m_timeAwareSystem->SetPortRole0(portIsSlave ? PORT_ROLE_PASSIVE : PORT_ROLE_SLAVE);
 
     /* If the clockIentity member of the systemIdentity (see 10.3.2) member of gmPriority (see 10.3.8.19) is equal to thisClock (see 10.2.3.22), i.e.,
      * if the current time-aware system is the grandmaster, the pathTrace array is set to contain the single element thisClock (see 10.2.3.22). */
@@ -196,19 +196,14 @@ void PortRoleSelection::UpdtRolesTree()
     }
 
     lognotice("New port roles.");
-    for (std::vector<PortRole>::size_type i = 0; i <= m_ports.size(); ++i)
+
+    lognotice("Domain %u: Port %lu: %s", m_timeAwareSystem->GetDomain(), 0, GetStrPortRole(m_timeAwareSystem->GetPortRole0()));
+    for (std::vector<PortRole>::size_type i = 0; i < m_ports.size(); ++i)
     {
-        PortRole portRole = m_timeAwareSystem->GetSelectedRole(i);
+        PortRole portRole = m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->GetPortRole();
         if(portRole != PORT_ROLE_DISABLED)
         {
-            if(i > 0)
-            {
-                lognotice("Domain %u: Port %s: %s", m_timeAwareSystem->GetDomain(), m_ports[i - 1]->GetInterfaceName().c_str(), GetStrPortRole(portRole));
-            }
-            else
-            {
-                lognotice("Domain %u: Port %lu: %s", m_timeAwareSystem->GetDomain(), i, GetStrPortRole(portRole));
-            }
+            lognotice("Domain %u: Port %s: %s", m_timeAwareSystem->GetDomain(), m_ports[i]->GetInterfaceName().c_str(), GetStrPortRole(portRole));
         }
     }
 }
@@ -249,7 +244,7 @@ void PortRoleSelection::ProcessState()
         case STATE_ROLE_SELECTION:
             for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
             {
-                SystemPort* port = m_timeAwareSystem->GetSystemPort(i);
+                SystemPort* port = m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain());
                 if(port->GetReselect())
                 {
                     reselect = true;
@@ -266,7 +261,7 @@ void PortRoleSelection::ProcessState()
             {
                 for (std::vector<SystemPort*>::size_type i = 0; i < m_ports.size(); ++i)
                 {
-                    m_timeAwareSystem->GetSystemPort(i)->ResetPortPriority();
+                    m_ports[i]->GetSystemPort(m_timeAwareSystem->GetDomain())->ResetPortPriority();
                 }
             }
 

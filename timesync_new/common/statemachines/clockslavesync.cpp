@@ -66,12 +66,15 @@ void ClockSlaveSync::ProcessState()
 
                 if(m_rcvdPSSyncPtr->localPortNumber > 0)
                 {
-                    SystemPort* systemPort = m_timeAwareSystem->GetSystemPort(m_rcvdPSSyncPtr->localPortNumber - 1);
-                    neighborPropDelay = systemPort->GetNeighborPropDelay();
-                    neighborRateRatio = systemPort->GetNeighborRateRatio();
-                    delayAsymmetry = systemPort->GetDelayAsymmetry();
-                    if(neighborRateRatio == 0)
-                        neighborRateRatio = 1.0;
+                    SystemPort* systemPort = m_timeAwareSystem->FindSystemPort(m_rcvdPSSyncPtr->localPortNumber);
+                    if(systemPort != NULL)
+                    {
+                        neighborPropDelay = systemPort->GetNeighborPropDelay();
+                        neighborRateRatio = systemPort->GetNeighborRateRatio();
+                        delayAsymmetry = systemPort->GetDelayAsymmetry();
+                        if(neighborRateRatio == 0)
+                            neighborRateRatio = 1.0;
+                    }
                 }
 
                 m_timeAwareSystem->SetSyncReceiptTime(m_rcvdPSSyncPtr->preciseOriginTimestamp + m_rcvdPSSyncPtr->followUpCorrectionField +

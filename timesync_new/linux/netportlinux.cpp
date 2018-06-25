@@ -629,4 +629,14 @@ int NetPortLinux::GetMaxSpeed()
     return speed;
 }
 
+SystemPort* NetPortLinux::GetSystemPort(uint8_t domain)
+{
+    return domain < m_systemPort.size() ? m_systemPort[domain] : NULL;
+}
+
+void NetPortLinux::AddSystemPort(SystemPort* port)
+{
+    m_systemPort.push_back(port);
+}
+
 #endif

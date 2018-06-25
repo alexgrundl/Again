@@ -154,10 +154,10 @@ public:
     void AddSelectedRole(PortRole role);
 
 
-    PortRole GetSelectedRole(int index);
+    PortRole GetPortRole0();
 
 
-    void SetSelectedRole(int index, PortRole role);
+    void SetPortRole0(PortRole portRole);
 
 
     ExtendedTimestamp GetMasterTime();
@@ -325,10 +325,10 @@ public:
     void SetTimeRelayEnabled(bool enable);
 
 
-    void AddSystemPort(PortIdentity portIdentity);
+    SystemPort* AddSystemPort(PortIdentity portIdentity);
 
 
-    SystemPort* GetSystemPort(int portIndex);
+    SystemPort* FindSystemPort(uint16_t portNumber);
 
 
     int GetNSystemPorts();
@@ -459,9 +459,9 @@ private:
     UScaledNs m_localTime;
 
     /**
-     * @brief Array of length numberPorts+1. selectedRole[j] is set equal to the port role of port whose portNumber is j.
+     * @brief The port role of "port 0" which isn't a physical port is used in conjunction with processing clock master sync send requests.
      */
-    std::vector<PortRole> m_selectedRole;
+    PortRole m_portRole0;
 
     /**
      * @brief The time maintained by the ClockMaster entity, based on information received from the ClockSource and LocalClock entities.

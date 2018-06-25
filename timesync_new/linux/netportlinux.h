@@ -81,6 +81,12 @@ class NetPortLinux : public INetPort
 
         void SetTxPhyDelay(uint32_t delay);
 
+
+        SystemPort* GetSystemPort(uint8_t domain);
+
+
+        void AddSystemPort(SystemPort* port);
+
 protected:
 
     const unsigned char P8021AS_MULTICAST[6] = {0x01, 0x80, 0xC2, 0x00, 0x00, 0x0E};
@@ -134,6 +140,7 @@ private:
 
     uint32_t m_txPhyDelay;
 
+    std::vector<SystemPort*> m_systemPort;
 
     /**
      * @brief IsCarrierSet Checks if the parameter "/sys/class/net/<m_IfcName>/carrier" is set.

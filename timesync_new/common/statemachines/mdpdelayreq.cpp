@@ -193,7 +193,7 @@ void MDPdelayReq::ProcessState()
                     m_systemPort->SetNeighborPropDelay(ComputePropTime());
                     m_networkPort->SetPDelay(m_systemPort->GetNeighborPropDelay().ns);
                 }
-                m_lostResponses = 0;
+
                 m_systemPort->SetIsMeasuringDelay(true);
                 if ((m_systemPort->GetNeighborPropDelay() <= m_systemPort->GetNeighborPropDelayThresh()) &&
                         memcmp(m_rcvdPdelayRespPtr->GetSourcePortIdentity().clockIdentity, m_timeAwareSystem->GetClockIdentity(), CLOCK_ID_LENGTH) != 0
@@ -201,6 +201,7 @@ void MDPdelayReq::ProcessState()
                 {
                     m_systemPort->SetAsCapable(true);
                     m_networkPort->SetASCapable(true);
+                    m_lostResponses = 0;
                 }
                 else
                 {
@@ -209,6 +210,13 @@ void MDPdelayReq::ProcessState()
                         m_lostResponses += 1;
                     else
                     {
+                        /* To be checked... */
+                        if(m_systemPort->GetAsCapable())
+                        {
+                            m_systemPort->SetReselect(true);
+                            m_systemPort->SetSelected(false);
+                        }
+
                         m_systemPort->SetAsCapable(false);
                         m_networkPort->SetASCapable(false);
                     }

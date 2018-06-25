@@ -64,6 +64,8 @@ SystemPort::SystemPort()
     identity.portNumber = 0;
     syncCount = 0;
     pdelayCount = 0;
+
+    m_portRole = PORT_ROLE_DISABLED;
 }
 
 SystemPort::~SystemPort()
@@ -569,4 +571,14 @@ void SystemPort::SetPdelayCount(uint32_t count)
 void SystemPort::IncreasePdelayCount()
 {
     pdelayCount++;
+}
+
+PortRole SystemPort::GetPortRole()
+{
+    return m_portRole;
+}
+
+void SystemPort::SetPortRole(PortRole portRole)
+{
+    m_portRole = portRole;
 }
