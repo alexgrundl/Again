@@ -68,6 +68,9 @@ private:
 
     void ExecuteUpdateState();
 
+
+    MasterInfo CheckForNewClockIdentity(PtpMessageAnnounce* rcvdAnnouncePtr);
+
 };
 
 #endif // PORTANNOUNCEINFORMATION_H

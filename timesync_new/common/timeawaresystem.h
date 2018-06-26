@@ -618,6 +618,9 @@ private:
     GPSClock m_gpsClock;
 
 
+    GPSClock m_gpsClockFallback;
+
+
     GpsClockState m_gpsClockState;
 
 

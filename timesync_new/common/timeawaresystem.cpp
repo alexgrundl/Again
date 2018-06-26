@@ -88,6 +88,7 @@ TimeAwareSystem::TimeAwareSystem()
     m_timeRelayEnabled = false;
 
     m_gpsClockState = GPS_CLOCK_STATE_UNKNOWN;
+    m_gpsClockFallback.SetAsFallback();
 
     m_portRole0 = PORT_ROLE_DISABLED;
 }
@@ -671,17 +672,19 @@ void TimeAwareSystem::SetTimeRelayEnabled(bool enable)
 
 void TimeAwareSystem::UpdateGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset)
 {
-    m_gpsClock.UpdateGpsData(gpsTime, gpsSystemTime, utcOffset, false);
+    m_gpsClock.UpdateGpsData(gpsTime, gpsSystemTime, utcOffset);
 }
 
 void TimeAwareSystem::UpdateFallbackGpsData(uint64_t gpsTime, uint64_t gpsSystemTime, uint16_t utcOffset)
 {
-    m_gpsClock.UpdateGpsData(gpsTime, gpsSystemTime, utcOffset, true);
+    m_gpsClockFallback.UpdateGpsData(gpsTime, gpsSystemTime, utcOffset);
 }
 
 GpsClockState TimeAwareSystem::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint64_t ppsSystemTime)
 {
-    GpsClockState clockState = m_gpsClock.UpdateGPSDataFromPPS(ppsDeviceTime, ppsSystemTime);
+    GpsClockState clockStateGPS = m_gpsClock.UpdateGPSDataFromPPS(ppsDeviceTime, ppsSystemTime);
+    GpsClockState clockStateFallback = m_gpsClockFallback.UpdateGPSDataFromPPS(ppsDeviceTime, ppsSystemTime);
+    GpsClockState clockState = clockStateGPS != GPS_CLOCK_STATE_UNKNOWN ? clockStateGPS : clockStateFallback;
 
     if(m_gpsClockState != clockState)
     {
@@ -695,9 +698,15 @@ GpsClockState TimeAwareSystem::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint
     if(m_portRole0 == PORT_ROLE_SLAVE)
         SetTimeSource(m_gpsClockState == GPS_CLOCK_STATE_AVAILABLE ? CLOCK_TIME_SOURCE_GPS : CLOCK_TIME_SOURCE_INTERNAL_OSCILLATOR);
     if(m_gpsClockState == GPS_CLOCK_STATE_UNKNOWN)
+    {
         m_currentUtcOffset = 0;
+        m_systemPriority.identity.clockQuality.clockClass = CLOCK_CLASS_DEFAULT;
+    }
     else
-        m_currentUtcOffset = m_gpsClockState == GPS_CLOCK_STATE_AVAILABLE ? m_gpsClock.GetUtcOffset() : m_gpsClock.GetFallbackUtcOffset();
+    {
+        m_currentUtcOffset = m_gpsClockState == GPS_CLOCK_STATE_AVAILABLE ? m_gpsClock.GetUtcOffset() : m_gpsClockFallback.GetUtcOffset();
+        m_systemPriority.identity.clockQuality.clockClass = m_gpsClockState == GPS_CLOCK_STATE_AVAILABLE ? CLOCK_CLASS_PRIMARY : CLOCK_CLASS_PRIMARY_LOST;
+    }
     m_currentUtcOffsetValid = m_gpsClockState == GPS_CLOCK_STATE_AVAILABLE;
 
 
@@ -706,12 +715,12 @@ GpsClockState TimeAwareSystem::UpdateGPSDataFromPPS(uint64_t ppsDeviceTime, uint
 
 bool TimeAwareSystem::GetGPSTime(uint64_t deviceTime, uint64_t* gpsTime)
 {
-    return m_gpsClock.GetGPSTime(deviceTime, gpsTime, m_gpsClockState != GPS_CLOCK_STATE_AVAILABLE);
+    return  m_gpsClockState == GPS_CLOCK_STATE_AVAILABLE ? m_gpsClock.GetGPSTime(deviceTime, gpsTime) : m_gpsClockFallback.GetGPSTime(deviceTime, gpsTime);
 }
 
 double TimeAwareSystem::GetGpsToDeviceRate()
 {
-    return m_gpsClock.GetGpsToDeviceRate();
+    return m_gpsClockState == GPS_CLOCK_STATE_AVAILABLE ? m_gpsClock.GetGpsToDeviceRate() : m_gpsClockFallback.GetGpsToDeviceRate();
 }
 
 GpsClockState TimeAwareSystem::GetGpsClockState()

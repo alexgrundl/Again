@@ -42,11 +42,7 @@ PortAnnounceInformation::MasterInfo PortAnnounceInformation::RcvInfo(PtpMessageA
             return MASTER_INFO_SUPERIOR;
         else if(info == SystemIdentity::INFO_EQUAL)
         {
-            //Force update if the signaled "time source changes"
-            if(rcvdAnnouncePtr->GetTimeSource() != m_timeAwareSystem->GetTimeSource())
-                return MASTER_INFO_SUPERIOR;
-
-            return MASTER_INFO_REPEATED;
+            return CheckForNewClockIdentity(rcvdAnnouncePtr);
         }
         else
             return MASTER_INFO_INFERIOR;
@@ -184,4 +180,25 @@ void PortAnnounceInformation::ExecuteUpdateState()
     m_systemPort->SetUpdtInfo(false);
     m_systemPort->SetInfoIs(SPANNING_TREE_PORT_STATE_MINE);
     m_systemPort->SetNewInfo(true);
+}
+
+PortAnnounceInformation::MasterInfo PortAnnounceInformation::CheckForNewClockIdentity(PtpMessageAnnounce* rcvdAnnouncePtr)
+{
+    SystemIdentity identityMaster, identityMessage;
+    PortAnnounceInformation::MasterInfo masterInfo;
+
+    identityMaster = m_systemPort->GetMasterPriority().identity;
+    rcvdAnnouncePtr->GetGrandmasterIdentity(identityMessage.clockIdentity);
+    identityMessage.clockQuality = rcvdAnnouncePtr->GetGrandmasterClockQuality();
+    identityMessage.priority1 = rcvdAnnouncePtr->GetGrandmasterPriority1();
+    identityMessage.priority2 = rcvdAnnouncePtr->GetGrandmasterPriority2();
+
+    /* Force update if the signaled time source changes. */
+    if(rcvdAnnouncePtr->GetTimeSource() != m_timeAwareSystem->GetTimeSource())
+        return rcvdAnnouncePtr->GetTimeSource() < m_timeAwareSystem->GetTimeSource() ? MASTER_INFO_SUPERIOR : MASTER_INFO_INFERIOR;
+    /* Force update if the signaled identity changes. */
+    SystemIdentity::Info info = identityMessage.Compare(identityMaster);
+    masterInfo = info == SystemIdentity::INFO_EQUAL ? MASTER_INFO_REPEATED : (info == SystemIdentity::INFO_SUPERIOR ? MASTER_INFO_SUPERIOR : MASTER_INFO_INFERIOR);
+
+    return masterInfo;
 }

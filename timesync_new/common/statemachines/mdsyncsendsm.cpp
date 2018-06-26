@@ -37,7 +37,7 @@ void MDSyncSendSM::SetFollowUp()
     UScaledNs upstreamTxTime = m_rcvdMDSyncPtr->upstreamTxTime;
 
     /* If we are master (Port Role 0 == Slave) calculate the GPS time from the device time. */
-    if(m_timeAwareSystem->GetPortRole0() == PORT_ROLE_SLAVE && m_timeAwareSystem->GetTimeSource() == CLOCK_TIME_SOURCE_GPS)
+    if(m_timeAwareSystem->GetPortRole0() == PORT_ROLE_SLAVE && m_timeAwareSystem->GetGpsClockState() != GPS_CLOCK_STATE_UNKNOWN)
     {
         uint64_t gpsTime;
 

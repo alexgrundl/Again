@@ -96,8 +96,9 @@ UScaledNs MDPdelayReq::ComputePropTime()
         tsPropTime = (localDelta - remoteDelta) / 2;
     else
     {
-        tsPropTime.sec = 0;
-        tsPropTime.ns = 0;
+        tsPropTime = (remoteDelta - localDelta) / 2;
+//        tsPropTime.sec = 0;
+//        tsPropTime.ns = 0;
     }
 
 //    if(m_neighborRateRatioValid)
