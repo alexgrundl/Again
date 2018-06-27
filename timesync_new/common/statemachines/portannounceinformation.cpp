@@ -45,7 +45,16 @@ PortAnnounceInformation::MasterInfo PortAnnounceInformation::RcvInfo(PtpMessageA
             return CheckForNewClockIdentity(rcvdAnnouncePtr);
         }
         else
+        {
+            /* As we do not want to become master for a short time if the current master announces
+               a new system identity which was worse than the one before, we signal that this master
+               info was superior. Nevertheless, the "PortRoleSelection" state machine would correctly
+               select a new master if this master is worse than another master, now. */
+            if(memcmp(m_messagePriority.identity.clockIdentity, m_systemPort->GetPortPriority().identity.clockIdentity, CLOCK_ID_LENGTH) == 0)
+                return MASTER_INFO_SUPERIOR;
+
             return MASTER_INFO_INFERIOR;
+        }
 
 //    }
     return MASTER_INFO_OTHER;
@@ -195,10 +204,10 @@ PortAnnounceInformation::MasterInfo PortAnnounceInformation::CheckForNewClockIde
 
     /* Force update if the signaled time source changes. */
     if(rcvdAnnouncePtr->GetTimeSource() != m_timeAwareSystem->GetTimeSource())
-        return rcvdAnnouncePtr->GetTimeSource() < m_timeAwareSystem->GetTimeSource() ? MASTER_INFO_SUPERIOR : MASTER_INFO_INFERIOR;
+        return rcvdAnnouncePtr->GetTimeSource() < m_timeAwareSystem->GetTimeSource() ? MASTER_INFO_SUPERIOR : MASTER_INFO_SUPERIOR;
     /* Force update if the signaled identity changes. */
     SystemIdentity::Info info = identityMessage.Compare(identityMaster);
-    masterInfo = info == SystemIdentity::INFO_EQUAL ? MASTER_INFO_REPEATED : (info == SystemIdentity::INFO_SUPERIOR ? MASTER_INFO_SUPERIOR : MASTER_INFO_INFERIOR);
+    masterInfo = info == SystemIdentity::INFO_EQUAL ? MASTER_INFO_REPEATED : (info == SystemIdentity::INFO_SUPERIOR ? MASTER_INFO_SUPERIOR : MASTER_INFO_SUPERIOR);
 
     return masterInfo;
 }

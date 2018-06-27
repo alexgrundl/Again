@@ -31,7 +31,7 @@ SystemPort::SystemPort()
     masterPriority.identity.priority1 = 255;
     masterPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
     masterPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
-    masterPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
+    masterPriority.identity.clockQuality.offsetScaledLogVariance = 16640;
     masterPriority.identity.priority2 = 255;
     memset(masterPriority.identity.clockIdentity, 255, sizeof(masterPriority.identity.clockIdentity));
     masterPriority.stepsRemoved = UINT16_MAX;
@@ -78,7 +78,7 @@ void SystemPort::ResetPortPriority()
     portPriority.identity.priority1 = 255;
     portPriority.identity.clockQuality.clockClass = CLOCK_CLASS_SLAVE_ONLY;
     portPriority.identity.clockQuality.clockAccuracy = CLOCK_ACCURACY_UNKNOWN;
-    portPriority.identity.clockQuality.offsetScaledLogVariance = UINT16_MAX;
+    portPriority.identity.clockQuality.offsetScaledLogVariance = 16640;
     portPriority.identity.priority2 = 255;
     memset(portPriority.identity.clockIdentity, 255, sizeof(portPriority.identity.clockIdentity));
     portPriority.stepsRemoved = UINT16_MAX;

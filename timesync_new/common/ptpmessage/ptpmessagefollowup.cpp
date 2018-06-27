@@ -74,29 +74,32 @@ void PtpMessageFollowUp::ParsePackage(const uint8_t* bytes)
     for(int i = 0; i < 4; i++)
         m_preciseOriginTimestamp.ns += ((uint64_t)bytes[kMessageHeaderLength + 6 + i] << (24 - i * 8));
 
-    m_followUpTLV.tlvType = (TlvType)((bytes[kMessageHeaderLength + 10] << 8) + bytes[kMessageHeaderLength + 11]);
-    m_followUpTLV.lengthField = (bytes[kMessageHeaderLength + 12] << 8) + bytes[kMessageHeaderLength + 13];
+    if(m_messageLength > 44)
+    {
+        m_followUpTLV.tlvType = (TlvType)((bytes[kMessageHeaderLength + 10] << 8) + bytes[kMessageHeaderLength + 11]);
+        m_followUpTLV.lengthField = (bytes[kMessageHeaderLength + 12] << 8) + bytes[kMessageHeaderLength + 13];
 
-    m_followUpTLV.organizationId[0] = bytes[kMessageHeaderLength + 14];
-    m_followUpTLV.organizationId[1] = bytes[kMessageHeaderLength + 15];
-    m_followUpTLV.organizationId[2] = bytes[kMessageHeaderLength + 16];
+        m_followUpTLV.organizationId[0] = bytes[kMessageHeaderLength + 14];
+        m_followUpTLV.organizationId[1] = bytes[kMessageHeaderLength + 15];
+        m_followUpTLV.organizationId[2] = bytes[kMessageHeaderLength + 16];
 
-    m_followUpTLV.organizationSubType = (bytes[kMessageHeaderLength + 17] << 16) + (bytes[kMessageHeaderLength + 18] << 8) + bytes[kMessageHeaderLength + 19];
+        m_followUpTLV.organizationSubType = (bytes[kMessageHeaderLength + 17] << 16) + (bytes[kMessageHeaderLength + 18] << 8) + bytes[kMessageHeaderLength + 19];
 
-    m_followUpTLV.cumulativeScaledRateOffset = 0;
-    for(int i = 0; i < 4; i++)
-        m_followUpTLV.cumulativeScaledRateOffset += ((uint64_t)bytes[kMessageHeaderLength + 20 + i] << (24 - i * 8));
+        m_followUpTLV.cumulativeScaledRateOffset = 0;
+        for(int i = 0; i < 4; i++)
+            m_followUpTLV.cumulativeScaledRateOffset += ((uint64_t)bytes[kMessageHeaderLength + 20 + i] << (24 - i * 8));
 
-    m_followUpTLV.gmTimeBaseIndicator = (bytes[kMessageHeaderLength + 24] << 8) + bytes[kMessageHeaderLength + 25];
+        m_followUpTLV.gmTimeBaseIndicator = (bytes[kMessageHeaderLength + 24] << 8) + bytes[kMessageHeaderLength + 25];
 
-    m_followUpTLV.lastGmPhaseChange.ns = 0;
-    for(int i = 0; i < 8; i++)
-        m_preciseOriginTimestamp.sec += ((uint64_t)bytes[kMessageHeaderLength + 28 + i] << (56 - i * 8));
-    m_followUpTLV.lastGmPhaseChange.ns_frac = (bytes[kMessageHeaderLength + 36] << 8) + bytes[kMessageHeaderLength + 37];
+        m_followUpTLV.lastGmPhaseChange.ns = 0;
+        for(int i = 0; i < 8; i++)
+            m_followUpTLV.lastGmPhaseChange.ns += ((uint64_t)bytes[kMessageHeaderLength + 28 + i] << (56 - i * 8));
+        m_followUpTLV.lastGmPhaseChange.ns_frac = (bytes[kMessageHeaderLength + 36] << 8) + bytes[kMessageHeaderLength + 37];
 
-    m_followUpTLV.scaledLastGmFreqChange = 0;
-    for(int i = 0; i < 4; i++)
-        m_followUpTLV.scaledLastGmFreqChange += ((uint64_t)bytes[kMessageHeaderLength + 38 + i] << (24 - i * 8));
+        m_followUpTLV.scaledLastGmFreqChange = 0;
+        for(int i = 0; i < 4; i++)
+            m_followUpTLV.scaledLastGmFreqChange += ((uint64_t)bytes[kMessageHeaderLength + 38 + i] << (24 - i * 8));
+    }
 }
 
 Timestamp PtpMessageFollowUp::GetPreciseOriginTimestamp()

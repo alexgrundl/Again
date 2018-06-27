@@ -24,6 +24,7 @@ public:
     uint16_t GetPortNumber() {return 0;}
     UScaledNs SendEventMessage(PtpMessageBase* Msg) {return {0, 0};}
     void ReceiveMessage(ReceivePackage* package) {}
+    void ReceiveGeneralUdpMessage(ReceivePackage* package) {}
     uint8_t const* GetMAC() {return 0;}
     uint32_t GetRxPhyDelay(){return 0;}
     void SetRxPhyDelay(uint32_t delay) {}
@@ -43,6 +44,7 @@ public:
     int GetMaxSpeed() {return -1;}
     SystemPort* GetSystemPort(uint8_t domain) {return NULL;}
     void AddSystemPort(SystemPort* port) {}
+    PtpProtocolType GetPtpProtocolType() {return PTP_PROTOCOL_TYPE_8021AS;}
 
 private:
 

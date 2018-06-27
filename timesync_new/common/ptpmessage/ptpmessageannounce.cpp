@@ -218,21 +218,23 @@ void PtpMessageAnnounce::ParsePackage(const uint8_t* bytes)
     memcpy(m_grandmasterIdentity, bytes + kMessageHeaderLength + 19, CLOCK_ID_LENGTH);
     m_stepsRemoved = (bytes[kMessageHeaderLength + 27] << 8) + bytes[kMessageHeaderLength + 28];
     m_timeSource = (ClockTimeSource)bytes[kMessageHeaderLength + 29];
-    m_tlv.tlvType = (TlvType)((bytes[kMessageHeaderLength + 30] << 8) + bytes[kMessageHeaderLength + 31]);
-    m_tlv.lengthField = (bytes[kMessageHeaderLength + 32] << 8) + bytes[kMessageHeaderLength + 33];
 
-    for (std::vector<uint8_t*>::size_type i = 0; i < m_tlv.pathSequence.size(); ++i)
+    if(m_messageLength >= 68)
     {
-        delete[] m_tlv.pathSequence[i];
-    }
-    m_tlv.pathSequence.clear();
-    m_messageLength = 68;
+        m_tlv.tlvType = (TlvType)((bytes[kMessageHeaderLength + 30] << 8) + bytes[kMessageHeaderLength + 31]);
+        m_tlv.lengthField = (bytes[kMessageHeaderLength + 32] << 8) + bytes[kMessageHeaderLength + 33];
 
-    for (int i = 0; i < m_tlv.lengthField; i+=CLOCK_ID_LENGTH)
-    {
-        uint8_t* clockIdentity = new uint8_t[CLOCK_ID_LENGTH];
-        memcpy(clockIdentity, bytes + kMessageHeaderLength + 34 + 8 * i, CLOCK_ID_LENGTH);
-        m_tlv.pathSequence.push_back(clockIdentity);
-        m_messageLength += CLOCK_ID_LENGTH;
+        for (std::vector<uint8_t*>::size_type i = 0; i < m_tlv.pathSequence.size(); ++i)
+        {
+            delete[] m_tlv.pathSequence[i];
+        }
+        m_tlv.pathSequence.clear();
+
+        for (int i = 0; i < m_tlv.lengthField; i+=CLOCK_ID_LENGTH)
+        {
+            uint8_t* clockIdentity = new uint8_t[CLOCK_ID_LENGTH];
+            memcpy(clockIdentity, bytes + kMessageHeaderLength + 34 + 8 * i, CLOCK_ID_LENGTH);
+            m_tlv.pathSequence.push_back(clockIdentity);
+        }
     }
 }

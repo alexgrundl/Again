@@ -16,6 +16,9 @@
 #endif
 #include <sys/utsname.h>
 
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include "types.h"
 #include "platform.h"
 #include "TimeMeas.h"
@@ -27,7 +30,7 @@ class NetPortLinux : public INetPort
 {
     public:
 
-        NetPortLinux(char const* const devname);
+        NetPortLinux(const char *devname, PtpProtocolType protocolType);
 
         ~NetPortLinux();
 
@@ -87,6 +90,12 @@ class NetPortLinux : public INetPort
 
         void AddSystemPort(SystemPort* port);
 
+
+        PtpProtocolType GetPtpProtocolType();
+
+
+        void ReceiveGeneralUdpMessage(ReceivePackage* package);
+
 protected:
 
     const unsigned char P8021AS_MULTICAST[6] = {0x01, 0x80, 0xC2, 0x00, 0x00, 0x0E};
@@ -141,6 +150,10 @@ private:
     uint32_t m_txPhyDelay;
 
     std::vector<SystemPort*> m_systemPort;
+
+    PtpProtocolType m_protocolType;
+
+    in_addr m_inAddress;
 
     /**
      * @brief IsCarrierSet Checks if the parameter "/sys/class/net/<m_IfcName>/carrier" is set.

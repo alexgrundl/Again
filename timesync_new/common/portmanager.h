@@ -36,7 +36,13 @@ private:
     uint32_t Receive(bool_t *pbIsRunning, pal::EventHandle_t pWaitHandle);
 
 
-    CThreadWrapper<PortManager>* m_portThread;
+    uint32_t ReceiveUdpGeneral(bool_t *pbIsRunning, pal::EventHandle_t pWaitHandle);
+
+
+    CThreadWrapper<PortManager>* m_receiveThread;
+
+
+    CThreadWrapper<PortManager>* m_receiveUpdGeneralThread;
 
 
     int m_portIndex;

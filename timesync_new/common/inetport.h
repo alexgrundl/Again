@@ -16,6 +16,12 @@ enum NetworkCardType
     NETWORK_CARD_TYPE_AXI_10G
 };
 
+enum PtpProtocolType
+{
+    PTP_PROTOCOL_TYPE_8021AS,
+    PTP_PROTOCOL_TYPE_UDP
+};
+
 class INetPort
 {
   public:
@@ -25,6 +31,7 @@ class INetPort
     virtual uint16_t GetPortNumber() = 0;
     virtual UScaledNs SendEventMessage(PtpMessageBase* Msg) = 0;
     virtual void ReceiveMessage(ReceivePackage* package) = 0;
+    virtual void ReceiveGeneralUdpMessage(ReceivePackage* package) = 0;
     virtual uint8_t const* GetMAC() = 0;
     virtual uint32_t GetRxPhyDelay() = 0;
     virtual void SetRxPhyDelay(uint32_t delay) = 0;
@@ -44,6 +51,7 @@ class INetPort
     virtual int GetMaxSpeed() = 0;
     virtual SystemPort* GetSystemPort(uint8_t domain) = 0;
     virtual void AddSystemPort(SystemPort* port) = 0;
+    virtual PtpProtocolType GetPtpProtocolType() = 0;
     virtual ~INetPort(){}
   protected:
     INetPort(){}

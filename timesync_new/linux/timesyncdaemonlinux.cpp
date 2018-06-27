@@ -45,7 +45,7 @@ void TimeSyncDaemonLinux::InitalizePorts(PtpConfig* config)
             if (next->ifa_addr && next->ifa_addr->sa_family == AF_PACKET &&
                     (next->ifa_flags & IFF_LOOPBACK) == 0)
             {
-                INetPort* networkPort = new NetPortLinux(next->ifa_name);
+                INetPort* networkPort = new NetPortLinux(next->ifa_name, PTP_PROTOCOL_TYPE_8021AS);
                 if(networkPort->GetNetworkCardType() != NETWORK_CARD_TYPE_UNKNOWN)
                 {
                     networkPort->Initialize();

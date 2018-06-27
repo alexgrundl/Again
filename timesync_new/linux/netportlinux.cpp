@@ -2,8 +2,9 @@
 
 #include "netportlinux.h"
 
-NetPortLinux::NetPortLinux(char const* const devname)
+NetPortLinux::NetPortLinux(const char* devname, PtpProtocolType protocolType)
 {
+    memset(&m_inAddress, 0, sizeof(in_addr));
     m_PtpClockIndex = -1;
     m_PDelay = 0;
     m_asCapable = false;
@@ -11,8 +12,19 @@ NetPortLinux::NetPortLinux(char const* const devname)
     m_EventLock = pal::LockedRegionCreate();
     m_IfcName = std::string(devname);
     m_IfcIndex = -1;
-    m_EventSock = pal::SocketCreate(PF_PACKET, SOCK_DGRAM, 0);
-    m_GeneralSock = pal::SocketCreate(PF_PACKET, SOCK_DGRAM, 0);
+    m_protocolType = protocolType;
+    m_EventSock = pal::SocketCreate(protocolType == PTP_PROTOCOL_TYPE_8021AS ? PF_PACKET : AF_INET, SOCK_DGRAM, 0);
+    m_GeneralSock = pal::SocketCreate(protocolType == PTP_PROTOCOL_TYPE_8021AS ? PF_PACKET : AF_INET, SOCK_DGRAM, 0);
+
+    if(protocolType != PTP_PROTOCOL_TYPE_8021AS)
+    {
+        timeval timeoutGeneral = {1, 500000};
+
+        setsockopt(pal::GetRawSocket(m_EventSock), SOL_SOCKET, SO_BINDTODEVICE, m_IfcName.c_str(), m_IfcName.size());
+        setsockopt(pal::GetRawSocket(m_GeneralSock), SOL_SOCKET, SO_BINDTODEVICE, m_IfcName.c_str(), m_IfcName.size());
+        setsockopt(pal::GetRawSocket(m_GeneralSock), SOL_SOCKET, SO_RCVTIMEO, &timeoutGeneral, sizeof(timeoutGeneral));
+    }
+
     m_ptpClock = new PtpClockLinux();
     m_cardType = ReadNetworkCardTypeFromSysFs();
 
@@ -98,6 +110,7 @@ bool NetPortLinux::Initialize()
     }
 
     /* enable raw socket access */
+    if(m_protocolType == PTP_PROTOCOL_TYPE_8021AS)
     {
         struct sockaddr_ll ifsock_addr;
         memset(&ifsock_addr, 0, sizeof(ifsock_addr));
@@ -112,6 +125,31 @@ bool NetPortLinux::Initialize()
         {
             logerror("failed to add raw socket to port %u", m_IfcIndex);
             return false;
+        }
+    }
+    else
+    {
+        struct sockaddr_in localSock;
+        /* Bind to the proper port number with the IP address */
+        /* specified as INADDR_ANY. */
+        memset((char *) &localSock, 0, sizeof(localSock));
+        localSock.sin_family = AF_INET;
+        localSock.sin_port = htons(319);
+        localSock.sin_addr.s_addr = INADDR_ANY;
+        if(bind(pal::GetRawSocket(m_EventSock), (struct sockaddr*)&localSock, sizeof(localSock)))
+        {
+            printf("Binding datagram socket error\n");
+        }
+        else
+        {
+            memset((char *) &localSock, 0, sizeof(localSock));
+            localSock.sin_family = AF_INET;
+            localSock.sin_port = htons(320);
+            localSock.sin_addr.s_addr = INADDR_ANY;
+            if(bind(pal::GetRawSocket(m_GeneralSock), (struct sockaddr*)&localSock, sizeof(localSock)))
+                printf("Binding datagram socket error\n");
+            else
+                printf("Binding datagram socket...OK.\n");
         }
     }
 
@@ -165,41 +203,81 @@ bool NetPortLinux::Initialize()
 
 bool NetPortLinux::SetRxQueueEnabled(bool settoenabled)
 {
-    struct packet_mreq mr_8021as;
-    memset(&mr_8021as, 0, sizeof(mr_8021as));
-    mr_8021as.mr_ifindex = m_IfcIndex;
-    mr_8021as.mr_type = PACKET_MR_MULTICAST;
-    mr_8021as.mr_alen = 6;
-    memcpy(mr_8021as.mr_address, P8021AS_MULTICAST, mr_8021as.mr_alen);
-
-    if(settoenabled)
+    if(m_protocolType == PTP_PROTOCOL_TYPE_8021AS)
     {
-        uint8_t buf[256];
-        while(pal::SocketRecvFrom(m_EventSock, buf, 256, MSG_DONTWAIT ) != -1);
+        struct packet_mreq mr_8021as;
+        memset(&mr_8021as, 0, sizeof(mr_8021as));
+        mr_8021as.mr_ifindex = m_IfcIndex;
+        mr_8021as.mr_type = PACKET_MR_MULTICAST;
+        mr_8021as.mr_alen = 6;
+        memcpy(mr_8021as.mr_address, P8021AS_MULTICAST, mr_8021as.mr_alen);
 
-        if(pal::SocketSetOption(m_EventSock, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr_8021as, sizeof(mr_8021as)))
+        if(settoenabled)
         {
-            //lognotice("added PTP multicast to port %u", m_IfcIndex);
-            return true;
+            uint8_t buf[256];
+            while(pal::SocketRecvFrom(m_EventSock, buf, 256, MSG_DONTWAIT ) != -1);
+
+            if(pal::SocketSetOption(m_EventSock, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr_8021as, sizeof(mr_8021as)))
+            {
+                //lognotice("added PTP multicast to port %u", m_IfcIndex);
+                return true;
+            }
+            else
+            {
+                logerror("failed to add PTP multicast to port %u", m_IfcIndex);
+                return false;
+            }
         }
         else
         {
-            logerror("failed to add PTP multicast to port %u", m_IfcIndex);
-            return false;
+            if(pal::SocketSetOption(m_EventSock, SOL_PACKET, PACKET_DROP_MEMBERSHIP, &mr_8021as, sizeof(mr_8021as)))
+            {
+                //lognotice("removed PTP multicast from port %u", m_IfcIndex);
+                return true;
+            }
+            else
+            {
+                logerror("failed to remove PTP multicast from port %u", m_IfcIndex);
+                return false;
+            }
         }
     }
     else
     {
-        if(pal::SocketSetOption(m_EventSock, SOL_PACKET, PACKET_DROP_MEMBERSHIP, &mr_8021as, sizeof(mr_8021as)))
+        struct ifreq ifr;
+        int fd = socket(AF_INET, SOCK_DGRAM, 0);
+        //Type of address to retrieve - IPv4 IP address
+        ifr.ifr_addr.sa_family = AF_INET;
+        //Copy the interface name in the ifreq structure
+        strncpy(ifr.ifr_name , m_IfcName.c_str() , IFNAMSIZ-1);
+        ioctl(fd, SIOCGIFADDR, &ifr);
+        close(fd);
+
+        m_inAddress = ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr;
+
+        struct ip_mreq group;
+        group.imr_multiaddr.s_addr = inet_addr("224.0.1.129");
+        group.imr_interface.s_addr = m_inAddress.s_addr;
+
+        if(setsockopt(pal::GetRawSocket(m_EventSock), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)
         {
-            //lognotice("removed PTP multicast from port %u", m_IfcIndex);
-            return true;
+            printf("Adding multicast group error.\n");
+            return false;
         }
         else
         {
-            logerror("failed to remove PTP multicast from port %u", m_IfcIndex);
-            return false;
+            group.imr_multiaddr.s_addr = inet_addr("224.0.0.107");
+            group.imr_interface.s_addr = ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
+            if(setsockopt(pal::GetRawSocket(m_EventSock), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)
+            {
+                printf("Adding multicast group error.\n");
+                return false;
+            }
+            else
+                printf("Adding multicast group...OK.\n");
+
         }
+        return true;
     }
 }
 
@@ -213,15 +291,37 @@ bool NetPortLinux::SendGenericMessage(PtpMessageBase* Msg)
     if(IsCarrierSet())
     {
         struct sockaddr_ll remote;
-        remote.sll_family = AF_PACKET;
-        remote.sll_protocol = htons(PtpMessageBase::kEtherType);
-        remote.sll_ifindex = m_IfcIndex;
-        remote.sll_halen = ETH_ALEN;
-        memcpy(remote.sll_addr, PtpMessageBase::kMacMulticast, ETH_ALEN);
-        uint8_t pBuffer[100];
+        struct sockaddr_in remoteUdp;
+        void* pSockAddr;
+        uint32_t sockAddrSize;
 
+        if(m_protocolType == PTP_PROTOCOL_TYPE_8021AS)
+        {
+            remote.sll_family = AF_PACKET;
+            remote.sll_protocol = htons(PtpMessageBase::kEtherType);
+            remote.sll_ifindex = m_IfcIndex;
+            remote.sll_halen = ETH_ALEN;
+            memcpy(remote.sll_addr, PtpMessageBase::kMacMulticast, ETH_ALEN);
+            pSockAddr = &remote;
+            sockAddrSize = sizeof(remote);
+        }
+        else
+        {
+            remoteUdp.sin_family = AF_INET;
+            remoteUdp.sin_port = htons(320);
+            if(Msg->GetMessageType() == PTP_MESSSAGE_TYPE_PDELAY_RESP_FOLLOW_UP)
+            {
+                inet_aton("224.0.0.107", &remoteUdp.sin_addr);
+            }
+            else
+                inet_aton("224.0.1.129", &remoteUdp.sin_addr);
+            pSockAddr = &remoteUdp;
+            sockAddrSize = sizeof(remoteUdp);
+        }
+
+        uint8_t pBuffer[100];
         Msg->GetPtpMessage(pBuffer);
-        if(pal::SocketSendToRaw(m_GeneralSock, pBuffer, Msg->GetMessageLength(), &remote, sizeof(remote)) < 0)
+        if(pal::SocketSendToRaw(m_GeneralSock, pBuffer, Msg->GetMessageLength(), pSockAddr, sockAddrSize) < 0)
         {
 
             logerror("failed to send general data frame: %d. Datasize: %u\n", errno, Msg->GetMessageLength());
@@ -241,16 +341,38 @@ UScaledNs NetPortLinux::SendEventMessage(PtpMessageBase* Msg)
         pal::LockedRegionEnter(m_EventLock);
         {
             struct sockaddr_ll remote;
-            remote.sll_family = AF_PACKET;
-            remote.sll_protocol = htons(PtpMessageBase::kEtherType);
-            remote.sll_ifindex = m_IfcIndex;
-            remote.sll_halen = ETH_ALEN;
-            memcpy(remote.sll_addr, PtpMessageBase::kMacMulticast, ETH_ALEN);
+            struct sockaddr_in remoteUdp;
+            void* pSockAddr;
+            uint32_t sockAddrSize;
+
+            if(m_protocolType == PTP_PROTOCOL_TYPE_8021AS)
+            {
+                remote.sll_family = AF_PACKET;
+                remote.sll_protocol = htons(PtpMessageBase::kEtherType);
+                remote.sll_ifindex = m_IfcIndex;
+                remote.sll_halen = ETH_ALEN;
+                memcpy(remote.sll_addr, PtpMessageBase::kMacMulticast, ETH_ALEN);
+                pSockAddr = &remote;
+                sockAddrSize = sizeof(remote);
+            }
+            else
+            {
+                remoteUdp.sin_family = AF_INET;
+                remoteUdp.sin_port = htons(319);
+                if(Msg->GetMessageType() == PTP_MESSSAGE_TYPE_PDELAY_REQ || Msg->GetMessageType() == PTP_MESSSAGE_TYPE_PDELAY_RESP)
+                {
+                    inet_aton("224.0.0.107", &remoteUdp.sin_addr);
+                }
+                else
+                    inet_aton("224.0.1.129", &remoteUdp.sin_addr);
+                pSockAddr = &remoteUdp;
+                sockAddrSize = sizeof(remoteUdp);
+            }
 
             uint8_t pBuffer[100];
             Msg->GetPtpMessage(pBuffer);
 
-            if(pal::SocketSendToRaw(m_EventSock, pBuffer, Msg->GetMessageLength(), &remote, sizeof(remote)) < 0)
+            if(pal::SocketSendToRaw(m_EventSock, pBuffer, Msg->GetMessageLength(), pSockAddr, sockAddrSize) < 0)
             {
                 logerror("failed to send event data frame");
             }
@@ -294,7 +416,13 @@ void NetPortLinux::ReceiveMessage(ReceivePackage* pRet)
 
             int32_t icnt = pal::SocketRecvMsg(m_EventSock, &msg);
 
-            if(icnt < 0)
+            /* Message from our own IP address... */
+            if(m_protocolType == PTP_PROTOCOL_TYPE_UDP &&
+               memcmp(&(((struct sockaddr_in*)&remote)->sin_addr), &m_inAddress, sizeof(in_addr)) == 0)
+            {
+                //printf("We sent it...\n");
+            }
+            else if(icnt < 0)
             {
                 logwarning("failed to receive!\n");
             }
@@ -637,6 +765,30 @@ SystemPort* NetPortLinux::GetSystemPort(uint8_t domain)
 void NetPortLinux::AddSystemPort(SystemPort* port)
 {
     m_systemPort.push_back(port);
+}
+
+PtpProtocolType NetPortLinux::GetPtpProtocolType()
+{
+    return m_protocolType;
+}
+
+void NetPortLinux::ReceiveGeneralUdpMessage(ReceivePackage* package)
+{
+    if(IsCarrierSet())
+    {
+        struct sockaddr_storage peerAddr;
+        socklen_t peerAddrLen;
+        uint8_t* buf = (uint8_t*)package->GetBuffer();
+
+        peerAddrLen = sizeof(struct sockaddr_storage);
+        recvfrom(pal::GetRawSocket(m_GeneralSock), buf, package->GetSize(), 0, (struct sockaddr *) &peerAddr, &peerAddrLen);
+
+        //Is it a valid general message and not sent from our own IP address?
+        if(memcmp(&(((struct sockaddr_in*)&peerAddr)->sin_addr), &m_inAddress, sizeof(in_addr)) != 0 && package->GetBuffer()[0] & 0x08)
+        {
+            package->SetValid();
+        }
+    }
 }
 
 #endif
